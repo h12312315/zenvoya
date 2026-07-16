@@ -5,22 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Zenvoya — AI Travel Assistant</title>
 <link rel="stylesheet" href="zenvoya-tokens.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
 
 body {
   font-family: var(--font-body);
   background: var(--color-white);
   color: var(--color-gray-900);
   height: 100dvh;
+  width: 100vw;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
 #app {
   display: flex;
+  width: 100%;
   height: 100dvh;
   position: relative;
 }
@@ -157,6 +166,40 @@ body {
 }
 
 .new-chat-btn:hover { background: var(--color-gray-50); }
+
+.trip-ideas-wrap { position: relative; }
+
+.trip-ideas-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 200px;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-medium);
+  overflow: hidden;
+  z-index: 15;
+  display: none;
+}
+
+.trip-ideas-menu.active { display: block; }
+
+.trip-ideas-item {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--color-gray-800);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.trip-ideas-item:hover { background: var(--color-gray-50); }
+
+.trip-ideas-empty {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--color-gray-400);
+}
 
 .nav-section { padding: 4px 12px; flex: 1; }
 
@@ -326,7 +369,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 680px;
+  max-width: 800px;
   margin: 0 auto;
   width: 100%;
 }
@@ -384,6 +427,9 @@ body {
   border-radius: var(--radius-lg) var(--radius-lg) 4px var(--radius-lg);
 }
 
+.message-bubble-cards { margin-top: 10px; }
+.message-bubble.has-cards { max-width: 100%; }
+
 /* Location Cards */
 .location-cards {
   display: grid;
@@ -409,7 +455,7 @@ body {
 
 .location-card.selected {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(108, 0, 246, 0.2);
+  box-shadow: 0 0 0 2px rgba(10, 10, 10, 0.2);
 }
 
 .location-card img {
@@ -438,7 +484,7 @@ body {
 /* Chat Input */
 .chat-input-area {
   padding: 12px 20px 20px;
-  max-width: 680px;
+  max-width: 800px;
   margin: 0 auto;
   width: 100%;
   flex-shrink: 0;
@@ -499,7 +545,7 @@ body {
   justify-content: center;
   align-items: center;
   padding: 40px 20px;
-  max-width: 680px;
+  max-width: 800px;
   margin: 0 auto;
   width: 100%;
 }
@@ -572,13 +618,13 @@ body {
   border-left: 1px solid var(--color-gray-200);
   overflow-y: auto;
   flex-shrink: 0;
+  background: var(--color-white);
   animation: slideIn 0.4s ease;
 }
 
 .itinerary-panel.active {
   display: block;
   width: 50%;
-  max-width: 720px;
 }
 
 @keyframes slideIn {
@@ -586,28 +632,52 @@ body {
   to { opacity: 1; transform: translateX(0); }
 }
 
-.itin-close {
-  position: absolute;
+.itin-toolbar {
+  position: sticky;
   top: 16px;
-  right: 16px;
+  height: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-right: 16px;
+  z-index: 900;
+  pointer-events: none;
+}
+
+.itin-toolbar-btn {
+  pointer-events: auto;
   width: 32px;
   height: 32px;
   border: none;
   background: var(--color-white);
   border-radius: 50%;
   cursor: pointer;
-  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: var(--shadow-xsmall);
-  z-index: 5;
   color: var(--color-gray-600);
 }
+
+.itin-toolbar-btn:hover { background: var(--color-gray-50); }
 
 .itin-content {
   position: relative;
 }
+
+.itinerary-panel.enlarged {
+  position: fixed;
+  inset: 0;
+  width: 100vw !important;
+  max-width: none !important;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.itinerary-panel.enlarged .itin-content { display: flex; flex-direction: row; height: 100vh; }
+.itinerary-panel.enlarged .itin-toolbar { position: absolute; top: 16px; right: calc(50% + 16px); height: auto; padding-right: 0; z-index: 900; }
+.itinerary-panel.enlarged .itin-map { width: 50%; height: 100vh; flex-shrink: 0; }
+.itinerary-panel.enlarged .itin-details { flex: 1; height: 100vh; overflow-y: auto; max-width: none; margin: 0; width: auto; }
 
 .itin-hero {
   width: 100%;
@@ -695,10 +765,39 @@ body {
   border-radius: var(--radius-sm);
   margin-bottom: 8px;
   overflow: hidden;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
 
 .day-item:hover { box-shadow: var(--shadow-xsmall); }
+.day-item.hidden { display: none; }
+
+.day-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.day-pill {
+  padding: 6px 12px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  font-family: var(--font-body);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.day-pill:hover { background: var(--color-gray-50); }
+
+.day-pill.active {
+  background: var(--color-gray-900);
+  border-color: var(--color-gray-900);
+  color: var(--color-white);
+}
 
 .day-header {
   display: flex;
@@ -756,31 +855,101 @@ body {
 
 .time-tag {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: var(--radius-full);
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-white);
+  color: var(--color-gray-500);
   margin-bottom: 10px;
 }
 
-.time-tag.morning { background: var(--color-morning); }
-.time-tag.afternoon { background: var(--color-afternoon); }
-.time-tag.evening { background: var(--color-evening); }
+.time-block-activities { display: flex; flex-direction: column; }
+
+.time-block-activities.carousel {
+  flex-direction: row;
+  overflow-x: auto;
+  gap: 12px;
+  padding-bottom: 6px;
+  scroll-snap-type: x proximity;
+}
+
+.time-block-activities.carousel .activity {
+  flex: 0 0 200px;
+  scroll-snap-align: start;
+}
+
+.time-block-options-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-gray-400);
+  margin-left: 8px;
+}
 
 .activity {
-  padding-left: 12px;
-  border-left: 2px solid var(--color-gray-200);
-  margin-bottom: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  cursor: grab;
+}
+
+.activity:active { cursor: grabbing; }
+.activity:hover { box-shadow: var(--shadow-xsmall); }
+
+.activity-handle {
+  color: var(--color-gray-300);
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 4px;
+  cursor: grab;
+}
+
+.activity-thumb {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: var(--shadow-xsmall);
+}
+
+.activity-badge {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-gray-900);
+  color: var(--color-white);
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-white);
+}
+
+.activity-body { flex: 1; min-width: 0; }
+
+.activity-title-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 2px;
 }
 
 .activity-title {
   font-size: 14px;
   font-weight: 600;
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .activity-desc {
@@ -788,15 +957,164 @@ body {
   color: var(--color-gray-600);
   line-height: 1.5;
   margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.activity-link {
-  font-size: 13px;
-  color: var(--color-primary);
-  font-weight: 500;
+.activity-avatars .stack-avatar { width: 20px; height: 20px; font-size: 9px; }
+
+.activity-trash {
+  color: var(--color-gray-300);
+  flex-shrink: 0;
   cursor: pointer;
-  text-decoration: underline;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 4px;
+  transition: color 0.15s;
 }
+
+.activity-trash:hover { color: var(--color-error); }
+
+.add-place-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed var(--color-gray-300);
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  font-family: var(--font-body);
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.add-place-btn:hover { background: var(--color-gray-50); border-color: var(--color-gray-400); }
+
+.itin-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-gray-200);
+  margin-bottom: 20px;
+}
+
+.itin-tab {
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray-500);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.itin-tab.active { font-weight: 600; color: var(--color-primary); border-bottom-color: var(--color-primary); }
+
+/* Flights / Stay tab cards */
+
+.booking-card {
+  display: flex;
+  gap: 14px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.booking-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: var(--color-gray-100);
+}
+
+.booking-card-body { flex: 1; min-width: 0; }
+.booking-card-title { font-size: 14px; font-weight: 600; color: var(--color-gray-900); }
+.booking-card-meta { font-size: 12px; color: var(--color-gray-500); margin-top: 2px; }
+.booking-card-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--color-gray-700);
+}
+.booking-card-route .sep { color: var(--color-gray-300); }
+.booking-card-price { font-size: 16px; font-weight: 700; color: var(--color-gray-900); flex-shrink: 0; text-align: right; }
+.booking-card-price span { display: block; font-size: 11px; font-weight: 500; color: var(--color-gray-400); }
+
+.flying-by-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.flying-by-row .avatar-stack { margin-left: 2px; }
+
+.reminder-banner {
+  background: var(--color-gray-100);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.reminder-banner-text { flex: 1; font-size: 13px; font-weight: 500; color: var(--color-gray-700); }
+
+.remind-btn {
+  padding: 8px 14px;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-700);
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.remind-btn:hover { background: var(--color-gray-50); }
+
+.more-options-banner {
+  background: var(--color-gray-100);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-700);
+}
+
+.explore-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-white);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.explore-btn:hover { background: var(--color-primary-hover); }
 
 /* ===================== MOBILE MENU OVERLAY ===================== */
 .mobile-menu-overlay {
@@ -915,36 +1233,6 @@ body {
   40% { transform: scale(1); opacity: 1; } /* impeccable-disable bounce-easing */
 }
 
-/* ===================== STEP INDICATOR ===================== */
-.step-indicator {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  display: flex;
-  gap: 6px;
-  z-index: 30;
-  background: var(--color-white);
-  padding: 8px 12px;
-  border-radius: var(--radius-full);
-  box-shadow: var(--shadow-medium);
-  border: 1px solid var(--color-gray-200);
-}
-
-.step-dot {
-  width: 24px;
-  height: 8px;
-  border-radius: 4px;
-  background: var(--color-gray-300);
-  cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s, opacity 0.2s;
-  transform: scaleX(0.333);
-  transform-origin: center;
-}
-
-.step-dot.active { background: var(--color-primary); transform: scaleX(1); }
-.step-dot:hover { background: var(--color-gray-400); }
-.step-dot.active:hover { background: var(--color-primary); }
-
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 768px) {
   .sidebar { display: none; }
@@ -954,12 +1242,717 @@ body {
   .chat-input-area { padding: 12px 16px 16px; }
   .location-cards { gap: 8px; }
   .location-card img { height: 100px; }
-  .step-indicator { bottom: 80px; right: 16px; }
 }
 
 @media (min-width: 769px) {
   .mobile-itin-view { display: none !important; }
   .mobile-menu, .mobile-menu-overlay { display: none !important; }
+}
+
+/* ===================== TRIPS / FRIENDS VIEWS ===================== */
+#tripsView, #friendsView {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+#tripsView.active, #friendsView.active { display: flex; }
+
+.view-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.view-content.full-width { max-width: none; }
+
+.trip-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.trip-card {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--color-white);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.trip-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
+
+.trip-card-thumb { height: 110px; }
+
+.trip-card-body { padding: 12px 14px; }
+
+.trip-card-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trip-card-meta {
+  font-size: 12px;
+  color: var(--color-gray-500);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trip-card-dates {
+  font-size: 12px;
+  color: var(--color-gray-400);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--color-gray-400); font-size: 14px; }
+
+/* Discover section (Trips view) */
+.discover-section {
+  margin-top: 32px;
+  padding: 28px;
+  border-radius: var(--radius-md);
+  background: var(--color-gray-100);
+  text-align: center;
+}
+
+.discover-section-title { font-size: 18px; font-weight: 700; color: var(--color-gray-900); margin-bottom: 8px; }
+.discover-section-desc { font-size: 13px; color: var(--color-gray-600); max-width: 440px; margin: 0 auto 18px; line-height: 1.5; }
+
+.discover-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.discover-btn:hover { background: var(--color-primary-hover); }
+
+/* Friends activity feed */
+.friend-activity-list { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+
+.friend-activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px 12px;
+  border-radius: var(--radius-sm);
+  align-items: center;
+}
+
+.friend-activity-item:hover { background: var(--color-gray-50); }
+
+.friend-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.friend-activity-text { font-size: 14px; color: var(--color-gray-800); line-height: 1.4; }
+.friend-activity-text b { font-weight: 600; }
+.friend-activity-time { font-size: 12px; color: var(--color-gray-400); margin-top: 2px; }
+
+.friend-activity-arrow { color: var(--color-gray-300); flex-shrink: 0; display: flex; align-items: center; }
+
+/* Friends avatar carousel */
+.friends-avatar-carousel {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-top: 4px;
+}
+
+.friends-avatar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.friends-avatar-item span { font-size: 12px; color: var(--color-gray-600); font-weight: 500; }
+
+/* ===================== MAP (Leaflet / OpenStreetMap) ===================== */
+.itin-map {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  overflow: hidden;
+  background: var(--color-gray-100);
+}
+
+.itin-map .leaflet-container {
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-body);
+  background: var(--color-gray-100);
+}
+
+.map-pin-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateY(-6px);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.map-pin-marker.dimmed { opacity: 0.2; }
+
+.map-pin-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--color-primary);
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-small);
+  border: 2px solid white;
+}
+
+.map-pin-dot span { transform: rotate(45deg); font-size: 11px; color: var(--color-white); font-weight: 600; }
+
+.map-pin-label {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-gray-800);
+  background: rgba(255,255,255,0.92);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  box-shadow: var(--shadow-xsmall);
+}
+
+.map-pin-squarcle {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+  border: 3px solid white;
+  box-shadow: var(--shadow-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  overflow: visible;
+}
+
+.map-pin-badge {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-gray-900);
+  color: var(--color-white);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-white);
+  z-index: 2;
+}
+
+/* Generic squarcle (Home world map / recommendations) */
+.squarcle {
+  border-radius: 30%;
+  border: 3px solid white;
+  box-shadow: var(--shadow-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.squarcle-marker { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+
+/* People selector */
+.avatar-stack { display: flex; align-items: center; }
+
+.avatar-stack .stack-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  margin-left: -8px;
+  flex-shrink: 0;
+}
+
+.avatar-stack .stack-avatar:first-child { margin-left: 0; }
+
+.avatar-stack .stack-add {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--color-gray-300);
+  background: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -8px;
+  cursor: pointer;
+  color: var(--color-gray-500);
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.avatar-stack .stack-add:hover { background: var(--color-gray-50); border-color: var(--color-gray-400); }
+
+/* ===================== MODAL ===================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-box {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  box-shadow: var(--shadow-xlarge);
+  overflow: hidden;
+  animation: menuIn 0.2s ease;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.modal-header h3 { font-size: 15px; font-weight: 600; }
+
+.modal-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-gray-500);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-close:hover { background: var(--color-gray-100); }
+
+.modal-tabs { display: flex; border-bottom: 1px solid var(--color-gray-200); }
+
+.modal-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-500);
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-body);
+}
+
+.modal-tab.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+
+.modal-body { padding: 16px 20px; max-height: 340px; overflow-y: auto; }
+
+.modal-friend-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.modal-friend-row .friend-avatar { width: 32px; height: 32px; font-size: 12px; }
+.modal-friend-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--color-gray-800); }
+
+.modal-friend-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-gray-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: transparent;
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.modal-friend-check.checked { background: var(--color-primary); border-color: var(--color-primary); color: white; }
+
+.modal-share-row { display: flex; gap: 8px; }
+
+.modal-share-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--color-gray-600);
+  background: var(--color-gray-50);
+  min-width: 0;
+}
+
+.modal-copy-btn {
+  padding: 10px 14px;
+  border: none;
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.modal-copy-btn:hover { background: var(--color-primary-hover); }
+
+.modal-footer { padding: 14px 20px; border-top: 1px solid var(--color-gray-200); }
+
+.modal-add-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modal-add-btn:hover { background: var(--color-primary-hover); }
+
+/* Add Place modal */
+.place-modal-box { width: 860px; max-width: calc(100vw - 32px); }
+.place-modal-body { display: flex; height: 560px; }
+.place-modal-map { width: 42%; flex-shrink: 0; border-right: 1px solid var(--color-gray-200); }
+.place-modal-list-col { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.place-modal-search {
+  margin: 14px 14px 0;
+  padding: 9px 12px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font-body);
+  outline: none;
+}
+.place-modal-search:focus { border-color: var(--color-primary); }
+
+.place-modal-vibe-label, .place-modal-avatar-label, .place-modal-suggested-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-gray-600);
+  margin: 14px 14px 8px;
+}
+
+.place-modal-vibes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 14px;
+}
+
+.vibe-pill {
+  padding: 6px 12px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  font-family: var(--font-body);
+}
+
+.vibe-pill:hover { background: var(--color-gray-50); }
+
+.place-modal-avatars { display: flex; gap: 8px; padding: 0 14px; }
+
+.place-modal-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: opacity 0.15s, box-shadow 0.15s;
+}
+
+.place-modal-avatar.active { opacity: 1; box-shadow: 0 0 0 2px var(--color-gray-900); }
+
+.place-modal-list { flex: 1; overflow-y: auto; padding: 0 10px 10px; }
+.place-modal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-gray-800);
+}
+.place-modal-item:hover { background: var(--color-gray-50); }
+.place-modal-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.place-modal-item-title { font-size: 13px; font-weight: 600; color: var(--color-gray-900); }
+.place-modal-item-vibe { font-size: 12px; color: var(--color-gray-500); margin-top: 2px; }
+
+/* ===================== HOME VIEW ===================== */
+#homeView { display: none; flex-direction: column; flex: 1; min-height: 0; }
+#homeView.active { display: flex; }
+
+.home-welcome {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--color-gray-900);
+  letter-spacing: -0.02em;
+  margin-bottom: 28px;
+}
+
+.home-section { margin-bottom: 36px; }
+
+.home-create-trip { max-width: 680px; }
+
+.home-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin-bottom: 2px;
+}
+
+.home-section-sub {
+  font-size: 13px;
+  color: var(--color-gray-500);
+  margin-bottom: 14px;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .status-grid { grid-template-columns: 1fr; }
+}
+
+.stat-card {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  background: var(--color-white);
+}
+
+.stat-card-title { font-size: 13px; font-weight: 600; color: var(--color-gray-700); margin-bottom: 18px; }
+.stat-card-subsection-title { font-size: 12px; font-weight: 600; color: var(--color-gray-700); margin: 20px 0 10px; }
+
+/* Bar chart */
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
+
+.bar-chart-col {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  gap: 6px;
+}
+
+.bar-chart-bar {
+  width: 100%;
+  max-width: 20px;
+  border-radius: 4px 4px 0 0;
+  background: var(--color-gray-200);
+  transition: background 0.15s;
+}
+
+.bar-chart-col:hover .bar-chart-bar { background: var(--color-primary); }
+.bar-chart-col.current .bar-chart-bar { background: var(--color-primary); }
+
+.bar-chart-label { font-size: 10px; color: var(--color-gray-400); }
+
+.bar-chart-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, 4px);
+  background: var(--color-gray-900);
+  color: var(--color-white);
+  font-size: 11px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s, transform 0.15s;
+  pointer-events: none;
+  z-index: 10;
+  text-align: left;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.bar-chart-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--color-gray-900);
+}
+
+.bar-chart-col:hover .bar-chart-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+/* Country flags */
+.country-flags { display: flex; flex-wrap: wrap; gap: 10px; }
+.country-flag { font-size: 24px; cursor: default; }
+
+/* Leaderboard */
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.leaderboard-rank { font-size: 12px; font-weight: 700; color: var(--color-gray-400); width: 14px; flex-shrink: 0; }
+.leaderboard-row.me .leaderboard-rank { color: var(--color-primary); }
+
+.leaderboard-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.leaderboard-name { font-size: 13px; font-weight: 500; color: var(--color-gray-800); width: 78px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.leaderboard-row.me .leaderboard-name { font-weight: 700; }
+
+.leaderboard-bar-track { flex: 1; height: 6px; border-radius: var(--radius-full); background: var(--color-gray-100); overflow: hidden; }
+.leaderboard-bar-fill { height: 100%; border-radius: var(--radius-full); background: var(--color-gray-300); }
+.leaderboard-row.me .leaderboard-bar-fill { background: var(--color-primary); }
+
+.leaderboard-count { font-size: 12px; font-weight: 600; color: var(--color-gray-500); width: 22px; text-align: right; flex-shrink: 0; }
+
+/* World recommendation map */
+.home-map-card {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  height: 320px;
+  position: relative;
+}
+
+.home-map-card .leaflet-container { width: 100%; height: 100%; font-family: var(--font-body); }
+
+/* Carousel */
+.carousel {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x proximity;
+}
+
+.carousel-card {
+  flex: 0 0 260px;
+  scroll-snap-align: start;
+  min-width: 0;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--color-white);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.carousel-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
+
+.carousel-card-visitor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-gray-100);
+  min-width: 0;
+}
+
+.carousel-card-visitor .friend-avatar { width: 22px; height: 22px; font-size: 10px; flex-shrink: 0; }
+
+.carousel-card-visitor span {
+  font-size: 12px;
+  color: var(--color-gray-600);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 </style>
@@ -972,11 +1965,11 @@ body {
     <div class="sidebar-header">
       <a class="logo" href="#">
         <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="32" height="32" rx="6" fill="#6c00f6"/>
+          <rect width="32" height="32" rx="6" fill="#0a0a0a"/>
           <path d="M8 12c0-1 .5-2 1.5-2.5L16 6l6.5 3.5C23.5 10 24 11 24 12v4c0 4-3.5 7-8 9-4.5-2-8-5-8-9v-4z" fill="white" opacity="0.9"/>
-          <circle cx="13" cy="14" r="1.5" fill="#6c00f6"/>
-          <circle cx="19" cy="14" r="1.5" fill="#6c00f6"/>
-          <path d="M13 18c1.5 1.5 4.5 1.5 6 0" stroke="#6c00f6" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="13" cy="14" r="1.5" fill="#0a0a0a"/>
+          <circle cx="19" cy="14" r="1.5" fill="#0a0a0a"/>
+          <path d="M13 18c1.5 1.5 4.5 1.5 6 0" stroke="#0a0a0a" stroke-width="1.2" stroke-linecap="round"/>
           <path d="M10 9l-2-3M22 9l2-3" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
         </svg>
         <span class="logo-text">zenvoya</span>
@@ -1006,7 +1999,10 @@ body {
         <button class="menu-btn" id="menuBtn" onclick="openMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></button>
         <span class="header-title" id="headerTitle">New Chat</span>
         <div class="header-right" id="headerRight">
-          <button class="new-chat-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg> <span>Trip ideas</span></button>
+          <div class="trip-ideas-wrap">
+            <button class="new-chat-btn" onclick="toggleTripIdeasMenu(event)"><span id="tripIdeasIcon" style="display:flex;"></span> <span>Trip ideas in this thread</span></button>
+            <div class="trip-ideas-menu" id="tripIdeasMenu"></div>
+          </div>
         </div>
       </header>
       <div class="chat-container">
@@ -1015,7 +2011,7 @@ body {
             <h2>What should we explore today?</h2>
             <p>Plan trips, book flights, find stays — Zoya has you covered.</p>
           </div>
-          <div style="width:100%;max-width:680px;">
+          <div style="width:100%;max-width:800px;">
             <div class="chat-input-wrapper">
               <input class="chat-input" id="chatInputStart" placeholder="Ask anything travel" />
               <button class="send-btn" id="sendBtnStart" onclick="advanceStep()">
@@ -1053,6 +2049,33 @@ body {
       </div>
     </div>
 
+    <!-- Home View -->
+    <div id="homeView">
+      <header class="main-header">
+        <button class="menu-btn" onclick="openMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></button>
+        <span class="header-title">Home</span>
+      </header>
+      <div class="view-content full-width" id="homeContent"></div>
+    </div>
+
+    <!-- Trips View -->
+    <div id="tripsView">
+      <header class="main-header">
+        <button class="menu-btn" onclick="openMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></button>
+        <span class="header-title">Trips</span>
+      </header>
+      <div class="view-content" id="tripsContent"></div>
+    </div>
+
+    <!-- Friends View -->
+    <div id="friendsView">
+      <header class="main-header">
+        <button class="menu-btn" onclick="openMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></button>
+        <span class="header-title">Friends</span>
+      </header>
+      <div class="view-content" id="friendsContent"></div>
+    </div>
+
     <!-- Mobile Itinerary View -->
     <div class="mobile-itin-view" id="mobileItinView">
       <div class="mobile-itin-header">
@@ -1073,7 +2096,7 @@ body {
 <div class="mobile-menu" id="mobileMenu">
   <div class="mobile-menu-header">
     <a class="logo" href="#">
-      <svg class="logo-icon" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="6" fill="#6c00f6"/><path d="M8 12c0-1 .5-2 1.5-2.5L16 6l6.5 3.5C23.5 10 24 11 24 12v4c0 4-3.5 7-8 9-4.5-2-8-5-8-9v-4z" fill="white" opacity="0.9"/><circle cx="13" cy="14" r="1.5" fill="#6c00f6"/><circle cx="19" cy="14" r="1.5" fill="#6c00f6"/><path d="M13 18c1.5 1.5 4.5 1.5 6 0" stroke="#6c00f6" stroke-width="1.2" stroke-linecap="round"/><path d="M10 9l-2-3M22 9l2-3" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
+      <svg class="logo-icon" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="6" fill="#0a0a0a"/><path d="M8 12c0-1 .5-2 1.5-2.5L16 6l6.5 3.5C23.5 10 24 11 24 12v4c0 4-3.5 7-8 9-4.5-2-8-5-8-9v-4z" fill="white" opacity="0.9"/><circle cx="13" cy="14" r="1.5" fill="#0a0a0a"/><circle cx="19" cy="14" r="1.5" fill="#0a0a0a"/><path d="M13 18c1.5 1.5 4.5 1.5 6 0" stroke="#0a0a0a" stroke-width="1.2" stroke-linecap="round"/><path d="M10 9l-2-3M22 9l2-3" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
       <span class="logo-text">zenvoya</span>
     </a>
     <button class="mobile-menu-close" onclick="closeMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
@@ -1089,13 +2112,31 @@ body {
   </div>
 </div>
 
-<!-- Step Indicator -->
-<div class="step-indicator" id="stepIndicator">
-  <div class="step-dot active" data-step="0" onclick="goToStep(0)"></div>
-  <div class="step-dot" data-step="1" onclick="goToStep(1)"></div>
-  <div class="step-dot" data-step="2" onclick="goToStep(2)"></div>
-  <div class="step-dot" data-step="3" onclick="goToStep(3)"></div>
-  <div class="step-dot" data-step="4" onclick="goToStep(4)"></div>
+<!-- Add People Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<!-- Add Place Modal -->
+<div class="modal-overlay" id="placeModalOverlay" onclick="closePlaceModalOnOverlay(event)">
+  <div class="modal-box place-modal-box">
+    <div class="modal-header">
+      <h3>Add a place</h3>
+      <button class="modal-close" onclick="closePlaceModal()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+    </div>
+    <div class="place-modal-body">
+      <div class="place-modal-map" id="placeModalMap"></div>
+      <div class="place-modal-list-col">
+        <input class="place-modal-search" id="placeModalSearch" placeholder="Search places" oninput="filterPlaceModal(this.value)" />
+        <div class="place-modal-vibe-label">Vibe</div>
+        <div class="place-modal-vibes" id="placeModalVibes"></div>
+        <div class="place-modal-avatar-label">Add for</div>
+        <div class="place-modal-avatars" id="placeModalAvatars"></div>
+        <div class="place-modal-suggested-label">Suggested places</div>
+        <div class="place-modal-list" id="placeModalList"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1125,76 +2166,511 @@ function lucide(name, size) {
     'dollar-sign': '<path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
     'plane-landing': '<path d="M2 22h20"/><path d="M3.77 10.77 2 9l2-4.5 1.1.55c.55.28.9.84.9 1.45s.35 1.17.9 1.45L8 8.5l3-6 1.05.53a2 2 0 0 1 1.09 1.52l.72 5.4a2 2 0 0 0 1.09 1.52l4.4 2.2c.56.27.95.78 1.08 1.39l.28 1.3-15.94-4.59Z"/>',
     'plane-takeoff': '<path d="M2 22h20"/><path d="M6.36 17.4 4 17l-2-4 1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12 5 6l.9-.45a2 2 0 0 1 2.09.2l4.02 3a2 2 0 0 0 2.1.2l4.19-2.06a2.41 2.41 0 0 1 1.73-.17L21 7a1.4 1.4 0 0 1 .87 1.99l-.38.76c-.23.46-.6.84-1.07 1.08L7.97 17.78a2 2 0 0 1-1.61-.38z"/>',
+    'check': '<path d="M20 6 9 17l-5-5"/>',
+    'home': '<path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/>',
+    'lightbulb': '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+    'maximize': '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>',
+    'minimize': '<path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>',
+    'grip-vertical': '<circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>',
+    'trash-2': '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
   };
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+icons[name]+'</svg>';
 }
 
-const ZOYA_SVG = `<svg class="zoya-avatar" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="14" fill="#6c00f6"/><path d="M7 11c0-.8.4-1.5 1.2-1.9L14 6l5.8 3.1c.8.4 1.2 1.1 1.2 1.9v3c0 3.5-3 6-7 7.5-4-1.5-7-4-7-7.5v-3z" fill="white" opacity="0.9"/><circle cx="11.5" cy="12.5" r="1.2" fill="#6c00f6"/><circle cx="16.5" cy="12.5" r="1.2" fill="#6c00f6"/><path d="M11.5 16c1.2 1.2 3.8 1.2 5 0" stroke="#6c00f6" stroke-width="1" stroke-linecap="round"/><path d="M9 8.5l-1.5-2.5M19 8.5l1.5-2.5" stroke="white" stroke-width="1" stroke-linecap="round"/></svg>`;
+const ZOYA_SVG = `<svg class="zoya-avatar" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="14" fill="#0a0a0a"/><path d="M7 11c0-.8.4-1.5 1.2-1.9L14 6l5.8 3.1c.8.4 1.2 1.1 1.2 1.9v3c0 3.5-3 6-7 7.5-4-1.5-7-4-7-7.5v-3z" fill="white" opacity="0.9"/><circle cx="11.5" cy="12.5" r="1.2" fill="#0a0a0a"/><circle cx="16.5" cy="12.5" r="1.2" fill="#0a0a0a"/><path d="M11.5 16c1.2 1.2 3.8 1.2 5 0" stroke="#0a0a0a" stroke-width="1" stroke-linecap="round"/><path d="M9 8.5l-1.5-2.5M19 8.5l1.5-2.5" stroke="white" stroke-width="1" stroke-linecap="round"/></svg>`;
+
+const FRIENDS = [
+  { id: 'mia', name: 'Mia Chen', initial: 'M', color: '#f97316' },
+  { id: 'liam', name: 'Liam Torres', initial: 'L', color: '#0ea5e9' },
+  { id: 'ava', name: 'Ava Patel', initial: 'A', color: '#a855f7' },
+  { id: 'noah', name: 'Noah Kim', initial: 'N', color: '#22c55e' },
+  { id: 'zoe', name: 'Zoe Martin', initial: 'Z', color: '#ec4899' },
+];
+
+function friendById(id) { return FRIENDS.find(f => f.id === id); }
+
+const ME = { name: 'George (You)', initial: 'G', color: 'var(--color-accent-green)', textColor: 'var(--color-gray-800)' };
+
+const TRIP_THUMB = 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-ultra-light))';
+
+const TRIPS = {
+  paris: {
+    id: 'paris', name: 'Paris', country: 'France', dates: 'Oct 3 – Oct 7',
+    desc: 'For a 4-day trip to Paris with light shopping, art museums and lots of vegetarian options.',
+    thumbGradient: TRIP_THUMB,
+    members: [ME, friendById('mia'), friendById('liam')],
+    days: [
+      { date: 'Fri, Oct 3', location: 'New York City', isFlight: true,
+        intro: 'Departure day from NYC to Paris — your France adventure begins!',
+        blocks: [{ time: 'Morning', tag: 'morning', activities: [
+          { icon: '✈', title: 'Flight to Paris', desc: 'Depart from JFK Airport on your transatlantic journey to Paris. This overnight flight will have you arriving the next morning, ready to begin your adventure.', link: 'Book Flight' }
+        ]}]
+      },
+      { date: 'Sat, Oct 4', location: 'Paris', isFlight: false,
+        intro: 'Your first full day exploring the City of Light!',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '🖼', title: 'Louvre Museum & Tuileries Garden', desc: 'Spend the morning wandering the world\'s largest art museum, then stroll through the manicured Tuileries Garden on your way out.', link: 'Learn More' }
+          ]},
+          { time: 'Afternoon', tag: 'afternoon', activities: [
+            { icon: '🛍', title: 'Le Marais Shopping Walk', desc: 'Browse independent boutiques and concept stores in the trendy Marais district — perfect for the shopping-focused stops on this trip.', link: 'Learn More' }
+          ]},
+          { time: 'Evening', tag: 'evening', activities: [
+            { icon: '🌅', title: 'Seine River Sunset Cruise', desc: 'Glide past Notre-Dame and the Eiffel Tower as the sun sets over the Seine on a relaxed evening river cruise.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Sun, Oct 5', location: 'Paris', isFlight: false,
+        intro: 'Icons of Paris, from the Iron Lady to the hilltop of Montmartre.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '🗼', title: 'Eiffel Tower & Trocadéro', desc: 'Beat the crowds with an early visit to the Eiffel Tower, then cross to Trocadéro for the classic postcard view.', link: 'Learn More' }
+          ]},
+          { time: 'Afternoon', tag: 'afternoon', activities: [
+            { icon: '🛍', title: 'Champs-Élysées Shopping', desc: 'Walk the famous avenue from the Arc de Triomphe, popping into flagship stores and the Galeries along the way.' },
+            { icon: '🧥', title: 'Le Marais Boutiques', desc: 'Browse independent designer boutiques and vintage shops in the Marais district.' },
+            { icon: '👜', title: 'Rue Saint-Honoré Shopping', desc: 'Window-shop the luxury flagships and concept stores along this upscale Right Bank street.' }
+          ]},
+          { time: 'Evening', tag: 'evening', activities: [
+            { icon: '⛪', title: 'Montmartre & Sacré-Cœur', desc: 'Climb the cobbled streets of Montmartre to Sacré-Cœur for panoramic views and dinner in a cozy bistro.' }
+          ]}
+        ]
+      },
+      { date: 'Mon, Oct 6', location: 'Paris', isFlight: false,
+        intro: 'A slower day mixing world-class art with the Left Bank\'s best boutiques.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '🖼', title: "Musée d'Orsay", desc: 'Explore the world\'s finest collection of Impressionist and Post-Impressionist masterpieces in a converted train station.', link: 'Learn More' }
+          ]},
+          { time: 'Afternoon', tag: 'afternoon', activities: [
+            { icon: '🛍', title: 'Le Bon Marché & Saint-Germain', desc: 'Shop Paris\'s oldest department store, then browse the boutiques and bookshops of Saint-Germain-des-Prés.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Tue, Oct 7', location: 'New York City', isFlight: true, blocks: [] },
+    ],
+    center: [48.8606, 2.3376], zoom: 13,
+    pins: [
+      { label: 'Charles de Gaulle Airport', lat: 49.0097, lng: 2.5479, day: 0, icon: '✈' },
+      { label: 'Louvre Museum', lat: 48.8606, lng: 2.3376, day: 1, icon: '🖼' },
+      { label: 'Le Marais', lat: 48.8555, lng: 2.3654, day: 1, icon: '🛍' },
+      { label: 'Seine River Cruise', lat: 48.8600, lng: 2.2950, day: 1, icon: '🌅' },
+      { label: 'Eiffel Tower', lat: 48.8584, lng: 2.2945, day: 2, icon: '🗼' },
+      { label: 'Champs-Élysées', lat: 48.8738, lng: 2.2950, day: 2, icon: '🛍' },
+      { label: 'Montmartre', lat: 48.8867, lng: 2.3431, day: 2, icon: '⛪' },
+      { label: "Musée d'Orsay", lat: 48.8600, lng: 2.3266, day: 3, icon: '🖼' },
+      { label: 'Saint-Germain', lat: 48.8539, lng: 2.3336, day: 3, icon: '🛍' },
+    ],
+  },
+  barcelona: {
+    id: 'barcelona', name: 'Barcelona', country: 'Spain', dates: 'May 8 – May 11',
+    desc: 'For a 4-day trip to Barcelona with beach walks, tapas tours and modernist architecture.',
+    thumbGradient: TRIP_THUMB,
+    members: [ME, friendById('mia')],
+    days: [
+      { date: 'Thu, May 8', location: 'New York City', isFlight: true,
+        intro: 'Departure day from NYC to Barcelona!',
+        blocks: [{ time: 'Morning', tag: 'morning', activities: [
+          { icon: '✈', title: 'Flight to Barcelona', desc: 'Depart from JFK Airport for an overnight flight, landing the next morning ready to explore Catalonia.', link: 'Book Flight' }
+        ]}]
+      },
+      { date: 'Fri, May 9', location: 'Barcelona', isFlight: false,
+        intro: 'Gaudí\'s masterpieces set the tone for day one.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '⛪', title: 'Sagrada Família', desc: 'Tour Gaudí\'s unfinished basilica, still under construction more than a century after it began.', link: 'Learn More' }
+          ]},
+          { time: 'Evening', tag: 'evening', activities: [
+            { icon: '🍢', title: 'Tapas Tour in El Born', desc: 'Hop between family-run tapas bars in the atmospheric El Born quarter.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Sat, May 10', location: 'Barcelona', isFlight: false,
+        intro: 'Sun, sea, and more modernist architecture.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '🏖', title: 'Barceloneta Beach Walk', desc: 'Stroll the palm-lined boardwalk along Barcelona\'s famous city beach.', link: 'Learn More' }
+          ]},
+          { time: 'Afternoon', tag: 'afternoon', activities: [
+            { icon: '🏛', title: 'Park Güell', desc: 'Wander Gaudí\'s colorful mosaic park overlooking the city skyline.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Sun, May 11', location: 'New York City', isFlight: true, blocks: [] },
+    ],
+    center: [41.3915, 2.1590], zoom: 13,
+    pins: [
+      { label: 'Barcelona–El Prat Airport', lat: 41.2974, lng: 2.0833, day: 0, icon: '✈' },
+      { label: 'Sagrada Família', lat: 41.4036, lng: 2.1744, day: 1, icon: '⛪' },
+      { label: 'El Born Tapas', lat: 41.3850, lng: 2.1810, day: 1, icon: '🍢' },
+      { label: 'Barceloneta Beach', lat: 41.3784, lng: 2.1925, day: 2, icon: '🏖' },
+      { label: 'Park Güell', lat: 41.4145, lng: 2.1527, day: 2, icon: '🏛' },
+    ],
+  },
+  santorini: {
+    id: 'santorini', name: 'Santorini', country: 'Greece', dates: 'Jun 5 – Jun 9',
+    desc: 'For a 4-day trip to Santorini with stunning sunsets, volcanic beaches and local wine tasting.',
+    thumbGradient: TRIP_THUMB,
+    members: [ME, friendById('ava')],
+    days: [
+      { date: 'Thu, Jun 5', location: 'New York City', isFlight: true,
+        intro: 'Departure day from NYC to Santorini!',
+        blocks: [{ time: 'Morning', tag: 'morning', activities: [
+          { icon: '✈', title: 'Flight to Santorini', desc: 'Depart from JFK, connecting through Athens, and land on the caldera by evening.', link: 'Book Flight' }
+        ]}]
+      },
+      { date: 'Fri, Jun 6', location: 'Santorini', isFlight: false,
+        intro: 'Whitewashed villages and the caldera views the island is famous for.',
+        blocks: [
+          { time: 'Afternoon', tag: 'afternoon', activities: [
+            { icon: '🏘', title: 'Oia Village Walk', desc: 'Wander the blue-domed streets of Oia, browsing local galleries and jewelry shops.', link: 'Learn More' }
+          ]},
+          { time: 'Evening', tag: 'evening', activities: [
+            { icon: '🌅', title: 'Caldera Sunset Viewpoint', desc: 'Watch the famous Santorini sunset from a cliffside terrace overlooking the volcano.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Sat, Jun 7', location: 'Santorini', isFlight: false,
+        intro: 'Volcanic sand and local wine round out the island experience.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '🏖', title: 'Red Beach', desc: 'Swim at the striking red-and-black volcanic sand beach near Akrotiri.', link: 'Learn More' }
+          ]},
+          { time: 'Afternoon', tag: 'afternoon', activities: [
+            { icon: '🍷', title: 'Vineyard Wine Tasting', desc: 'Sample Assyrtiko wines grown in volcanic soil at a family-run winery.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Sun, Jun 8', location: 'New York City', isFlight: true, blocks: [] },
+    ],
+    center: [36.4020, 25.4400], zoom: 12,
+    pins: [
+      { label: 'Santorini Airport', lat: 36.3992, lng: 25.4793, day: 0, icon: '✈' },
+      { label: 'Oia Village', lat: 36.4620, lng: 25.3753, day: 1, icon: '🏘' },
+      { label: 'Caldera Viewpoint', lat: 36.4275, lng: 25.4306, day: 1, icon: '🌅' },
+      { label: 'Red Beach', lat: 36.3502, lng: 25.3958, day: 2, icon: '🏖' },
+      { label: 'Vineyard', lat: 36.3865, lng: 25.4443, day: 2, icon: '🍷' },
+    ],
+  },
+  rome: {
+    id: 'rome', name: 'Rome', country: 'Italy', dates: 'Sep 12 – Sep 16',
+    desc: 'For a 4-day trip to Rome with ancient ruins, authentic Italian cuisine and Renaissance art.',
+    thumbGradient: TRIP_THUMB,
+    members: [ME],
+    days: [
+      { date: 'Fri, Sep 12', location: 'New York City', isFlight: true,
+        intro: 'Departure day from NYC to Rome — your Italian adventure begins!',
+        blocks: [{ time: 'Morning', tag: 'morning', activities: [
+          { icon: '✈', title: 'Flight to Rome', desc: 'Depart from JFK Airport on your transatlantic journey to Rome, arriving the next morning.', link: 'Book Flight' }
+        ]}]
+      },
+      { date: 'Sat, Sep 13', location: 'Rome', isFlight: false,
+        intro: 'Ancient Rome, all in one day.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '🏛', title: 'Colosseum & Roman Forum', desc: 'Walk the ruins of the ancient empire\'s greatest amphitheater and civic center.', link: 'Learn More' }
+          ]},
+          { time: 'Evening', tag: 'evening', activities: [
+            { icon: '🍝', title: 'Trastevere Trattoria Dinner', desc: 'Enjoy classic Roman pasta dishes in the cobblestone streets of Trastevere.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Sun, Sep 14', location: 'Rome', isFlight: false,
+        intro: 'Renaissance art and the world\'s smallest country.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '⛪', title: 'Vatican Museums & Sistine Chapel', desc: 'See Michelangelo\'s ceiling and St. Peter\'s Basilica in Vatican City.', link: 'Learn More' }
+          ]},
+          { time: 'Afternoon', tag: 'afternoon', activities: [
+            { icon: '⛲', title: 'Trevi Fountain & Pantheon', desc: 'Toss a coin at the Trevi Fountain, then admire the 2,000-year-old Pantheon.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Mon, Sep 15', location: 'New York City', isFlight: true, blocks: [] },
+    ],
+    center: [41.8930, 12.4820], zoom: 13,
+    pins: [
+      { label: 'Fiumicino Airport', lat: 41.8003, lng: 12.2389, day: 0, icon: '✈' },
+      { label: 'Colosseum', lat: 41.8902, lng: 12.4922, day: 1, icon: '🏛' },
+      { label: 'Trastevere', lat: 41.8896, lng: 12.4692, day: 1, icon: '🍝' },
+      { label: 'Vatican Museums', lat: 41.9065, lng: 12.4536, day: 2, icon: '⛪' },
+      { label: 'Trevi Fountain', lat: 41.9009, lng: 12.4833, day: 2, icon: '⛲' },
+    ],
+  },
+  tokyo: {
+    id: 'tokyo', name: 'Tokyo', country: 'Japan', dates: 'Nov 12 – Nov 17',
+    desc: 'For a 5-day trip to Tokyo mixing classic sights, food markets and neon-lit nightlife.',
+    thumbGradient: TRIP_THUMB,
+    members: [ME, friendById('noah'), friendById('zoe')],
+    days: [
+      { date: 'Wed, Nov 12', location: 'New York City', isFlight: true,
+        intro: 'Departure day from NYC to Tokyo — your Japan adventure begins!',
+        blocks: [{ time: 'Morning', tag: 'morning', activities: [
+          { icon: '✈', title: 'Flight to Tokyo', desc: 'Depart from JFK Airport on a direct flight to Narita, arriving the following afternoon local time.', link: 'Book Flight' }
+        ]}]
+      },
+      { date: 'Thu, Nov 13', location: 'Tokyo', isFlight: false,
+        intro: 'Old Tokyo meets the city\'s most famous crossing.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '⛩', title: 'Senso-ji Temple & Asakusa', desc: 'Explore Tokyo\'s oldest temple and the traditional shopping street of Nakamise-dori.', link: 'Learn More' }
+          ]},
+          { time: 'Afternoon', tag: 'afternoon', activities: [
+            { icon: '🍣', title: 'Tsukiji Outer Market Food Tour', desc: 'Sample fresh sushi, tamagoyaki and street snacks at the famous outer market.', link: 'Learn More' }
+          ]},
+          { time: 'Evening', tag: 'evening', activities: [
+            { icon: '🌃', title: 'Shibuya Crossing & Sky View', desc: 'Experience the world\'s busiest pedestrian crossing, then take in the skyline from Shibuya Sky.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Fri, Nov 14', location: 'Tokyo', isFlight: false,
+        intro: 'Shrines, shopping streets and late-night alleys.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '⛩', title: 'Meiji Shrine & Harajuku', desc: 'Walk the forested path to Meiji Shrine, then dive into Harajuku\'s youth fashion scene.', link: 'Learn More' }
+          ]},
+          { time: 'Afternoon', tag: 'afternoon', activities: [
+            { icon: '🛍', title: 'Omotesando Shopping', desc: 'Browse flagship fashion stores along Tokyo\'s tree-lined answer to the Champs-Élysées.', link: 'Learn More' }
+          ]},
+          { time: 'Evening', tag: 'evening', activities: [
+            { icon: '🏮', title: 'Shinjuku Golden Gai', desc: 'Squeeze into one of the tiny bars packed into this atmospheric alleyway district.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Sat, Nov 15', location: 'Tokyo', isFlight: false,
+        intro: 'Digital art, electronics, and a night on the bay.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '🎨', title: 'teamLab Planets', desc: 'Wade through immersive, water-based digital art installations at this must-see museum.', link: 'Learn More' }
+          ]},
+          { time: 'Afternoon', tag: 'afternoon', activities: [
+            { icon: '🕹', title: 'Akihabara Electronics District', desc: 'Explore multi-story electronics stores, arcades and anime shops.', link: 'Learn More' }
+          ]},
+          { time: 'Evening', tag: 'evening', activities: [
+            { icon: '🎆', title: 'Tokyo Bay Dinner Cruise', desc: 'Enjoy skyline views of Tokyo Bay and the Rainbow Bridge over dinner on the water.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Sun, Nov 16', location: 'New York City', isFlight: true, blocks: [] },
+    ],
+    center: [35.6812, 139.7300], zoom: 12,
+    pins: [
+      { label: 'Narita Airport', lat: 35.7720, lng: 140.3929, day: 0, icon: '✈' },
+      { label: 'Senso-ji Temple', lat: 35.7148, lng: 139.7967, day: 1, icon: '⛩' },
+      { label: 'Tsukiji Outer Market', lat: 35.6654, lng: 139.7707, day: 1, icon: '🍣' },
+      { label: 'Shibuya Crossing', lat: 35.6595, lng: 139.7005, day: 1, icon: '🌃' },
+      { label: 'Meiji Shrine', lat: 35.6764, lng: 139.6993, day: 2, icon: '⛩' },
+      { label: 'Omotesando', lat: 35.6656, lng: 139.7124, day: 2, icon: '🛍' },
+      { label: 'Shinjuku Golden Gai', lat: 35.6938, lng: 139.7034, day: 2, icon: '🏮' },
+      { label: 'teamLab Planets', lat: 35.6469, lng: 139.7930, day: 3, icon: '🎨' },
+      { label: 'Akihabara', lat: 35.6984, lng: 139.7731, day: 3, icon: '🕹' },
+    ],
+  },
+  lisbon: {
+    id: 'lisbon', name: 'Lisbon', country: 'Portugal', dates: 'Apr 10 – Apr 13',
+    desc: 'For a 4-day trip to Lisbon with pastel-tiled streets, fado music and coastal day trips.',
+    thumbGradient: TRIP_THUMB,
+    members: [ME],
+    days: [
+      { date: 'Fri, Apr 10', location: 'New York City', isFlight: true,
+        intro: 'Departure day from NYC to Lisbon!',
+        blocks: [{ time: 'Morning', tag: 'morning', activities: [
+          { icon: '✈', title: 'Flight to Lisbon', desc: 'Depart from JFK Airport for an overnight flight, landing the next morning ready to explore Portugal.', link: 'Book Flight' }
+        ]}]
+      },
+      { date: 'Sat, Apr 11', location: 'Lisbon', isFlight: false,
+        intro: 'Historic hills and the city\'s iconic yellow trams.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '🏰', title: 'Alfama & São Jorge Castle', desc: 'Wander the narrow lanes of the old Alfama quarter up to the hilltop castle.', link: 'Learn More' }
+          ]},
+          { time: 'Evening', tag: 'evening', activities: [
+            { icon: '🎵', title: 'Fado Dinner in Alfama', desc: 'Hear Portugal\'s soulful fado music live over a traditional dinner.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Sun, Apr 12', location: 'Lisbon', isFlight: false,
+        intro: 'A coastal day trip to the fairytale town of Sintra.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '🏯', title: 'Pena Palace, Sintra', desc: 'Explore the colorful hilltop palace in the romantic town of Sintra, a short train ride from Lisbon.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Mon, Apr 13', location: 'New York City', isFlight: true, blocks: [] },
+    ],
+    center: [38.7223, -9.1393], zoom: 12,
+    pins: [
+      { label: 'Lisbon Airport', lat: 38.7742, lng: -9.1342, day: 0, icon: '✈' },
+      { label: 'Alfama & Castle', lat: 38.7139, lng: -9.1334, day: 1, icon: '🏰' },
+      { label: 'Fado in Alfama', lat: 38.7125, lng: -9.1289, day: 1, icon: '🎵' },
+      { label: 'Pena Palace, Sintra', lat: 38.7876, lng: -9.3906, day: 2, icon: '🏯' },
+    ],
+  },
+  kyoto: {
+    id: 'kyoto', name: 'Kyoto', country: 'Japan', dates: 'Mar 20 – Mar 23',
+    desc: 'For a 4-day trip to Kyoto with ancient temples, bamboo groves and spring cherry blossoms.',
+    thumbGradient: TRIP_THUMB,
+    members: [ME],
+    days: [
+      { date: 'Fri, Mar 20', location: 'New York City', isFlight: true,
+        intro: 'Departure day from NYC to Kyoto, via Osaka!',
+        blocks: [{ time: 'Morning', tag: 'morning', activities: [
+          { icon: '✈', title: 'Flight to Kyoto', desc: 'Depart from JFK Airport, connecting through Osaka Kansai, and arrive in Kyoto by evening.', link: 'Book Flight' }
+        ]}]
+      },
+      { date: 'Sat, Mar 21', location: 'Kyoto', isFlight: false,
+        intro: 'Iconic vermillion gates and a bamboo forest.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '⛩', title: 'Fushimi Inari Shrine', desc: 'Hike beneath thousands of vermillion torii gates winding up the mountainside.', link: 'Learn More' }
+          ]},
+          { time: 'Afternoon', tag: 'afternoon', activities: [
+            { icon: '🎋', title: 'Arashiyama Bamboo Grove', desc: 'Walk through the towering, otherworldly bamboo groves of Arashiyama.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Sun, Mar 22', location: 'Kyoto', isFlight: false,
+        intro: 'A golden pavilion and the geisha district.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '🏯', title: 'Kinkaku-ji (Golden Pavilion)', desc: 'See the shimmering gold-leaf pavilion reflected in its still pond.', link: 'Learn More' }
+          ]},
+          { time: 'Evening', tag: 'evening', activities: [
+            { icon: '🏮', title: 'Gion District Walk', desc: 'Stroll the lantern-lit streets of Kyoto\'s famous geisha district.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Mon, Mar 23', location: 'New York City', isFlight: true, blocks: [] },
+    ],
+    center: [35.0116, 135.7681], zoom: 12,
+    pins: [
+      { label: 'Kansai Airport', lat: 34.4347, lng: 135.2441, day: 0, icon: '✈' },
+      { label: 'Fushimi Inari Shrine', lat: 34.9671, lng: 135.7727, day: 1, icon: '⛩' },
+      { label: 'Arashiyama Bamboo Grove', lat: 35.0094, lng: 135.6668, day: 1, icon: '🎋' },
+      { label: 'Kinkaku-ji', lat: 35.0394, lng: 135.7292, day: 2, icon: '🏯' },
+      { label: 'Gion District', lat: 35.0037, lng: 135.7752, day: 2, icon: '🏮' },
+    ],
+  },
+  reykjavik: {
+    id: 'reykjavik', name: 'Reykjavik', country: 'Iceland', dates: 'Feb 14 – Feb 17',
+    desc: 'For a 4-day trip to Reykjavik with the Blue Lagoon, waterfalls and northern lights.',
+    thumbGradient: TRIP_THUMB,
+    members: [ME],
+    days: [
+      { date: 'Sat, Feb 14', location: 'New York City', isFlight: true,
+        intro: 'Departure day from NYC to Reykjavik!',
+        blocks: [{ time: 'Morning', tag: 'morning', activities: [
+          { icon: '✈', title: 'Flight to Reykjavik', desc: 'Depart from JFK Airport on a short overnight flight, landing early morning in Iceland.', link: 'Book Flight' }
+        ]}]
+      },
+      { date: 'Sun, Feb 15', location: 'Reykjavik', isFlight: false,
+        intro: 'Geothermal spas and the city\'s striking modern church.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '♨', title: 'Blue Lagoon', desc: 'Soak in the milky-blue geothermal waters of Iceland\'s most famous spa.', link: 'Learn More' }
+          ]},
+          { time: 'Evening', tag: 'evening', activities: [
+            { icon: '🌌', title: 'Northern Lights Hunt', desc: 'Head out from the city lights for a chance to see the aurora borealis dance overhead.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Mon, Feb 16', location: 'Reykjavik', isFlight: false,
+        intro: 'The Golden Circle\'s waterfalls and geysers.',
+        blocks: [
+          { time: 'Morning', tag: 'morning', activities: [
+            { icon: '💦', title: 'Gullfoss Waterfall', desc: 'Marvel at the thundering two-tiered waterfall carved into the Icelandic canyon.', link: 'Learn More' }
+          ]}
+        ]
+      },
+      { date: 'Tue, Feb 17', location: 'New York City', isFlight: true, blocks: [] },
+    ],
+    center: [64.1466, -21.9426], zoom: 11,
+    pins: [
+      { label: 'Keflavík Airport', lat: 63.9850, lng: -22.6056, day: 0, icon: '✈' },
+      { label: 'Blue Lagoon', lat: 63.8804, lng: -22.4495, day: 1, icon: '♨' },
+      { label: 'Northern Lights Spot', lat: 64.2000, lng: -21.7000, day: 1, icon: '🌌' },
+      { label: 'Gullfoss Waterfall', lat: 64.3271, lng: -20.1199, day: 2, icon: '💦' },
+    ],
+  },
+};
+
+const SAVED_TRIP_IDS = ['paris', 'tokyo', 'santorini'];
+
+const FRIEND_ACTIVITY = [
+  { friend: friendById('mia'), action: 'added a new stop to', tripId: 'paris', tripName: 'Paris trip for shopping', time: '2h ago' },
+  { friend: friendById('liam'), action: 'edited the itinerary for', tripId: 'paris', tripName: 'Paris trip for shopping', time: '5h ago' },
+  { friend: friendById('zoe'), action: 'started planning a new trip to', tripId: 'lisbon', tripName: 'Lisbon', time: '1d ago' },
+  { friend: friendById('ava'), action: 'saved', tripId: 'santorini', tripName: 'Santorini', time: '2d ago' },
+  { friend: friendById('zoe'), action: 'commented on', tripId: 'tokyo', tripName: 'Tokyo 5-day itinerary', time: '3d ago' },
+  { friend: friendById('noah'), action: 'booked flights for', tripId: 'tokyo', tripName: 'Tokyo 5-day itinerary', time: '4d ago' },
+  { friend: friendById('mia'), action: 'joined your trip to', tripId: 'barcelona', tripName: 'Barcelona', time: '6d ago' },
+];
+
+/* ===================== HOME VIEW DATA ===================== */
+const MONTHLY_TRIPS = [
+  { label: 'Jan', count: 1, places: ['Whistler'] },
+  { label: 'Feb', count: 1, places: ['Reykjavik'] },
+  { label: 'Mar', count: 2, places: ['Kyoto', 'Austin'] },
+  { label: 'Apr', count: 1, places: ['Lisbon'] },
+  { label: 'May', count: 3, places: ['Barcelona', 'Nashville', 'Miami'] },
+  { label: 'Jun', count: 2, places: ['Santorini', 'Denver'] },
+  { label: 'Jul', count: 1, places: ['Chicago'] },
+  { label: 'Aug', count: 0, places: [] },
+  { label: 'Sep', count: 2, places: ['Rome', 'Seattle'] },
+  { label: 'Oct', count: 3, places: ['Paris', 'Boston', 'Portland'] },
+  { label: 'Nov', count: 2, places: ['Tokyo', 'Vancouver'] },
+  { label: 'Dec', count: 1, places: ['Denver'] },
+];
+const CURRENT_MONTH_IDX = 9; // Oct — matches currentDate context for this prototype
+
+const RECENT_COUNTRIES = [
+  { flag: '🇫🇷', name: 'France' },
+  { flag: '🇯🇵', name: 'Japan' },
+  { flag: '🇮🇸', name: 'Iceland' },
+  { flag: '🇵🇹', name: 'Portugal' },
+  { flag: '🇪🇸', name: 'Spain' },
+  { flag: '🇬🇷', name: 'Greece' },
+  { flag: '🇮🇹', name: 'Italy' },
+];
+
+const LEADERBOARD = [
+  { name: 'George (You)', initial: 'G', color: 'var(--color-accent-green)', textColor: 'var(--color-gray-800)', count: 34, isMe: true },
+  { name: 'Mia Chen', initial: 'M', color: '#f97316', count: 29 },
+  { name: 'Noah Kim', initial: 'N', color: '#22c55e', count: 26 },
+  { name: 'Zoe Martin', initial: 'Z', color: '#ec4899', count: 22 },
+  { name: 'Liam Torres', initial: 'L', color: '#0ea5e9', count: 19 },
+  { name: 'Ava Patel', initial: 'A', color: '#a855f7', count: 15 },
+];
+
+const RECOMMENDED_TRIP_IDS = ['lisbon', 'kyoto', 'reykjavik', 'barcelona'];
+
+const FRIEND_VISITED_TRIPS = [
+  { tripId: 'rome', friendName: 'Liam Torres' },
+  { tripId: 'barcelona', friendName: 'Mia Chen' },
+  { tripId: 'kyoto', friendName: 'Zoe Martin' },
+  { tripId: 'reykjavik', friendName: 'Noah Kim' },
+  { tripId: 'santorini', friendName: 'Ava Patel' },
+];
 
 const DESTINATIONS = [
-  { name: 'Paris', country: 'France', img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=300&fit=crop&q=80' },
-  { name: 'Barcelona', country: 'Spain', img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=400&h=300&fit=crop&q=80' },
-  { name: 'Santorini', country: 'Greece', img: 'https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=400&h=300&fit=crop&q=80' },
-  { name: 'Rome', country: 'Italy', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&h=300&fit=crop&q=80' },
-];
-
-const HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&h=400&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800&h=400&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&h=400&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&h=400&fit=crop&q=80',
-];
-
-const DEST_DESCRIPTIONS = [
-  'For a 4-day trip to Paris with light hiking, art museums and lots of vegetarian options.',
-  'For a 4-day trip to Barcelona with beach walks, tapas tours and modernist architecture.',
-  'For a 4-day trip to Santorini with stunning sunsets, volcanic beaches and local wine tasting.',
-  'For a 4-day trip to Rome with ancient ruins, authentic Italian cuisine and Renaissance art.',
+  { id: 'paris', name: 'Paris', country: 'France', img: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&h=300&fit=crop&q=80' },
+  { id: 'barcelona', name: 'Barcelona', country: 'Spain', img: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?w=400&h=300&fit=crop&q=80' },
+  { id: 'santorini', name: 'Santorini', country: 'Greece', img: 'https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=400&h=300&fit=crop&q=80' },
+  { id: 'rome', name: 'Rome', country: 'Italy', img: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&h=300&fit=crop&q=80' },
 ];
 
 let selectedDestIdx = 0;
 
-const ITINERARY_DAYS = [
-  {
-    date: 'Fri, Oct 3',
-    location: 'New York City',
-    isFlight: true,
-    intro: 'Departure day from NYC to Paris — your France adventure begins!',
-    blocks: [
-      {
-        time: 'Morning',
-        tag: 'morning',
-        activities: [
-          { icon: '✈', title: 'Flight to Paris', desc: 'Depart from JFK Airport on your transatlantic journey to Rome. This overnight flight will have you arriving in the Eternal City the next morning, ready to begin your Italian adventure.', link: 'Book Flight' }
-        ]
-      }
-    ]
-  },
-  { date: 'Sat, Oct 4', location: 'Paris', isFlight: false,
-    intro: 'Your first full day exploring the City of Light!',
-    blocks: [
-      { time: 'Morning', tag: 'morning', activities: [
-        { icon: '✈', title: 'Flight to Paris', desc: 'Depart from JFK Airport on your transatlantic journey to Rome. This overnight flight will have you arriving in the Eternal City the next morning, ready to begin your Italian adventure.', link: 'Book Flight' }
-      ]},
-      { time: 'Afternoon', tag: 'afternoon', activities: [
-        { icon: '🍳', title: 'San Lorenzo Market and Cooking Class', desc: 'Browse the bustling San Lorenzo market for fresh ingredients, then participate in a hands-on Tuscan cooking class, learning to make fresh pasta and traditional sauces.', link: 'Learn More' }
-      ]},
-      { time: 'Evening', tag: 'evening', activities: [
-        { icon: '🌅', title: 'Piazzale Michelangelo Sunset', desc: 'Climb to Piazzale Michelangelo for the most spectacular sunset views over Florence, with the entire Renaissance cityscape spread below you like a living museum.', link: 'Learn More' }
-      ]}
-    ]
-  },
-  { date: 'Sat, Oct 5', location: 'Paris', isFlight: false, blocks: [] },
-  { date: 'Sat, Oct 6', location: 'Paris', isFlight: false, blocks: [] },
-  { date: 'Sat, Oct 7', location: 'New York City', isFlight: true, blocks: [] },
-];
-
 let currentStep = 0;
+let currentView = 'chat'; // 'chat' | 'trips' | 'friends'
+let lastMobileView = 'chat';
 
 let sidebarExpanded = true;
 
-function zoyaMsg(text) {
-  return `<div class="message bot"><div class="message-avatar">${ZOYA_SVG}</div><div class="message-bubble">${text}</div></div>`;
+function zoyaMsg(text, tripIds) {
+  const cards = tripIds && tripIds.length ? `<div class="message-bubble-cards">${chatTripCardsHTML(tripIds)}</div>` : '';
+  return `<div class="message bot"><div class="message-avatar">${ZOYA_SVG}</div><div class="message-bubble${cards ? ' has-cards' : ''}">${text}${cards}</div></div>`;
 }
 
 function userMsg(text) {
@@ -1213,55 +2689,98 @@ function locationCardsHTML() {
   ).join('')}</div>`;
 }
 
-function itineraryHTML(destIdx) {
-  const dest = DESTINATIONS[destIdx] || DESTINATIONS[0];
-  const hero = HERO_IMAGES[destIdx] || HERO_IMAGES[0];
-  const desc = DEST_DESCRIPTIONS[destIdx] || DEST_DESCRIPTIONS[0];
-  const days = ITINERARY_DAYS.map(d => ({
-    ...d,
-    location: d.isFlight ? d.location : dest.name
-  }));
+function itineraryHTML(tripId) {
+  const trip = TRIPS[tripId] || TRIPS.paris;
   return `
     <div class="itin-content">
-      <button class="itin-close" onclick="closeItinPanel()">${lucide('x',18)}</button>
-      <div class="itin-hero-map" style="width:100%;height:300px;background:var(--color-gray-100);display:flex;align-items:center;justify-content:center;color:var(--color-gray-400);font-size:13px;position:relative;overflow:hidden;">
-        <img src="${hero}" alt="Map" style="width:100%;height:100%;object-fit:cover;filter:saturate(0.3) brightness(1.1);" loading="lazy"/>
-        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.05);"></div>
+      <div class="itin-toolbar">
+        <button class="itin-toolbar-btn" onclick="toggleEnlarge()" title="Enlarge">${lucide('maximize', 16)}</button>
+        <button class="itin-toolbar-btn" onclick="closeItinPanel()" title="Close">${lucide('x', 16)}</button>
       </div>
+      <div class="itin-map" id="itinMap-${trip.id}"></div>
       <div class="itin-details">
         <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:16px;">
-          <img src="${DESTINATIONS[destIdx].img}" alt="${dest.name}" style="width:100px;height:80px;border-radius:var(--radius-md);object-fit:cover;flex-shrink:0;" loading="lazy"/>
+          <div style="width:100px;height:80px;border-radius:var(--radius-md);flex-shrink:0;background:${trip.thumbGradient};"></div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
-              <div class="itin-city">${dest.name}</div>
+              <div class="itin-city">${trip.name}</div>
               <div style="display:flex;gap:8px;">
-                <button class="action-btn" style="flex:none;padding:8px 14px;">${lucide('bookmark',14)} Save</button>
+                <button class="action-btn" style="flex:none;padding:8px 14px;">${lucide('calendar',14)} ${trip.days.length} day <span style="color:var(--color-gray-400);margin-left:2px;">${lucide('chevron-down',12)}</span></button>
+                <button class="action-btn" style="flex:none;padding:8px 14px;">${lucide('bookmark',14)} Save trip</button>
                 <button class="action-btn" style="flex:none;padding:8px 14px;">${lucide('share',14)} Share</button>
               </div>
             </div>
-            <div class="itin-country">${dest.country}</div>
-            <div style="display:flex;gap:8px;margin-top:8px;">
-              <button class="action-btn" style="flex:none;padding:6px 12px;font-size:12px;">${lucide('calendar',13)} 4 day <span style="color:var(--color-gray-400);margin-left:2px;">${lucide('chevron-down',12)}</span></button>
-              <button class="action-btn" style="flex:none;padding:6px 12px;font-size:12px;">${lucide('users',13)} 1 <span style="color:var(--color-gray-400);margin-left:2px;">${lucide('chevron-down',12)}</span></button>
+            <div class="itin-country">${trip.country}</div>
+            <div style="display:flex;gap:12px;margin-top:8px;align-items:center;">
+              <div class="avatar-stack">
+                ${trip.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+                <div class="stack-add" onclick="openAddFriendsModal('${trip.id}')" title="Add people">${lucide('plus',14)}</div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="itin-tabs" style="display:flex;gap:0;border-bottom:1px solid var(--color-gray-200);margin-bottom:20px;">
-          <button class="itin-tab active" style="padding:10px 16px;border:none;background:none;font-size:14px;font-weight:600;color:var(--color-primary);border-bottom:2px solid var(--color-primary);cursor:pointer;font-family:var(--font-body);">Itinerary</button>
-          <button class="itin-tab" style="padding:10px 16px;border:none;background:none;font-size:14px;font-weight:500;color:var(--color-gray-500);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--font-body);">Flights</button>
-          <button class="itin-tab" style="padding:10px 16px;border:none;background:none;font-size:14px;font-weight:500;color:var(--color-gray-500);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--font-body);">Stay</button>
-          <button class="itin-tab" style="padding:10px 16px;border:none;background:none;font-size:14px;font-weight:500;color:var(--color-gray-500);border-bottom:2px solid transparent;cursor:pointer;font-family:var(--font-body);">Finances</button>
+        <div class="itin-tabs">
+          <button class="itin-tab active" data-tab="itinerary" onclick="switchItinTab(this,'itinerary')">Itinerary</button>
+          <button class="itin-tab" data-tab="flights" onclick="switchItinTab(this,'flights')">Flights</button>
+          <button class="itin-tab" data-tab="stay" onclick="switchItinTab(this,'stay')">Stay</button>
+          <button class="itin-tab" data-tab="finances" onclick="switchItinTab(this,'finances')">Finances</button>
         </div>
-        ${days.map((day, i) => dayItemHTML(day, i)).join('')}
+        <div class="itin-tab-panel" data-panel="itinerary">
+          <div class="day-pill-group">
+            <button class="day-pill active" data-day="all" onclick="filterToDay(null)">All</button>
+            ${trip.days.map((d, i) => `<button class="day-pill" data-day="${i}" onclick="filterToDay(${i})">Day ${i + 1}</button>`).join('')}
+          </div>
+          ${trip.days.map((day, i) => dayItemHTML(trip, day, i)).join('')}
+        </div>
+        <div class="itin-tab-panel" data-panel="flights" style="display:none;">${flightsTabHTML(trip)}</div>
+        <div class="itin-tab-panel" data-panel="stay" style="display:none;">${stayTabHTML(trip)}</div>
+        <div class="itin-tab-panel" data-panel="finances" style="display:none;"><div class="empty-state">Finances tracking coming soon.</div></div>
       </div>
     </div>`;
 }
 
-function dayItemHTML(day, index) {
+const TIME_RANGES = {
+  morning: '9:00 AM – 12:00 PM',
+  afternoon: '1:00 PM – 5:00 PM',
+  evening: '6:00 PM – 9:00 PM',
+};
+
+function activityHTML(trip, dayIndex, blockIndex, actIndex, a, members) {
+  const avatarMembers = a.members || members || trip.members;
+  return `
+    <div class="activity" draggable="true"
+      ondragstart="activityDragStart(event,${dayIndex},${blockIndex},${actIndex})"
+      ondragover="event.preventDefault();"
+      ondrop="activityDrop(event,'${trip.id}',${dayIndex},${blockIndex},${actIndex})">
+      <span class="activity-handle" title="Drag to reorder">${lucide('grip-vertical', 14)}</span>
+      <div class="activity-thumb" style="background:${TRIP_THUMB};">
+        <span class="activity-badge">${dayIndex + 1}</span>
+        ${a.icon}
+      </div>
+      <div class="activity-body">
+        <div class="activity-title-row">
+          <span class="activity-title">${a.title}</span>
+        </div>
+        <div class="activity-desc">${a.desc}</div>
+        <div class="avatar-stack activity-avatars">
+          ${avatarMembers.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+        </div>
+      </div>
+      <span class="activity-trash" title="Remove" onclick="event.stopPropagation(); removeActivity('${trip.id}',${dayIndex},${blockIndex},${actIndex})">${lucide('trash-2', 14)}</span>
+    </div>`;
+}
+
+function distributeMembers(members, count) {
+  const groups = Array.from({ length: count }, () => []);
+  members.forEach((m, i) => groups[i % count].push(m));
+  return groups;
+}
+
+function dayItemHTML(trip, day, index) {
   const expandable = day.blocks && day.blocks.length > 0;
   return `
-    <div class="day-item" onclick="toggleDay(this)">
-      <div class="day-header">
+    <div class="day-item expanded" data-day-item="${index}">
+      <div class="day-header" onclick="toggleDay(this)">
         <span class="day-date">${day.date}</span>
         <span class="day-location">${day.location}</span>
         ${day.isFlight ? '<span class="day-flight-icon">' + lucide(index === 0 ? 'plane-takeoff' : 'plane-landing', 16) + '</span>' : ''}
@@ -1272,30 +2791,277 @@ function dayItemHTML(day, index) {
           ${ZOYA_SVG.replace('zoya-avatar', 'day-intro-avatar')}
           <span class="day-intro-text">${day.intro}</span>
         </div>
-        ${day.blocks.map(b => `
+        ${day.blocks.map((b, blockIndex) => {
+          const multi = b.activities.length > 1;
+          const memberGroups = multi ? distributeMembers(trip.members, b.activities.length) : null;
+          return `
           <div class="time-block">
-            <div class="time-tag ${b.tag}">${b.time}</div>
-            ${b.activities.map(a => `
-              <div class="activity">
-                <div class="activity-title">${a.icon} ${a.title}</div>
-                <div class="activity-desc">${a.desc}</div>
-                <span class="activity-link">${a.link}</span>
-              </div>
-            `).join('')}
-          </div>
-        `).join('')}
+            <div class="time-tag">${TIME_RANGES[b.tag] || b.time}${multi ? `<span class="time-block-options-label">${b.activities.length} options — scroll for more →</span>` : ''}</div>
+            <div class="time-block-activities ${multi ? 'carousel' : ''}">
+              ${b.activities.map((a, actIndex) => activityHTML(trip, index, blockIndex, actIndex, a, multi ? memberGroups[actIndex] : trip.members)).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+        <button class="add-place-btn" onclick="openAddPlaceModal('${trip.id}', ${index})">${lucide('plus', 14)} Add another place</button>
       </div></div>` : ''}
     </div>`;
 }
 
-function toggleDay(el) {
-  el.classList.toggle('expanded');
+function toggleDay(headerEl) {
+  headerEl.closest('.day-item').classList.toggle('expanded');
 }
 
-function updateStepDots() {
-  document.querySelectorAll('.step-dot').forEach((dot, i) => {
-    dot.classList.toggle('active', i === currentStep);
+function switchItinTab(btn, tab) {
+  btn.parentElement.querySelectorAll('.itin-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const panels = btn.closest('.itin-details').querySelectorAll('.itin-tab-panel');
+  panels.forEach(p => { p.style.display = p.dataset.panel === tab ? '' : 'none'; });
+}
+
+function toggleEnlarge() {
+  const panel = document.getElementById('itinPanel');
+  panel.classList.toggle('enlarged');
+  setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 350);
+}
+
+function reRenderItinerary(tripId, keepDayExpanded) {
+  const itinPanel = document.getElementById('itinPanel');
+  if (!itinPanel.classList.contains('active')) return;
+  const wasEnlarged = itinPanel.classList.contains('enlarged');
+  itinPanel.innerHTML = itineraryHTML(tripId);
+  if (wasEnlarged) itinPanel.classList.add('enlarged');
+  setTimeout(() => {
+    initLeafletMap(tripId);
+    if (selectedDayIndex !== null) {
+      filterToDay(selectedDayIndex);
+    } else if (keepDayExpanded !== undefined && keepDayExpanded !== null) {
+      const items = document.querySelectorAll('.day-item');
+      if (items[keepDayExpanded]) items[keepDayExpanded].classList.add('expanded');
+    }
+  }, 0);
+}
+
+/* ===================== ACTIVITY REORDER / REMOVE ===================== */
+let dragSource = null;
+
+function activityDragStart(e, dayIdx, blockIdx, actIdx) {
+  dragSource = { dayIdx, blockIdx, actIdx };
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function activityDrop(e, tripId, dayIdx, blockIdx, actIdx) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (!dragSource || dragSource.dayIdx !== dayIdx || dragSource.blockIdx !== blockIdx) { dragSource = null; return; }
+  const trip = TRIPS[tripId];
+  const arr = trip.days[dayIdx].blocks[blockIdx].activities;
+  const [moved] = arr.splice(dragSource.actIdx, 1);
+  arr.splice(actIdx, 0, moved);
+  dragSource = null;
+  reRenderItinerary(tripId, dayIdx);
+}
+
+function removeActivity(tripId, dayIdx, blockIdx, actIdx) {
+  const trip = TRIPS[tripId];
+  const block = trip.days[dayIdx].blocks[blockIdx];
+  block.activities.splice(actIdx, 1);
+  if (!block.activities.length) trip.days[dayIdx].blocks.splice(blockIdx, 1);
+  reRenderItinerary(tripId, dayIdx);
+}
+
+/* ===================== ADD PLACE MODAL ===================== */
+let placeModalTripId = null;
+let placeModalDayIndex = null;
+let placeModalCandidates = [];
+let placeModalMap = null;
+
+const PLACE_CATEGORIES = [
+  { icon: '🏛', suffix: 'Museum of Art', vibe: 'Culture' },
+  { icon: '🎭', suffix: 'Historic Theater', vibe: 'Culture' },
+  { icon: '🌳', suffix: 'City Park', vibe: 'Outdoors' },
+  { icon: '🌿', suffix: 'Botanical Garden', vibe: 'Outdoors' },
+  { icon: '🛍', suffix: 'Old Town Market', vibe: 'Shopping' },
+  { icon: '🌅', suffix: 'Sunset Viewpoint', vibe: 'Relaxing' },
+  { icon: '☕', suffix: 'Central Café', vibe: 'Food & Drink' },
+  { icon: '🍷', suffix: 'Wine Bar', vibe: 'Nightlife' },
+];
+
+const VIBES = [...new Set(PLACE_CATEGORIES.map(c => c.vibe))];
+
+let placeModalSelectedMembers = new Set();
+
+function generateCandidatePlaces(trip) {
+  return PLACE_CATEGORIES.map(c => ({
+    label: `${trip.name} ${c.suffix}`,
+    vibe: c.vibe,
+    lat: trip.center[0] + (Math.random() - 0.5) * 0.06,
+    lng: trip.center[1] + (Math.random() - 0.5) * 0.06,
+  }));
+}
+
+function openAddPlaceModal(tripId, dayIndex) {
+  placeModalTripId = tripId;
+  placeModalDayIndex = dayIndex;
+  const trip = TRIPS[tripId];
+  placeModalCandidates = generateCandidatePlaces(trip);
+  placeModalSelectedMembers = new Set(trip.members.map(m => m.name));
+  document.getElementById('placeModalSearch').value = '';
+  document.getElementById('placeModalVibes').innerHTML = vibePillsHTML();
+  document.getElementById('placeModalAvatars').innerHTML = memberSelectorHTML(trip);
+  renderPlaceModal('');
+  document.getElementById('placeModalOverlay').classList.add('active');
+  setTimeout(() => initPlaceModalMap(trip), 0);
+}
+
+function vibePillsHTML() {
+  return VIBES.map(v => `<button class="vibe-pill" onclick="selectVibe('${v}')">${v}</button>`).join('');
+}
+
+function selectVibe(vibe) {
+  document.getElementById('placeModalSearch').value = vibe;
+  renderPlaceModal(vibe);
+}
+
+function memberSelectorHTML(trip) {
+  return trip.members.map(m => `
+    <div class="place-modal-avatar ${placeModalSelectedMembers.has(m.name) ? 'active' : ''}" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}" onclick="togglePlaceModalMember('${m.name}')">${m.initial}</div>
+  `).join('');
+}
+
+function togglePlaceModalMember(name) {
+  if (placeModalSelectedMembers.has(name)) placeModalSelectedMembers.delete(name); else placeModalSelectedMembers.add(name);
+  document.getElementById('placeModalAvatars').innerHTML = memberSelectorHTML(TRIPS[placeModalTripId]);
+}
+
+function renderPlaceModal(query) {
+  const q = (query || '').toLowerCase();
+  const filtered = q
+    ? placeModalCandidates.filter(p => p.label.toLowerCase().includes(q) || p.vibe.toLowerCase() === q)
+    : placeModalCandidates;
+  document.getElementById('placeModalList').innerHTML = filtered.length
+    ? filtered.map(p => {
+        const idx = placeModalCandidates.indexOf(p);
+        return `<div class="place-modal-item" onclick="addPlaceToDay(${idx})">
+          <div class="place-modal-thumb" style="background:${TRIP_THUMB};"></div>
+          <div>
+            <div class="place-modal-item-title">${p.label}</div>
+            <div class="place-modal-item-vibe">${p.vibe}</div>
+          </div>
+        </div>`;
+      }).join('')
+    : `<div class="trip-ideas-empty">No places found</div>`;
+}
+
+function filterPlaceModal(value) { renderPlaceModal(value); }
+
+function closePlaceModal() {
+  document.getElementById('placeModalOverlay').classList.remove('active');
+  if (placeModalMap) { placeModalMap.remove(); placeModalMap = null; }
+}
+
+function closePlaceModalOnOverlay(e) {
+  if (e.target.id === 'placeModalOverlay') closePlaceModal();
+}
+
+function initPlaceModalMap(trip) {
+  const container = document.getElementById('placeModalMap');
+  if (!container || typeof L === 'undefined') return;
+  if (placeModalMap) { placeModalMap.remove(); placeModalMap = null; }
+  placeModalMap = L.map(container).setView(trip.center, trip.zoom);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  }).addTo(placeModalMap);
+  placeModalCandidates.forEach(p => {
+    L.marker([p.lat, p.lng]).addTo(placeModalMap).bindTooltip(p.label);
   });
+}
+
+function addPlaceToDay(candidateIdx) {
+  const trip = TRIPS[placeModalTripId];
+  const day = trip.days[placeModalDayIndex];
+  const place = placeModalCandidates[candidateIdx];
+  const selectedMembers = trip.members.filter(m => placeModalSelectedMembers.has(m.name));
+  if (!day.blocks.length) day.blocks.push({ time: 'Morning', tag: 'morning', activities: [] });
+  const block = day.blocks[day.blocks.length - 1];
+  block.activities.push({ icon: '📍', title: place.label, desc: 'Added from recommendations.', members: selectedMembers.length ? selectedMembers : trip.members });
+  trip.pins.push({ label: place.label, lat: place.lat, lng: place.lng, day: placeModalDayIndex, icon: '📍' });
+  const dayIndex = placeModalDayIndex;
+  closePlaceModal();
+  reRenderItinerary(placeModalTripId, dayIndex);
+}
+
+/* ===================== FLIGHTS / STAY TABS ===================== */
+function reminderBannerHTML(notBooked, label) {
+  if (!notBooked.length) return '';
+  return `
+    <div class="reminder-banner">
+      <div class="avatar-stack">
+        ${notBooked.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+      </div>
+      <span class="reminder-banner-text">${label}</span>
+      <button class="remind-btn" onclick="alert('Reminder sent!')">Send reminder</button>
+    </div>`;
+}
+
+function moreOptionsBannerHTML(label) {
+  return `
+    <div class="more-options-banner">
+      <span>${label}</span>
+      <button class="explore-btn" onclick="alert('Exploring more options...')">Explore</button>
+    </div>`;
+}
+
+function flightsTabHTML(trip) {
+  const booked = trip.members.slice(0, Math.min(2, trip.members.length));
+  const notBooked = trip.members.slice(booked.length);
+  const flights = [
+    { route: 'JFK → ' + (trip.pins[0] ? trip.pins[0].label : trip.name), date: trip.days[0] ? trip.days[0].date : '', price: 612 },
+    { route: (trip.pins[0] ? trip.pins[0].label : trip.name) + ' → JFK', date: trip.days[trip.days.length - 1] ? trip.days[trip.days.length - 1].date : '', price: 588 },
+  ];
+  return `
+    ${reminderBannerHTML(notBooked, "Haven't booked flights yet")}
+    ${flights.map(f => `
+      <div class="flying-by-row">
+        <span style="font-size:13px;font-weight:600;color:var(--color-gray-700);">Booked</span>
+        <div class="avatar-stack">
+          ${(booked.length ? booked : [ME]).map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+        </div>
+      </div>
+      <div class="booking-card">
+        <div class="booking-card-icon">${lucide('plane', 20)}</div>
+        <div class="booking-card-body">
+          <div class="booking-card-title">${f.route}</div>
+          <div class="booking-card-meta">${f.date} · Nonstop · 8h 15m</div>
+        </div>
+        <div class="booking-card-price">$${f.price}<span>per person</span></div>
+      </div>
+    `).join('')}
+    ${moreOptionsBannerHTML('More flight options available')}
+  `;
+}
+
+function stayTabHTML(trip) {
+  const booked = trip.members.slice(0, Math.min(2, trip.members.length));
+  const notBooked = trip.members.slice(booked.length);
+  return `
+    ${reminderBannerHTML(notBooked, "Haven't booked a stay yet")}
+    <div class="flying-by-row">
+      <span style="font-size:13px;font-weight:600;color:var(--color-gray-700);">Booked</span>
+      <div class="avatar-stack">
+        ${(booked.length ? booked : [ME]).map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+      </div>
+    </div>
+    <div class="booking-card">
+      <div class="booking-card-icon">${lucide('bed', 20)}</div>
+      <div class="booking-card-body">
+        <div class="booking-card-title">${trip.name} Central Hotel</div>
+        <div class="booking-card-meta">${trip.days.length - 2} nights · ★ 4.7 (1,204 reviews)</div>
+      </div>
+      <div class="booking-card-price">$189<span>per night</span></div>
+    </div>
+    ${moreOptionsBannerHTML('More stay options available')}
+  `;
 }
 
 function scrollChat() {
@@ -1303,27 +3069,31 @@ function scrollChat() {
   setTimeout(() => el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }), 50);
 }
 
-function renderStep(step, animate) {
+function switchView(view) {
+  currentView = view;
+  document.getElementById('chatView').style.display = view === 'chat' ? '' : 'none';
+  document.getElementById('homeView').classList.toggle('active', view === 'home');
+  document.getElementById('tripsView').classList.toggle('active', view === 'trips');
+  document.getElementById('friendsView').classList.toggle('active', view === 'friends');
+  document.getElementById('mobileItinView').classList.remove('active');
+}
+
+function renderStep(step, animate, openItin) {
+  if (openItin === undefined) openItin = true;
   const msgs = document.getElementById('chatMessages');
   const input = document.getElementById('chatInput');
-  const chatView = document.getElementById('chatView');
-  const mobileItinView = document.getElementById('mobileItinView');
   const itinPanel = document.getElementById('itinPanel');
-  const sidebar = document.getElementById('sidebar');
   const startView = document.getElementById('chatStartView');
   const inputArea = document.getElementById('chatInputArea');
   const headerTitle = document.getElementById('headerTitle');
 
-  chatView.style.display = '';
-  mobileItinView.classList.remove('active');
+  switchView('chat');
   itinPanel.classList.remove('active');
 
   if (step === 0) {
     startView.style.display = '';
     msgs.style.display = 'none';
     inputArea.style.display = 'none';
-    sidebar.classList.remove('collapsed');
-    sidebarExpanded = true;
     activeChatId = null;
     headerTitle.textContent = 'New Chat';
     renderNav();
@@ -1336,8 +3106,6 @@ function renderStep(step, animate) {
       userMsg("Paris trip for shopping");
     input.value = '';
     input.placeholder = 'Ask anything travel';
-    sidebar.classList.add('collapsed');
-    sidebarExpanded = false;
     activeChatId = 'paris';
     headerTitle.textContent = 'Paris trip for shopping';
     renderNav();
@@ -1361,8 +3129,6 @@ function renderStep(step, animate) {
       userMsg("Paris trip for shopping") +
       zoyaMsg("Here are some ideas that you might like.");
     input.value = '';
-    sidebar.classList.remove('collapsed');
-    sidebarExpanded = true;
     activeChatId = 'paris';
     headerTitle.textContent = 'Paris trip for shopping';
     renderNav();
@@ -1390,8 +3156,6 @@ function renderStep(step, animate) {
       zoyaMsg("Here are some ideas that you might like.") +
       locationCardsHTML() +
       zoyaMsg("These locations offer a perfect mix! Which one speaks to you? I can create a detailed 4-day itinerary for you.");
-    sidebar.classList.remove('collapsed');
-    sidebarExpanded = true;
     activeChatId = 'paris';
     headerTitle.textContent = 'Paris trip for shopping';
     renderNav();
@@ -1401,12 +3165,11 @@ function renderStep(step, animate) {
       if (sel) sel.classList.add('selected');
     }, 50);
 
-    showItinerary(selectedDestIdx);
+    if (openItin) showItinerary(DESTINATIONS[selectedDestIdx].id);
 
   }
 
   scrollChat();
-  updateStepDots();
 }
 
 
@@ -1420,26 +3183,34 @@ function selectDestination(idx) {
     currentStep = 3;
     renderStep(3, false);
   } else if (currentStep >= 3) {
-    showItinerary(idx);
+    showItinerary(DESTINATIONS[idx].id);
   }
 }
 
-function showItinerary(destIdx) {
+function showItinerary(tripId) {
+  const trip = TRIPS[tripId];
+  if (!trip) return;
+  selectedDayIndex = null;
   const isMobile = window.innerWidth <= 768;
   if (isMobile) {
+    lastMobileView = currentView;
     document.getElementById('chatView').style.display = 'none';
+    document.getElementById('homeView').classList.remove('active');
+    document.getElementById('tripsView').classList.remove('active');
+    document.getElementById('friendsView').classList.remove('active');
     const mobileItinView = document.getElementById('mobileItinView');
     mobileItinView.classList.add('active');
-    mobileItinView.querySelector('.header-title').textContent = DESTINATIONS[destIdx].name;
+    mobileItinView.querySelector('.header-title').textContent = trip.name;
     const content = document.getElementById('mobileItinContent');
-    content.innerHTML = itineraryHTML(destIdx);
-    const closeBtn = content.querySelector('.itin-close');
-    if (closeBtn) closeBtn.remove();
+    content.innerHTML = itineraryHTML(tripId);
+    const toolbar = content.querySelector('.itin-toolbar');
+    if (toolbar) toolbar.remove();
   } else {
     const itinPanel = document.getElementById('itinPanel');
     itinPanel.classList.add('active');
-    itinPanel.innerHTML = itineraryHTML(destIdx);
+    itinPanel.innerHTML = itineraryHTML(tripId);
   }
+  setTimeout(() => initLeafletMap(trip.id), 0);
 }
 
 function advanceStep() {
@@ -1447,11 +3218,6 @@ function advanceStep() {
     currentStep++;
     renderStep(currentStep, true);
   }
-}
-
-function goToStep(step) {
-  currentStep = step;
-  renderStep(step, false);
 }
 
 function resetFlow() {
@@ -1465,9 +3231,16 @@ function closeItinPanel() {
 
 function closeMobileItin() {
   document.getElementById('mobileItinView').classList.remove('active');
-  document.getElementById('chatView').style.display = '';
-  currentStep = 2;
-  renderStep(2, false);
+  switchView(lastMobileView);
+  if (lastMobileView === 'home') {
+    document.getElementById('homeContent').innerHTML = homeHTML();
+    setTimeout(initHomeMap, 0);
+  } else if (lastMobileView === 'trips') {
+    document.getElementById('tripsContent').innerHTML = tripsHTML();
+  } else if (lastMobileView === 'friends') {
+    document.getElementById('friendsContent').innerHTML = friendsHTML();
+  }
+  renderNav();
 }
 
 function openMobileMenu() {
@@ -1485,6 +3258,14 @@ function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('collapsed', !sidebarExpanded);
 }
 
+function applyResponsiveSidebar() {
+  if (window.innerWidth < 1000 && sidebarExpanded) {
+    sidebarExpanded = false;
+    document.getElementById('sidebar').classList.add('collapsed');
+  }
+}
+window.addEventListener('resize', applyResponsiveSidebar);
+
 document.getElementById('chatInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') advanceStep();
 });
@@ -1493,9 +3274,19 @@ document.getElementById('chatInputStart').addEventListener('keydown', (e) => {
 });
 
 const CHATS = [
-  { id: 'paris', name: 'Paris trip for shopping' },
-  { id: 'tokyo', name: 'Tokyo 5-day itinerary' },
-  { id: 'budget', name: 'Budget travel tips Europe' },
+  { id: 'paris', name: 'Paris trip for shopping', tripId: 'paris', tripIds: ['paris', 'barcelona', 'santorini', 'rome'] },
+  { id: 'tokyo', name: 'Tokyo 5-day itinerary', tripId: 'tokyo', tripIds: ['tokyo'], messages: [
+    { role: 'bot', text: "Hi I'm Zoya, your personal travel assistant. What should we explore today?" },
+    { role: 'user', text: 'Plan a 5-day itinerary for Tokyo' },
+    { role: 'bot', text: "Tokyo is an amazing choice! I've put together a 5-day itinerary mixing classic sights, food markets and neon-lit nightlife. Tap the card below to see the full itinerary.", tripIds: ['tokyo'] },
+  ] },
+  { id: 'budget', name: 'Budget travel tips Europe', tripId: null, tripIds: ['paris', 'barcelona', 'santorini', 'rome'], messages: [
+    { role: 'bot', text: "Hi I'm Zoya, your personal travel assistant. What should we explore today?" },
+    { role: 'user', text: 'What are some budget travel tips for Europe?' },
+    { role: 'bot', text: "Great question! A few favorites: travel by overnight train to save on hotels, eat where locals eat (avoid restaurants directly on main squares), use city tourist cards for free transit and museum entry, and book flights on Tuesdays or Wednesdays for the best fares." },
+    { role: 'user', text: 'Any tips for finding cheap accommodation?' },
+    { role: 'bot', text: "Definitely — look into hostels with private rooms, university dorms rented out in summer, and home-swapping. Booking 2-3 months ahead for shoulder season (April-May, Sept-Oct) usually saves 30-40% versus peak summer. Here are a few budget-friendly European itineraries to get you started:", tripIds: ['paris', 'barcelona', 'santorini', 'rome'] },
+  ] },
 ];
 
 let activeChatId = null;
@@ -1506,18 +3297,58 @@ function getChatTitle() {
   return chat ? chat.name : 'New Chat';
 }
 
+function chatTripCardsHTML(tripIds) {
+  return `<div class="location-cards in-chat">${tripIds.map(id => {
+    const t = TRIPS[id];
+    if (!t) return '';
+    return `<div class="location-card" onclick="showItinerary('${id}')">
+      <div style="height:120px;background:${t.thumbGradient};"></div>
+      <div class="location-card-info">
+        <div class="location-card-name">${t.name}</div>
+        <div class="location-card-country">${t.country}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function getThreadTripIds() {
+  if (activeChatId === 'paris') return currentStep >= 2 ? ['paris', 'barcelona', 'santorini', 'rome'] : [];
+  const chat = CHATS.find(c => c.id === activeChatId);
+  return chat && chat.tripIds ? chat.tripIds : [];
+}
+
+function toggleTripIdeasMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('tripIdeasMenu');
+  const ids = getThreadTripIds();
+  menu.innerHTML = ids.length
+    ? ids.map(id => `<div class="trip-ideas-item" onclick="showItinerary('${id}'); closeTripIdeasMenu();">${TRIPS[id] ? TRIPS[id].name : id}</div>`).join('')
+    : `<div class="trip-ideas-empty">No trips mentioned yet</div>`;
+  menu.classList.toggle('active');
+}
+
+function closeTripIdeasMenu() {
+  const menu = document.getElementById('tripIdeasMenu');
+  if (menu) menu.classList.remove('active');
+}
+
+document.addEventListener('click', () => closeTripIdeasMenu());
+
 function renderNav() {
   const chatChildren = CHATS.map(c =>
     `<div class="nav-child ${c.id === activeChatId ? 'active' : ''}" onclick="selectChat('${c.id}', event)"><span class="nav-child-dot"></span><span class="nav-label">${c.name}</span></div>`
   ).join('');
+  const chatActive = currentView === 'chat' && !activeChatId;
   const navHTML = `
-    <div class="nav-item active"><span class="nav-icon">${lucide('message-square',18)}</span><span class="nav-label">Chat</span><span class="nav-arrow">${lucide('chevron-down',14)}</span></div>
+    <div class="nav-item ${currentView === 'home' ? 'active' : ''}" onclick="openHomeView()"><span class="nav-icon">${lucide('home',18)}</span><span class="nav-label">Home</span></div>
+    <div class="nav-item ${chatActive ? 'active' : ''}" onclick="resetFlow()"><span class="nav-icon">${lucide('message-square',18)}</span><span class="nav-label">Chat</span><span class="nav-arrow">${lucide('chevron-down',14)}</span></div>
     <div class="nav-children">
-      ${chatChildren}
       <button class="nav-new-chat" onclick="resetFlow()"><span class="nav-icon" style="width:14px;">${lucide('plus',14)}</span><span class="nav-label">New chat</span></button>
+      ${chatChildren}
     </div>
-    <div class="nav-item"><span class="nav-icon">${lucide('plane',18)}</span><span class="nav-label">My Trips</span></div>
-    <div class="nav-item"><span class="nav-icon">${lucide('shopping-cart',18)}</span><span class="nav-label">Book Trip</span></div>
+    <div class="nav-item ${currentView === 'trips' ? 'active' : ''}" onclick="openTripsView()"><span class="nav-icon">${lucide('plane',18)}</span><span class="nav-label">Trips</span></div>
+    <div class="nav-item ${currentView === 'friends' ? 'active' : ''}" onclick="openFriendsView()"><span class="nav-icon">${lucide('users',18)}</span><span class="nav-label">Friends</span></div>
+    <div class="nav-item"><span class="nav-icon">${lucide('shopping-cart',18)}</span><span class="nav-label">Book</span></div>
   `;
   document.getElementById('navSection').innerHTML = navHTML;
   const mobileNav = document.getElementById('mobileNavSection');
@@ -1527,12 +3358,441 @@ function renderNav() {
 function selectChat(chatId, e) {
   if (e) e.stopPropagation();
   activeChatId = chatId;
-  renderNav();
+  const chat = CHATS.find(c => c.id === chatId);
+  switchView('chat');
   document.getElementById('headerTitle').textContent = getChatTitle();
+  closeItinPanel();
+
+  if (chatId === 'paris') {
+    currentStep = 4;
+    renderStep(4, false, false);
+    renderNav();
+    return;
+  }
+
+  currentStep = -1;
+  const msgs = document.getElementById('chatMessages');
+  const startView = document.getElementById('chatStartView');
+  const inputArea = document.getElementById('chatInputArea');
+  startView.style.display = 'none';
+  msgs.style.display = '';
+  inputArea.style.display = '';
+  msgs.innerHTML = (chat && chat.messages ? chat.messages : []).map(m => {
+    return m.role === 'bot' ? zoyaMsg(m.text, m.tripIds) : userMsg(m.text);
+  }).join('');
+  document.getElementById('chatInput').value = '';
+  scrollChat();
+  renderNav();
+}
+
+function createTripFromHome() {
+  const input = document.getElementById('homeCreateTripInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const id = 'trip-' + Date.now();
+  const name = text.length > 40 ? text.slice(0, 40) + '…' : text;
+  CHATS.unshift({
+    id, name, tripId: null, tripIds: [],
+    messages: [
+      { role: 'user', text },
+      { role: 'bot', text: "Got it! Let me put together some ideas for you — give me a moment and I'll follow up with a full itinerary here." },
+    ],
+  });
+  input.value = '';
+  selectChat(id);
+}
+
+/* ===================== HOME VIEW ===================== */
+function barChartHTML() {
+  const max = Math.max(...MONTHLY_TRIPS.map(m => m.count), 1);
+  return `<div class="bar-chart">
+    ${MONTHLY_TRIPS.map((m, i) => `
+      <div class="bar-chart-col ${i === CURRENT_MONTH_IDX ? 'current' : ''}">
+        <div class="bar-chart-tooltip">
+          <strong>${m.count} trip${m.count === 1 ? '' : 's'}</strong>
+          ${m.places.length ? `<br>${m.places.join(', ')}` : ''}
+        </div>
+        <div class="bar-chart-bar" style="height:${Math.max(4, (m.count / max) * 100)}%;"></div>
+        <div class="bar-chart-label">${m.label}</div>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+function countryFlagsHTML() {
+  return `<div class="country-flags">
+    ${RECENT_COUNTRIES.map(c => `<span class="country-flag" title="${c.name}">${c.flag}</span>`).join('')}
+  </div>`;
+}
+
+function leaderboardHTML() {
+  const max = Math.max(...LEADERBOARD.map(p => p.count), 1);
+  return LEADERBOARD.map((p, i) => `
+    <div class="leaderboard-row ${p.isMe ? 'me' : ''}">
+      <span class="leaderboard-rank">${i + 1}</span>
+      <div class="leaderboard-avatar" style="background:${p.color};${p.textColor ? 'color:'+p.textColor+';' : ''}">${p.initial}</div>
+      <span class="leaderboard-name">${p.name}</span>
+      <div class="leaderboard-bar-track"><div class="leaderboard-bar-fill" style="width:${(p.count / max) * 100}%;"></div></div>
+      <span class="leaderboard-count">${p.count}</span>
+    </div>
+  `).join('');
+}
+
+function recommendedCarouselHTML() {
+  return `<div class="carousel">
+    ${FRIEND_VISITED_TRIPS.map(v => {
+      const t = TRIPS[v.tripId];
+      const f = FRIENDS.find(fr => fr.name === v.friendName);
+      if (!t) return '';
+      return `<div class="carousel-card" onclick="showItinerary('${v.tripId}')">
+        <div class="trip-card-thumb" style="background:${t.thumbGradient};"></div>
+        <div class="trip-card-body">
+          <div class="trip-card-name">${t.name}</div>
+          <div class="trip-card-meta">${t.country}</div>
+          <div class="carousel-card-visitor">
+            <div class="friend-avatar" style="background:${f ? f.color : 'var(--color-gray-300)'};">${f ? f.initial : v.friendName.charAt(0)}</div>
+            <span>${v.friendName}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function homeHTML() {
+  return `
+    <h1 class="home-welcome">Welcome back, George</h1>
+
+    <div class="home-section">
+      <div class="home-section-title">Create new trip</div>
+      <div class="home-create-trip">
+        <div class="chat-input-wrapper">
+          <input class="chat-input" id="homeCreateTripInput" placeholder="Ask anything travel" onkeydown="if(event.key==='Enter') createTripFromHome();" />
+          <button class="send-btn" onclick="createTripFromHome()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-section">
+      <div class="home-section-title">Your travel status</div>
+      <div class="home-section-sub">Trips taken this year and how you stack up against friends</div>
+      <div class="status-grid">
+        <div class="stat-card">
+          <div class="stat-card-title">Trips in 2026</div>
+          ${barChartHTML()}
+          <div class="stat-card-subsection-title">Recent countries visited</div>
+          ${countryFlagsHTML()}
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-title">Activity leaderboard</div>
+          ${leaderboardHTML()}
+        </div>
+      </div>
+    </div>
+
+    <div class="home-section">
+      <div class="home-section-title">New trips for you</div>
+      <div class="home-section-sub">A few places we think you'd love next</div>
+      <div class="home-map-card" id="homeMap"></div>
+    </div>
+
+    <div class="home-section">
+      <div class="home-section-title">Your friends also visited</div>
+      <div class="home-section-sub">See where your travel circle has been</div>
+      ${recommendedCarouselHTML()}
+    </div>
+  `;
+}
+
+let homeMap = null;
+
+function initHomeMap() {
+  const container = document.getElementById('homeMap');
+  if (!container || typeof L === 'undefined') return;
+
+  if (homeMap) {
+    homeMap.remove();
+    homeMap = null;
+  }
+
+  homeMap = L.map(container, {
+    scrollWheelZoom: false,
+    dragging: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    keyboard: false,
+    touchZoom: false,
+    zoomControl: false,
+    tap: false,
+  }).setView([35, 15], 2);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  }).addTo(homeMap);
+
+  RECOMMENDED_TRIP_IDS.forEach(id => {
+    const t = TRIPS[id];
+    if (!t) return;
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="squarcle-marker"><div class="squarcle" style="width:52px;height:52px;background:${t.thumbGradient};font-weight:700;color:var(--color-gray-700);">${t.name.charAt(0)}</div><div class="squarcle-label">${t.name}</div></div>`,
+      iconSize: [52, 74],
+      iconAnchor: [26, 66],
+    });
+    const marker = L.marker(t.center, { icon }).addTo(homeMap);
+    marker.on('click', () => showItinerary(id));
+  });
+}
+
+function openHomeView() {
+  switchView('home');
+  closeItinPanel();
+  document.getElementById('homeContent').innerHTML = homeHTML();
+  setTimeout(initHomeMap, 0);
+  renderNav();
+}
+
+/* ===================== TRIPS VIEW ===================== */
+function tripsHTML() {
+  const list = SAVED_TRIP_IDS.length
+    ? `<div class="trip-list">
+        ${SAVED_TRIP_IDS.map(id => {
+          const t = TRIPS[id];
+          return `<div class="trip-card" onclick="showItinerary('${id}')">
+            <div class="trip-card-thumb" style="background:${t.thumbGradient};"></div>
+            <div class="trip-card-body">
+              <div class="trip-card-name">${t.name}</div>
+              <div class="trip-card-meta">${t.country}</div>
+              <div class="trip-card-dates">${lucide('calendar',12)} ${t.dates}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`
+    : `<div class="empty-state">No saved trips yet.</div>`;
+
+  return `
+    <div class="home-section-title">Your trips</div>
+    ${list}
+    <div class="discover-section">
+      <div class="discover-section-title">Looking for your next trip?</div>
+      <div class="discover-section-desc">Tell us what you're in the mood for and we'll put together fresh destination ideas tailored to you.</div>
+      <button class="discover-btn" onclick="openHomeView()">Discover</button>
+    </div>
+  `;
+}
+
+function openTripsView() {
+  switchView('trips');
+  closeItinPanel();
+  document.getElementById('tripsContent').innerHTML = tripsHTML();
+  renderNav();
+}
+
+/* ===================== FRIENDS VIEW ===================== */
+function friendsHTML() {
+  return `
+    <div class="home-section-title">Your friends</div>
+    <div class="friends-avatar-carousel">
+      ${FRIENDS.map(f => `
+        <div class="friends-avatar-item" title="${f.name}">
+          <div class="friend-avatar" style="background:${f.color};width:48px;height:48px;font-size:16px;">${f.initial}</div>
+          <span>${f.name.split(' ')[0]}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="home-section-title" style="margin-top:32px;">Activities</div>
+    <div class="friend-activity-list">
+      ${FRIEND_ACTIVITY.map(a => `
+        <div class="friend-activity-item" ${a.tripId ? `onclick="showItinerary('${a.tripId}')" style="cursor:pointer;"` : ''}>
+          <div class="friend-avatar" style="background:${a.friend.color};">${a.friend.initial}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="friend-activity-text"><b>${a.friend.name}</b> ${a.action} <b>${a.tripName}</b></div>
+            <div class="friend-activity-time">${a.time}</div>
+          </div>
+          ${a.tripId ? `<span class="friend-activity-arrow">${lucide('chevron-right',16)}</span>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function openFriendsView() {
+  switchView('friends');
+  closeItinPanel();
+  document.getElementById('friendsContent').innerHTML = friendsHTML();
+  renderNav();
+}
+
+/* ===================== MAP (Leaflet / OpenStreetMap) ===================== */
+let leafletMap = null;
+let leafletMarkers = [];
+let currentMapTripId = null;
+let selectedDayIndex = null;
+
+function initLeafletMap(tripId) {
+  const trip = TRIPS[tripId];
+  const container = document.getElementById('itinMap-' + tripId);
+  if (!trip || !container || typeof L === 'undefined') return;
+
+  if (leafletMap) {
+    leafletMap.remove();
+    leafletMap = null;
+  }
+
+  currentMapTripId = tripId;
+  leafletMap = L.map(container, { scrollWheelZoom: true }).setView(trip.center, trip.zoom);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  }).addTo(leafletMap);
+
+  renderMapPins(trip);
+}
+
+function renderMapPins(trip) {
+  leafletMarkers.forEach(m => leafletMap.removeLayer(m));
+  leafletMarkers = [];
+
+  trip.pins.forEach(p => {
+    const isSelected = selectedDayIndex !== null && p.day === selectedDayIndex;
+    const isDimmed = selectedDayIndex !== null && p.day !== selectedDayIndex;
+    const html = isSelected
+      ? `<div class="map-pin-marker"><div class="map-pin-squarcle" style="background:${trip.thumbGradient};"><span class="map-pin-badge">${p.day + 1}</span>${p.icon || p.label.charAt(0)}</div><div class="map-pin-label">${p.label}</div></div>`
+      : `<div class="map-pin-marker${isDimmed ? ' dimmed' : ''}"><div class="map-pin-dot"><span>${p.day + 1}</span></div><div class="map-pin-label">${p.label}</div></div>`;
+    const icon = L.divIcon({
+      className: '',
+      html,
+      iconSize: isSelected ? [76, 98] : [26, 46],
+      iconAnchor: isSelected ? [38, 90] : [13, 40],
+    });
+    const marker = L.marker([p.lat, p.lng], { icon }).addTo(leafletMap);
+    marker.on('click', () => filterToDay(p.day));
+    leafletMarkers.push(marker);
+  });
+}
+
+function filterToDay(index) {
+  selectedDayIndex = index;
+  document.querySelectorAll('.day-item').forEach((el, i) => {
+    const isMatch = index === null || i === index;
+    el.classList.toggle('hidden', !isMatch);
+    if (index !== null && i === index) {
+      el.classList.add('expanded');
+    }
+  });
+  document.querySelectorAll('.day-pill').forEach(el => {
+    const d = el.dataset.day;
+    const pillIndex = d === 'all' ? null : parseInt(d, 10);
+    el.classList.toggle('active', pillIndex === index);
+  });
+  const trip = TRIPS[currentMapTripId];
+  if (leafletMap && trip) renderMapPins(trip);
+}
+
+document.addEventListener('click', (e) => {
+  const itinDetails = e.target.closest('.itin-details');
+  if (!itinDetails) return;
+  if (e.target.closest('.day-item') || e.target.closest('.day-pill-group')) return;
+  if (selectedDayIndex !== null) filterToDay(null);
+});
+
+/* ===================== ADD PEOPLE MODAL ===================== */
+let modalTripId = null;
+let modalSelectedFriends = new Set();
+
+function openAddFriendsModal(tripId) {
+  modalTripId = tripId;
+  modalSelectedFriends = new Set();
+  renderModal('friends');
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target.id === 'modalOverlay') closeModal();
+}
+
+function renderModal(tab) {
+  const trip = TRIPS[modalTripId];
+  if (!trip) return;
+  const existingIds = new Set(trip.members.map(m => m.id).filter(Boolean));
+  const shareLink = `https://zenvoya.app/trip/${modalTripId}?invite=${modalTripId.slice(0,4)}92x`;
+  document.getElementById('modalBox').innerHTML = `
+    <div class="modal-header">
+      <h3>Add people to ${trip.name}</h3>
+      <button class="modal-close" onclick="closeModal()">${lucide('x',16)}</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab ${tab==='friends'?'active':''}" onclick="renderModal('friends')">From friends</button>
+      <button class="modal-tab ${tab==='share'?'active':''}" onclick="renderModal('share')">Share link</button>
+    </div>
+    <div class="modal-body">
+      ${tab === 'friends' ? `
+        ${FRIENDS.map(f => {
+          const checked = existingIds.has(f.id) || modalSelectedFriends.has(f.id);
+          const disabled = existingIds.has(f.id);
+          return `
+          <div class="modal-friend-row">
+            <div class="friend-avatar" style="background:${f.color};">${f.initial}</div>
+            <div class="modal-friend-name">${f.name}${disabled ? ' <span style="color:var(--color-gray-400);font-weight:400;">· already on trip</span>' : ''}</div>
+            <div class="modal-friend-check ${checked ? 'checked' : ''}" ${disabled ? '' : `onclick="toggleModalFriend('${f.id}')"`} style="${disabled ? 'cursor:default;opacity:0.6;' : ''}">${checked ? lucide('check',12) : ''}</div>
+          </div>`;
+        }).join('')}
+      ` : `
+        <p style="font-size:13px;color:var(--color-gray-500);margin-bottom:10px;line-height:1.4;">Anyone with this link can view and join ${trip.name}.</p>
+        <div class="modal-share-row">
+          <input class="modal-share-input" id="shareLinkInput" value="${shareLink}" readonly />
+          <button class="modal-copy-btn" onclick="copyShareLink()">Copy</button>
+        </div>
+      `}
+    </div>
+    ${tab === 'friends' ? `<div class="modal-footer"><button class="modal-add-btn" onclick="confirmAddFriends()">Add selected</button></div>` : ''}
+  `;
+}
+
+function toggleModalFriend(id) {
+  if (modalSelectedFriends.has(id)) modalSelectedFriends.delete(id); else modalSelectedFriends.add(id);
+  renderModal('friends');
+}
+
+function confirmAddFriends() {
+  const trip = TRIPS[modalTripId];
+  if (!trip) return;
+  modalSelectedFriends.forEach(id => {
+    if (!trip.members.some(m => m.id === id)) {
+      const f = friendById(id);
+      if (f) trip.members.push(f);
+    }
+  });
+  closeModal();
+  showItinerary(modalTripId);
+}
+
+function copyShareLink() {
+  const input = document.getElementById('shareLinkInput');
+  input.select();
+  try { navigator.clipboard.writeText(input.value); } catch (e) {}
+  const btn = document.querySelector('.modal-copy-btn');
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  }
 }
 
 renderNav();
 renderStep(0, false);
+openHomeView();
+applyResponsiveSidebar();
+document.getElementById('tripIdeasIcon').innerHTML = lucide('lightbulb', 14);
 </script>
 </body>
 </html>
