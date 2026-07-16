@@ -1,0 +1,1478 @@
+<title>Zenvoya Design System — Component Library</title>
+<link rel="stylesheet" href="zenvoya-tokens.css">
+<style>
+
+/* ═══════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--page-fg);
+  background: var(--page-bg);
+}
+
+/* ═══════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════ */
+.shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--nav-bg);
+  border-right: 1px solid var(--nav-border);
+  padding: 24px 0;
+}
+.sidebar-brand {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--nav-border);
+  margin-bottom: 16px;
+}
+.sidebar-brand h1 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-primary);
+}
+.sidebar-brand span {
+  font-size: 11px;
+  color: var(--section-label);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: block;
+  margin-top: 2px;
+}
+.sidebar nav { display: flex; flex-direction: column; gap: 1px; }
+.sidebar a {
+  display: block;
+  padding: 7px 20px;
+  font-size: 13px;
+  color: var(--page-fg);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.sidebar a:hover, .sidebar a:focus-visible {
+  background: var(--color-primary-ultra-light);
+  color: var(--color-primary);
+  outline: none;
+}
+.sidebar .nav-group {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--section-label);
+  padding: 16px 20px 4px;
+  cursor: default;
+}
+
+/* Main */
+.main {
+  padding: 32px 40px 80px;
+  max-width: 1100px;
+}
+
+/* Section */
+.ds-section {
+  margin-bottom: 48px;
+}
+.ds-section > h2 {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--section-label);
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+/* Specimen card */
+.specimen {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.specimen-label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.specimen-meta {
+  font-size: 11px;
+  color: var(--section-label);
+  margin-bottom: 16px;
+}
+.specimen-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+.specimen-row.col {
+  flex-direction: column;
+}
+
+/* Tags */
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+}
+.tag.green { background: #e8fccf; color: #3d7a00; }
+.tag.blue { background: #d6f0ff; color: #006da8; }
+:root[data-theme="dark"] .tag.green,
+:root[data-theme="dark"] .tag.blue { opacity: 0.85; }
+@media (prefers-color-scheme: dark) {
+  .tag.green { background: #1e3300; color: #b8f54a; }
+  .tag.blue { background: #002e44; color: #5ad4ff; }
+}
+:root[data-theme="dark"] .tag.green { background: #1e3300; color: #b8f54a; }
+:root[data-theme="dark"] .tag.blue { background: #002e44; color: #5ad4ff; }
+:root[data-theme="light"] .tag.green { background: #e8fccf; color: #3d7a00; }
+:root[data-theme="light"] .tag.blue { background: #d6f0ff; color: #006da8; }
+
+/* ═══════════════════════════════════════
+   COMPONENT SPECIMENS
+   ═══════════════════════════════════════ */
+
+/* -- Colors -- */
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
+.color-swatch {
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--card-border);
+  position: relative;
+  overflow: hidden;
+}
+.color-swatch-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 6px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.color-swatch-info .name {
+  display: block;
+  font-weight: 500;
+  font-size: 11px;
+  margin-bottom: 1px;
+}
+
+/* -- Typography -- */
+.type-scale {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.type-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--card-border);
+}
+.type-row:last-child { border-bottom: none; }
+.type-label {
+  flex: 0 0 140px;
+  font-size: 11px;
+  color: var(--section-label);
+  font-variant-numeric: tabular-nums;
+}
+.type-sample {
+  flex: 1;
+  font-family: Inter, sans-serif;
+  color: var(--page-fg);
+}
+
+/* -- Shadows -- */
+.shadow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+}
+.shadow-box {
+  height: 80px;
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  display: flex;
+  align-items: flex-end;
+  padding: 8px;
+}
+.shadow-box span {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--section-label);
+  letter-spacing: 0.02em;
+}
+
+/* -- Radius -- */
+.radius-grid {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+}
+.radius-box {
+  width: 64px;
+  height: 64px;
+  background: var(--color-primary-light);
+  border: 2px solid var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* -- Buttons -- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, opacity 0.15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+/* Sizes */
+.btn.md { padding: 10px 20px; border-radius: var(--radius-md); font-size: 14px; }
+.btn.sm { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 13px; }
+.btn.icon-only { padding: 10px; border-radius: var(--radius-md); }
+.btn.icon-only.sm { padding: 6px; }
+
+/* Primary */
+.btn.primary { background: var(--color-primary); color: #fff; }
+.btn.primary:hover { background: var(--color-primary-hover); }
+.btn.primary:disabled { opacity: 0.4; cursor: default; }
+
+/* Secondary */
+.btn.secondary { background: transparent; color: var(--page-fg); border: 1.5px solid var(--card-border); }
+.btn.secondary:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.btn.secondary:disabled { opacity: 0.4; cursor: default; }
+
+/* Tertiary */
+.btn.tertiary { background: transparent; color: var(--page-fg); }
+.btn.tertiary:hover { background: var(--color-primary-ultra-light); color: var(--color-primary); }
+
+/* Link */
+.btn.link { background: transparent; color: var(--color-primary); padding: 0; font-weight: 500; text-decoration: underline; text-underline-offset: 2px; }
+.btn.link:hover { color: var(--color-primary-hover); }
+
+/* With 3rd party */
+.btn.third-party { background: transparent; border: 1.5px solid var(--card-border); color: var(--page-fg); }
+.btn.third-party img { height: 18px; }
+
+/* -- Checkboxes -- */
+.checkbox-demo { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+.checkbox-box {
+  width: 20px; height: 20px;
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.checkbox-box.checked { background: var(--color-primary); border-color: var(--color-primary); }
+.checkbox-box.checked::after { content: '✓'; color: #fff; font-size: 12px; font-weight: 700; }
+
+/* -- Tabs -- */
+.tabs-demo {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--card-border);
+}
+.tab-item {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--section-label);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+}
+.tab-item:hover { color: var(--page-fg); }
+.tab-item.active { color: var(--color-primary); border-bottom-color: var(--color-primary); font-weight: 600; }
+
+.tabs-bordered {
+  display: flex;
+  gap: 4px;
+}
+.tab-bordered {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--section-label);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tab-bordered:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.tab-bordered.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+
+/* -- Filters -- */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid var(--card-border);
+  background: transparent;
+  color: var(--page-fg);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-chip:hover { border-color: var(--color-primary); }
+.filter-chip.selected { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+
+/* -- Inputs -- */
+.input-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 240px;
+}
+.input-label { font-size: 13px; font-weight: 500; }
+.input-field {
+  padding: 10px 12px;
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: Inter, sans-serif;
+  background: var(--card-bg);
+  color: var(--page-fg);
+  transition: border-color 0.15s;
+  outline: none;
+}
+.input-field:focus { border-color: var(--color-primary); }
+.input-field.error { border-color: var(--color-error); }
+.input-field::placeholder { color: var(--color-gray-400); }
+.input-helper { font-size: 11px; color: var(--section-label); }
+.input-helper.error { color: var(--color-error); }
+
+textarea.input-field { resize: vertical; min-height: 80px; }
+
+.select-field {
+  padding: 10px 32px 10px 12px;
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: Inter, sans-serif;
+  background: var(--card-bg);
+  color: var(--page-fg);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  outline: none;
+}
+.select-field:focus { border-color: var(--color-primary); }
+
+/* -- Stepper -- */
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.stepper button {
+  width: 36px; height: 36px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--page-fg);
+  display: flex; align-items: center; justify-content: center;
+}
+.stepper button:hover { background: var(--color-primary-ultra-light); color: var(--color-primary); }
+.stepper .stepper-val {
+  width: 40px; text-align: center;
+  font-size: 14px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border-left: 1px solid var(--card-border);
+  border-right: 1px solid var(--card-border);
+  padding: 6px 0;
+}
+
+/* -- Toasts -- */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--shadow-medium);
+  max-width: 340px;
+}
+.toast.success { background: #ecfdf5; color: #065f46; }
+.toast.error { background: #fef2f2; color: #991b1b; }
+.toast.info { background: #eff6ff; color: #1e40af; }
+@media (prefers-color-scheme: dark) {
+  .toast.success { background: #0a2618; color: #6ee7b7; }
+  .toast.error { background: #2a0f0f; color: #fca5a5; }
+  .toast.info { background: #0c1929; color: #93c5fd; }
+}
+:root[data-theme="dark"] .toast.success { background: #0a2618; color: #6ee7b7; }
+:root[data-theme="dark"] .toast.error { background: #2a0f0f; color: #fca5a5; }
+:root[data-theme="dark"] .toast.info { background: #0c1929; color: #93c5fd; }
+:root[data-theme="light"] .toast.success { background: #ecfdf5; color: #065f46; }
+:root[data-theme="light"] .toast.error { background: #fef2f2; color: #991b1b; }
+:root[data-theme="light"] .toast.info { background: #eff6ff; color: #1e40af; }
+
+/* -- Avatar -- */
+.avatar {
+  border-radius: 50%;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.avatar.lg { width: 48px; height: 48px; font-size: 18px; }
+.avatar.md { width: 36px; height: 36px; font-size: 14px; }
+.avatar.sm { width: 24px; height: 24px; font-size: 10px; }
+
+/* -- Cards -- */
+.card-demo {
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  max-width: 300px;
+  background: var(--card-bg);
+  transition: box-shadow 0.2s;
+  cursor: pointer;
+}
+.card-demo:hover { box-shadow: var(--shadow-medium); }
+.card-img {
+  height: 140px;
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary-ultra-light) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  font-size: 32px;
+}
+.card-body { padding: 16px; }
+.card-body h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.card-body p { font-size: 12px; color: var(--section-label); }
+
+/* -- Header -- */
+.header-demo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+}
+.header-left { display: flex; align-items: center; gap: 24px; }
+.header-logo { font-size: 16px; font-weight: 700; color: var(--color-primary); letter-spacing: -0.03em; }
+.header-nav { display: flex; gap: 16px; }
+.header-nav a { font-size: 13px; color: var(--page-fg); text-decoration: none; font-weight: 500; }
+.header-nav a:hover { color: var(--color-primary); }
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+/* -- Chat -- */
+.chat-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 360px;
+  padding: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+}
+.chat-bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.chat-bubble.zoya {
+  background: var(--color-primary-light);
+  color: var(--page-fg);
+  align-self: flex-start;
+  border-bottom-left-radius: var(--radius-sm);
+}
+.chat-bubble.user {
+  background: var(--color-primary);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: var(--radius-sm);
+}
+.chat-input-demo {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--card-border);
+}
+.chat-input-demo input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-family: Inter, sans-serif;
+  background: transparent;
+  color: var(--page-fg);
+  outline: none;
+}
+.chat-input-demo input:focus { border-color: var(--color-primary); }
+
+/* -- Bottom Drawer -- */
+.drawer-demo {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  max-width: 375px;
+  overflow: hidden;
+}
+.drawer-handle {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+}
+.drawer-handle span {
+  width: 36px; height: 4px;
+  background: var(--color-gray-200);
+  border-radius: var(--radius-full);
+}
+.drawer-content { padding: 0 20px 20px; }
+.drawer-content h4 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+
+/* -- Progress -- */
+.progress-bar {
+  height: 4px;
+  background: var(--color-gray-100);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+/* -- Stars -- */
+.stars { display: flex; gap: 2px; }
+.star { font-size: 16px; cursor: pointer; }
+.star.filled { color: #f59e0b; }
+.star.empty { color: var(--color-gray-200); }
+
+/* -- Booking card -- */
+.booking-card {
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  max-width: 400px;
+  background: var(--card-bg);
+}
+.booking-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.booking-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--card-border);
+  font-size: 13px;
+}
+.booking-row .label { color: var(--section-label); }
+.booking-row .value { font-weight: 600; }
+
+/* -- Time Selector -- */
+.time-slots { display: flex; gap: 8px; flex-wrap: wrap; }
+.time-slot {
+  padding: 8px 16px;
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.time-slot:hover { border-color: var(--color-primary); }
+.time-slot.selected { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+.time-slot.disabled { opacity: 0.4; cursor: default; }
+.time-slot .seats { display: block; font-size: 10px; font-weight: 400; color: var(--section-label); margin-top: 2px; }
+.time-slot.selected .seats { color: rgba(255,255,255,0.7); }
+.time-slot .popular { display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-accent-blue); margin-bottom: 2px; }
+
+/* -- Fixed CTA -- */
+.fixed-cta-demo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  max-width: 375px;
+}
+.fixed-cta-price { font-size: 18px; font-weight: 700; }
+.fixed-cta-price span { font-size: 12px; font-weight: 400; color: var(--section-label); display: block; }
+
+/* -- Side menu -- */
+.sidemenu-demo {
+  width: 260px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 0;
+  overflow: hidden;
+}
+.sidemenu-header { padding: 0 20px 16px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; gap: 12px; }
+.sidemenu-header .name { font-size: 14px; font-weight: 600; }
+.sidemenu-header .email { font-size: 11px; color: var(--section-label); }
+.sidemenu-item {
+  padding: 10px 20px;
+  font-size: 13px;
+  color: var(--page-fg);
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidemenu-item:hover { background: var(--color-primary-ultra-light); color: var(--color-primary); }
+.sidemenu-item .icon { width: 18px; text-align: center; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .shell { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .main { padding: 20px 16px 60px; }
+  .specimen-row { gap: 8px; }
+  .color-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+  .shadow-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  .radius-grid { flex-wrap: wrap; }
+  .header-demo { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .header-nav { flex-wrap: wrap; gap: 8px; }
+  .booking-card, .fixed-cta-demo, .drawer-demo, .chat-demo { max-width: 100%; }
+}
+@media (max-width: 480px) {
+  .type-row { flex-direction: column; gap: 4px; }
+  .type-label { flex: none; }
+  .tabs-bordered { flex-wrap: wrap; }
+  .time-slots { flex-direction: column; }
+  .time-slot { width: 100%; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Interactive specimens: ensure min touch targets */
+.filter-chip, .tab-item, .tab-bordered, .time-slot {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.sidemenu-item { min-height: 44px; }
+
+/* Overflow safety on all specimens */
+.specimen-row { overflow-x: auto; }
+</style>
+
+<div class="shell">
+  <!-- Sidebar -->
+  <aside class="sidebar" role="navigation" aria-label="Component sections">
+    <div class="sidebar-brand">
+      <h1>Zenvoya</h1>
+      <span>Design System Audit</span>
+    </div>
+    <nav aria-label="Design system sections">
+      <div class="nav-group">Foundations</div>
+      <a href="#colors">Colors</a>
+      <a href="#typography">Typography</a>
+      <a href="#shadows">Shadows</a>
+      <a href="#radius">Border Radius</a>
+      <a href="#icons">Icons</a>
+      <div class="nav-group">Navigation</div>
+      <a href="#header">Header</a>
+      <a href="#side-menu">Side Menu</a>
+      <a href="#tabs">Tabs</a>
+      <a href="#nav-link">Nav Link</a>
+      <div class="nav-group">Actions</div>
+      <a href="#buttons">Buttons</a>
+      <a href="#filters">Filters</a>
+      <div class="nav-group">Form Controls</div>
+      <a href="#inputs">Text Inputs</a>
+      <a href="#checkbox">Checkbox</a>
+      <a href="#stepper">Stepper</a>
+      <a href="#select">Select</a>
+      <div class="nav-group">Content</div>
+      <a href="#cards">Cards</a>
+      <a href="#toasts">Toasts</a>
+      <a href="#avatars">Avatars</a>
+      <a href="#stars">Stars</a>
+      <a href="#progress">Progress</a>
+      <div class="nav-group">Travel</div>
+      <a href="#booking">Booking Sections</a>
+      <a href="#time-selector">Time Selector</a>
+      <a href="#fixed-cta">Fixed CTA</a>
+      <a href="#bottom-drawer">Bottom Drawer</a>
+      <div class="nav-group">AI Chat</div>
+      <a href="#chat">Chat Bubbles</a>
+      <a href="#chat-input">Chat Input</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ═══ COLORS ═══ -->
+    <section class="ds-section" id="colors">
+      <h2>Colors</h2>
+      <div class="specimen">
+        <div class="specimen-label">Brand Colors</div>
+        <div class="specimen-meta">Primary, accents — 3 tokens</div>
+        <div class="color-grid">
+          <div class="color-swatch" style="background:#6c00f6">
+            <div class="color-swatch-info" style="color:#fff"><span class="name">Primary Purple</span>#6c00f6</div>
+          </div>
+          <div class="color-swatch" style="background:#a1f919">
+            <div class="color-swatch-info" style="color:#222"><span class="name">Accent Green</span>#a1f919</div>
+          </div>
+          <div class="color-swatch" style="background:#00b8ff">
+            <div class="color-swatch-info" style="color:#fff"><span class="name">Accent Blue</span>#00b8ff</div>
+          </div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Neutrals</div>
+        <div class="specimen-meta">8-step scale — White to Black</div>
+        <div class="color-grid">
+          <div class="color-swatch" style="background:#ffffff"><div class="color-swatch-info" style="color:#222"><span class="name">White</span>#ffffff</div></div>
+          <div class="color-swatch" style="background:#eeeeee"><div class="color-swatch-info" style="color:#222"><span class="name">Gray-100</span>#eeeeee</div></div>
+          <div class="color-swatch" style="background:#cccccc"><div class="color-swatch-info" style="color:#222"><span class="name">Gray-200</span>#cccccc</div></div>
+          <div class="color-swatch" style="background:#aaaaaa"><div class="color-swatch-info" style="color:#222"><span class="name">Gray-300</span>#aaaaaa</div></div>
+          <div class="color-swatch" style="background:#666666"><div class="color-swatch-info" style="color:#fff"><span class="name">Gray-400</span>#666666</div></div>
+          <div class="color-swatch" style="background:#444444"><div class="color-swatch-info" style="color:#fff"><span class="name">Gray-500</span>#444444</div></div>
+          <div class="color-swatch" style="background:#222222"><div class="color-swatch-info" style="color:#fff"><span class="name">Gray-600</span>#222222</div></div>
+          <div class="color-swatch" style="background:#000000"><div class="color-swatch-info" style="color:#fff"><span class="name">Black</span>#000000</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TYPOGRAPHY ═══ -->
+    <section class="ds-section" id="typography">
+      <h2>Typography</h2>
+      <div class="specimen">
+        <div class="specimen-label">Heading Scale</div>
+        <div class="specimen-meta">Inter Bold — H1 through H6 + Tagline (Satoshi)</div>
+        <div class="type-scale">
+          <div class="type-row"><div class="type-label">H1 — 56px / 120%</div><div class="type-sample" style="font-size:42px;font-weight:700;line-height:1.2;letter-spacing:-0.01em">Heading 1</div></div>
+          <div class="type-row"><div class="type-label">H2 — 48px / 120%</div><div class="type-sample" style="font-size:36px;font-weight:700;line-height:1.2">Heading 2</div></div>
+          <div class="type-row"><div class="type-label">H3 — 40px / 120%</div><div class="type-sample" style="font-size:30px;font-weight:700;line-height:1.2">Heading 3</div></div>
+          <div class="type-row"><div class="type-label">H4 — 38px / 130%</div><div class="type-sample" style="font-size:28px;font-weight:700;line-height:1.3">Heading 4</div></div>
+          <div class="type-row"><div class="type-label">H5 — 28px / 140%</div><div class="type-sample" style="font-size:22px;font-weight:700;line-height:1.4">Heading 5</div></div>
+          <div class="type-row"><div class="type-label">H6 — 24px / 140%</div><div class="type-sample" style="font-size:19px;font-weight:700;line-height:1.4">Heading 6</div></div>
+          <div class="type-row"><div class="type-label">Tagline — 16px / 150%</div><div class="type-sample" style="font-size:14px;font-weight:500;line-height:1.5;letter-spacing:0.01em">Tagline — Satoshi Medium</div></div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Body Text</div>
+        <div class="specimen-meta">Inter — 6 sizes × 7 weights (Large 24px → Extra Tiny 14px)</div>
+        <div class="type-scale">
+          <div class="type-row"><div class="type-label">Large — 24px</div><div class="type-sample" style="font-size:20px;line-height:1.4">The quick brown fox jumps over the lazy dog</div></div>
+          <div class="type-row"><div class="type-label">Medium — 22px</div><div class="type-sample" style="font-size:18px;line-height:1.4">The quick brown fox jumps over the lazy dog</div></div>
+          <div class="type-row"><div class="type-label">Regular — 20px</div><div class="type-sample" style="font-size:16px;line-height:1.4">The quick brown fox jumps over the lazy dog</div></div>
+          <div class="type-row"><div class="type-label">Small — 18px</div><div class="type-sample" style="font-size:15px;line-height:1.4">The quick brown fox jumps over the lazy dog</div></div>
+          <div class="type-row"><div class="type-label">Tiny — 16px</div><div class="type-sample" style="font-size:13px;line-height:1.4">The quick brown fox jumps over the lazy dog</div></div>
+          <div class="type-row"><div class="type-label">Extra Tiny — 14px</div><div class="type-sample" style="font-size:12px;line-height:1.4">The quick brown fox jumps over the lazy dog</div></div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Weight Ramp</div>
+        <div class="specimen-meta">Light → Extra Bold + Link underline</div>
+        <div class="type-scale">
+          <div class="type-row"><div class="type-label">Light</div><div class="type-sample" style="font-weight:300;font-size:16px">Travel the world with Zenvoya</div></div>
+          <div class="type-row"><div class="type-label">Normal</div><div class="type-sample" style="font-weight:400;font-size:16px">Travel the world with Zenvoya</div></div>
+          <div class="type-row"><div class="type-label">Medium</div><div class="type-sample" style="font-weight:500;font-size:16px">Travel the world with Zenvoya</div></div>
+          <div class="type-row"><div class="type-label">Semi Bold</div><div class="type-sample" style="font-weight:600;font-size:16px">Travel the world with Zenvoya</div></div>
+          <div class="type-row"><div class="type-label">Bold</div><div class="type-sample" style="font-weight:700;font-size:16px">Travel the world with Zenvoya</div></div>
+          <div class="type-row"><div class="type-label">Extra Bold</div><div class="type-sample" style="font-weight:800;font-size:16px">Travel the world with Zenvoya</div></div>
+          <div class="type-row"><div class="type-label">Link</div><div class="type-sample" style="font-weight:400;font-size:16px;text-decoration:underline;text-underline-offset:2px;color:var(--color-primary)">View trip details</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SHADOWS ═══ -->
+    <section class="ds-section" id="shadows">
+      <h2>Shadows</h2>
+      <div class="specimen">
+        <div class="specimen-label">Elevation Scale</div>
+        <div class="specimen-meta">7 levels — xxsmall through xxlarge</div>
+        <div class="shadow-grid">
+          <div class="shadow-box" style="box-shadow:var(--shadow-xxsmall)"><span>xxsmall</span></div>
+          <div class="shadow-box" style="box-shadow:var(--shadow-xsmall)"><span>xsmall</span></div>
+          <div class="shadow-box" style="box-shadow:var(--shadow-small)"><span>small</span></div>
+          <div class="shadow-box" style="box-shadow:var(--shadow-medium)"><span>medium</span></div>
+          <div class="shadow-box" style="box-shadow:var(--shadow-large)"><span>large</span></div>
+          <div class="shadow-box" style="box-shadow:var(--shadow-xlarge)"><span>xlarge</span></div>
+          <div class="shadow-box" style="box-shadow:var(--shadow-xxlarge)"><span>xxlarge</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ RADIUS ═══ -->
+    <section class="ds-section" id="radius">
+      <h2>Border Radius</h2>
+      <div class="specimen">
+        <div class="specimen-label">Radius Tokens</div>
+        <div class="specimen-meta">5 stops — 4px to pill</div>
+        <div class="radius-grid">
+          <div class="radius-box" style="border-radius:4px">4px</div>
+          <div class="radius-box" style="border-radius:8px">8px</div>
+          <div class="radius-box" style="border-radius:12px">12px</div>
+          <div class="radius-box" style="border-radius:16px">16px</div>
+          <div class="radius-box" style="border-radius:9999px">pill</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ ICONS (Lucide) ═══ -->
+    <section class="ds-section" id="icons">
+      <h2>Icons</h2>
+      <div class="specimen">
+        <div class="specimen-label">Lucide Icons — UI Set</div>
+        <div class="specimen-meta">Source: lucide.dev (shadcn/ui icon library). Inline SVG, stroke-based, 24x24 viewBox. Use stroke="currentColor" to inherit text color.</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:16px;padding:20px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">message-square</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">plane</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">settings</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">panel-left</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">plus</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">arrow-right</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">arrow-left</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">x</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">chevron-right</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">chevron-down</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">menu</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">search</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">heart</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">map-pin</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">calendar</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">star</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">user</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px solid var(--card-border);border-radius:var(--radius-md);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+            <span style="font-size:11px;color:var(--section-label)">log-out</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ HEADER ═══ -->
+    <section class="ds-section" id="header">
+      <h2>Header</h2>
+      <div class="specimen">
+        <div class="specimen-label">Header — Desktop / ANON</div>
+        <div class="specimen-meta">9 variants: Mobile/Desktop × ANON/Member/Exit/Breadcrumb/Title/Branded</div>
+        <div class="header-demo">
+          <div class="header-left">
+            <div class="header-logo">zenvoya</div>
+            <div class="header-nav">
+              <a href="javascript:void(0)">Explore</a>
+              <a href="javascript:void(0)">My Trips</a>
+              <a href="javascript:void(0)">Deals</a>
+            </div>
+          </div>
+          <div class="header-right">
+            <button class="btn secondary sm">Log in</button>
+            <button class="btn primary sm">Sign up</button>
+          </div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Header — Desktop / Member</div>
+        <div class="header-demo">
+          <div class="header-left">
+            <div class="header-logo">zenvoya</div>
+            <div class="header-nav">
+              <a href="javascript:void(0)">Explore</a>
+              <a href="javascript:void(0)">My Trips</a>
+              <a href="javascript:void(0)">Deals</a>
+            </div>
+          </div>
+          <div class="header-right">
+            <span style="position:relative;cursor:pointer;font-size:18px">🛒<span style="position:absolute;top:-4px;right:-6px;width:14px;height:14px;background:var(--color-primary);border-radius:50%;font-size:9px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700">2</span></span>
+            <div class="avatar sm">G</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SIDE MENU ═══ -->
+    <section class="ds-section" id="side-menu">
+      <h2>Side Menu</h2>
+      <div class="specimen">
+        <div class="specimen-label">Side Menu — Member</div>
+        <div class="specimen-meta">4 desktop variants (ANON/Member × Open/Close) + 2 mobile + auth variants</div>
+        <div class="sidemenu-demo">
+          <div class="sidemenu-header">
+            <div class="avatar md">GC</div>
+            <div><div class="name">George Chang</div><div class="email">george@zenvoya.com</div></div>
+          </div>
+          <div class="sidemenu-item"><span class="icon">✈</span> My Trips</div>
+          <div class="sidemenu-item"><span class="icon">♡</span> Saved</div>
+          <div class="sidemenu-item"><span class="icon">⚙</span> Settings</div>
+          <div class="sidemenu-item"><span class="icon">?</span> Help</div>
+          <div class="sidemenu-item" style="color:var(--color-error)"><span class="icon">→</span> Log out</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TABS ═══ -->
+    <section class="ds-section" id="tabs">
+      <h2>Tabs</h2>
+      <div class="specimen">
+        <div class="specimen-label">Tab Group — Line Style</div>
+        <div class="specimen-meta">Tab component: Small/Medium/Line × Default/Border/Hover</div>
+        <div class="tabs-demo" role="tablist" aria-label="Example tabs">
+          <button class="tab-item active" role="tab" aria-selected="true" tabindex="0">Overview</button>
+          <button class="tab-item" role="tab" aria-selected="false" tabindex="-1">Reviews</button>
+          <button class="tab-item" role="tab" aria-selected="false" tabindex="-1">Photos</button>
+          <button class="tab-item" role="tab" aria-selected="false" tabindex="-1">Pricing</button>
+        </div>
+      </div>
+      <div class="specimen" style="margin-top:12px">
+        <div class="specimen-label">Tab Group — Bordered</div>
+        <div class="tabs-bordered" role="tablist" aria-label="Example bordered tabs">
+          <button class="tab-bordered active" role="tab" aria-selected="true">Flights</button>
+          <button class="tab-bordered" role="tab" aria-selected="false">Hotels</button>
+          <button class="tab-bordered" role="tab" aria-selected="false">Activities</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ NAV LINK ═══ -->
+    <section class="ds-section" id="nav-link">
+      <h2>Nav Link</h2>
+      <div class="specimen">
+        <div class="specimen-label">nav link</div>
+        <div class="specimen-meta">Default / Hover states</div>
+        <div class="specimen-row">
+          <a href="javascript:void(0)" style="font-size:14px;font-weight:500;color:var(--page-fg);text-decoration:none;padding:6px 0;border-bottom:2px solid transparent;transition:all 0.15s">Explore destinations</a>
+          <a href="javascript:void(0)" style="font-size:14px;font-weight:500;color:var(--color-primary);text-decoration:none;padding:6px 0;border-bottom:2px solid var(--color-primary);transition:all 0.15s">Explore destinations <span class="tag" style="margin-left:4px">hover</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ BUTTONS ═══ -->
+    <section class="ds-section" id="buttons">
+      <h2>Buttons</h2>
+      <div class="specimen">
+        <div class="specimen-label">Primary</div>
+        <div class="specimen-meta">Style=Primary — No icon / Leading / Trailing / Icon only × Small / Medium × States</div>
+        <div class="specimen-row">
+          <button class="btn primary md">Book now</button>
+          <button class="btn primary sm">Book now</button>
+          <button class="btn primary md">✈ Search flights</button>
+          <button class="btn primary md">Continue →</button>
+          <button class="btn primary icon-only md">+</button>
+          <button class="btn primary icon-only sm">+</button>
+          <button class="btn primary md" disabled>Disabled</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Secondary</div>
+        <div class="specimen-meta">Style=Secondary — includes "With 3rd party" state</div>
+        <div class="specimen-row">
+          <button class="btn secondary md">Cancel</button>
+          <button class="btn secondary sm">Cancel</button>
+          <button class="btn secondary md">⟲ Refresh</button>
+          <button class="btn secondary icon-only md">⋯</button>
+          <button class="btn secondary md" disabled>Disabled</button>
+          <button class="btn third-party md">G  Continue with Google</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Tertiary</div>
+        <div class="specimen-row">
+          <button class="btn tertiary md">Learn more</button>
+          <button class="btn tertiary sm">Learn more</button>
+          <button class="btn tertiary md">← Back</button>
+          <button class="btn tertiary icon-only md">✕</button>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Link</div>
+        <div class="specimen-row" style="align-items:center">
+          <button class="btn link">View all destinations</button>
+          <button class="btn link">← Go back</button>
+          <button class="btn link">Terms & conditions →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ FILTERS ═══ -->
+    <section class="ds-section" id="filters">
+      <h2>Filters</h2>
+      <div class="specimen">
+        <div class="specimen-label">Filter Component</div>
+        <div class="specimen-meta">Selected / Unselected + standalone Filter (Default / Filter on)</div>
+        <div class="specimen-row">
+          <button class="filter-chip selected" aria-pressed="true">✓ Under $500</button>
+          <button class="filter-chip selected" aria-pressed="true">✓ Non-stop</button>
+          <button class="filter-chip" aria-pressed="false">Morning departure</button>
+          <button class="filter-chip" aria-pressed="false">1 carry-on</button>
+          <button class="filter-chip" aria-pressed="false">Wi-Fi included</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ INPUTS ═══ -->
+    <section class="ds-section" id="inputs">
+      <h2>Text Inputs</h2>
+      <div class="specimen">
+        <div class="specimen-label">Text Input</div>
+        <div class="specimen-meta">Size: Large/Medium × State: Default/Inputted/Error × Button: Yes/No</div>
+        <div class="specimen-row" style="gap:20px">
+          <div class="input-demo">
+            <div class="input-label">Destination</div>
+            <input class="input-field" type="text" placeholder="Where to?">
+            <div class="input-helper">City, airport, or region</div>
+          </div>
+          <div class="input-demo">
+            <div class="input-label">Email</div>
+            <input class="input-field" type="text" value="george@zenvoya.com">
+          </div>
+          <div class="input-demo">
+            <div class="input-label">Passport number</div>
+            <input class="input-field error" type="text" value="ABC">
+            <div class="input-helper error">Invalid passport number</div>
+          </div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Text Area</div>
+        <div class="specimen-row">
+          <div class="input-demo" style="min-width:340px">
+            <div class="input-label">Special requests</div>
+            <textarea class="input-field" placeholder="Any dietary needs, accessibility requirements, etc."></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CHECKBOX ═══ -->
+    <section class="ds-section" id="checkbox">
+      <h2>Checkbox</h2>
+      <div class="specimen">
+        <div class="specimen-label">Checkbox</div>
+        <div class="specimen-meta">Selected: True/False</div>
+        <div class="specimen-row col" style="gap:10px">
+          <label class="checkbox-demo"><div class="checkbox-box checked"></div>Include travel insurance</label>
+          <label class="checkbox-demo"><div class="checkbox-box"></div>Add airport transfer</label>
+          <label class="checkbox-demo"><div class="checkbox-box checked"></div>Send booking confirmation via SMS</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ STEPPER ═══ -->
+    <section class="ds-section" id="stepper">
+      <h2>Stepper</h2>
+      <div class="specimen">
+        <div class="specimen-label">Stepper</div>
+        <div class="specimen-meta">Numeric +/- control</div>
+        <div class="specimen-row" style="gap:20px;align-items:center">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:13px;font-weight:500">Adults</span>
+            <div class="stepper"><button>−</button><div class="stepper-val">2</div><button>+</button></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:13px;font-weight:500">Children</span>
+            <div class="stepper"><button>−</button><div class="stepper-val">0</div><button>+</button></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:13px;font-weight:500">Rooms</span>
+            <div class="stepper"><button>−</button><div class="stepper-val">1</div><button>+</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SELECT ═══ -->
+    <section class="ds-section" id="select">
+      <h2>Select</h2>
+      <div class="specimen">
+        <div class="specimen-label">Select / Dropdown</div>
+        <div class="specimen-row" style="gap:20px">
+          <div class="input-demo">
+            <div class="input-label">Cabin class</div>
+            <select class="select-field"><option>Economy</option><option>Premium Economy</option><option>Business</option><option>First</option></select>
+          </div>
+          <div class="input-demo">
+            <div class="input-label">Sort by</div>
+            <select class="select-field"><option>Recommended</option><option>Price: low to high</option><option>Price: high to low</option><option>Duration</option></select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CARDS ═══ -->
+    <section class="ds-section" id="cards">
+      <h2>Cards</h2>
+      <div class="specimen">
+        <div class="specimen-label">Location Card / Itinerary Card</div>
+        <div class="specimen-meta">Default / Hover — used in browse & My Trips</div>
+        <div class="specimen-row">
+          <div class="card-demo">
+            <div class="card-img">🗼</div>
+            <div class="card-body">
+              <h4>Paris, France</h4>
+              <p>5 days · Nov 27 – Dec 2</p>
+              <div style="margin-top:8px;display:flex;gap:4px"><span class="tag">Culture</span><span class="tag blue">Popular</span></div>
+            </div>
+          </div>
+          <div class="card-demo">
+            <div class="card-img">⛩</div>
+            <div class="card-body">
+              <h4>Tokyo, Japan</h4>
+              <p>7 days · Jan 10 – Jan 17</p>
+              <div style="margin-top:8px;display:flex;gap:4px"><span class="tag">Adventure</span><span class="tag green">Best deal</span></div>
+            </div>
+          </div>
+          <div class="card-demo">
+            <div class="card-img">🏖</div>
+            <div class="card-body">
+              <h4>Bali, Indonesia</h4>
+              <p>4 days · Feb 3 – Feb 7</p>
+              <div style="margin-top:8px;display:flex;gap:4px"><span class="tag">Beach</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Hotel List Item</div>
+        <div class="specimen-meta">User: ANON/Member — search result card</div>
+        <div style="border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:16px;display:flex;gap:16px;max-width:500px;background:var(--card-bg)">
+          <div style="width:120px;height:90px;border-radius:var(--radius-md);background:linear-gradient(135deg,var(--color-primary-light),var(--color-primary-ultra-light));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px">🏨</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600">Grand Hyatt Tokyo</div>
+            <div class="stars" style="margin:4px 0"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star empty">★</span></div>
+            <div style="font-size:12px;color:var(--section-label)">Roppongi · 0.3 mi from center</div>
+            <div style="margin-top:8px;display:flex;align-items:baseline;gap:4px"><span style="font-size:18px;font-weight:700">$284</span><span style="font-size:11px;color:var(--section-label)">/night</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TOASTS ═══ -->
+    <section class="ds-section" id="toasts">
+      <h2>Toasts</h2>
+      <div class="specimen">
+        <div class="specimen-label">Toast</div>
+        <div class="specimen-meta">State: Success / Error / Info</div>
+        <div class="specimen-row col">
+          <div class="toast success">✓  Trip saved to your account</div>
+          <div class="toast error">✕  Payment failed — check your card details</div>
+          <div class="toast info">ℹ  Prices updated 2 minutes ago</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ AVATARS ═══ -->
+    <section class="ds-section" id="avatars">
+      <h2>Avatars</h2>
+      <div class="specimen">
+        <div class="specimen-label">Avatar</div>
+        <div class="specimen-meta">Size: Large / Medium / Small</div>
+        <div class="specimen-row" style="align-items:center;gap:16px">
+          <div style="text-align:center"><div class="avatar lg">GC</div><div style="font-size:10px;color:var(--section-label);margin-top:4px">Large (48)</div></div>
+          <div style="text-align:center"><div class="avatar md">GC</div><div style="font-size:10px;color:var(--section-label);margin-top:4px">Medium (36)</div></div>
+          <div style="text-align:center"><div class="avatar sm">G</div><div style="font-size:10px;color:var(--section-label);margin-top:4px">Small (24)</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ STARS ═══ -->
+    <section class="ds-section" id="stars">
+      <h2>Stars</h2>
+      <div class="specimen">
+        <div class="specimen-label">Star Rating</div>
+        <div class="specimen-meta">Filled / Unfilled</div>
+        <div class="specimen-row" style="gap:20px;align-items:center">
+          <div class="stars"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span></div>
+          <div class="stars"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star empty">★</span></div>
+          <div class="stars"><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star empty">★</span><span class="star empty">★</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ PROGRESS ═══ -->
+    <section class="ds-section" id="progress">
+      <h2>Progress</h2>
+      <div class="specimen">
+        <div class="specimen-label">Progress Bar</div>
+        <div class="specimen-meta">start / filled states</div>
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:400px">
+          <div><div style="font-size:11px;color:var(--section-label);margin-bottom:4px">Step 1 of 3 — Travelers</div><div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div></div>
+          <div><div style="font-size:11px;color:var(--section-label);margin-bottom:4px">Step 2 of 3 — Payment</div><div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div></div>
+          <div><div style="font-size:11px;color:var(--section-label);margin-bottom:4px">Step 3 of 3 — Confirmation</div><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div></div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Budget Meter</div>
+        <div class="specimen-meta">Budget progress indicator — Itinerary collaboration</div>
+        <div style="max-width:300px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="font-weight:600">Budget</span><span style="color:var(--section-label)">$2,340 / $3,000</span></div>
+          <div class="progress-bar" style="height:8px"><div class="progress-fill" style="width:78%;background:var(--color-accent-green)"></div></div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Indicator Dots</div>
+        <div class="specimen-meta">Selected / Unselected — carousel pagination</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--color-primary)"></div>
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--color-gray-200)"></div>
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--color-gray-200)"></div>
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--color-gray-200)"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ BOOKING ═══ -->
+    <section class="ds-section" id="booking">
+      <h2>Booking Sections</h2>
+      <div class="specimen">
+        <div class="specimen-label">Booking Section — Flight Search</div>
+        <div class="specimen-meta">Type: Trip/Flight/Stay × Search/Edit × Mobile/Desktop</div>
+        <div class="booking-card">
+          <h4>✈ Flight details</h4>
+          <div class="booking-row"><span class="label">Route</span><span class="value">SFO → NRT</span></div>
+          <div class="booking-row"><span class="label">Departure</span><span class="value">Jan 10, 2026</span></div>
+          <div class="booking-row"><span class="label">Return</span><span class="value">Jan 17, 2026</span></div>
+          <div class="booking-row"><span class="label">Passengers</span><span class="value">2 adults</span></div>
+          <div class="booking-row"><span class="label">Class</span><span class="value">Economy</span></div>
+          <div style="margin-top:12px"><button class="btn primary md" style="width:100%">Search flights</button></div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Flight Line / List Item</div>
+        <div class="specimen-meta">Flight result row — Desktop/Mobile × Close/Added to cart</div>
+        <div style="border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:16px;max-width:500px;background:var(--card-bg)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:13px;font-weight:600">ANA · NH7</div>
+              <div style="font-size:18px;font-weight:700;margin:4px 0">10:30 AM → 3:45 PM+1</div>
+              <div style="font-size:12px;color:var(--section-label)">SFO → NRT · 11h 15m · Non-stop</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:20px;font-weight:700">$847</div>
+              <div style="font-size:11px;color:var(--section-label)">per person</div>
+              <button class="btn primary sm" style="margin-top:8px">Add to cart</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Benefits</div>
+        <div class="specimen-meta">Default / Included / Not included</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--color-success);font-weight:700">✓</span> 1 carry-on bag included</div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--color-success);font-weight:700">✓</span> Seat selection included</div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--color-error);font-weight:700">✕</span> No checked baggage</div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="color:var(--section-label)">–</span> <span style="color:var(--section-label)">Wi-Fi available for purchase</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TIME SELECTOR ═══ -->
+    <section class="ds-section" id="time-selector">
+      <h2>Time Selector</h2>
+      <div class="specimen">
+        <div class="specimen-label">Time Selector</div>
+        <div class="specimen-meta">State: Default/Selected/Hover/Disabled × Seats × Popular — Viator activity booking</div>
+        <div class="time-slots">
+          <div class="time-slot"><span class="popular">Popular</span>9:00 AM<span class="seats">12 seats left</span></div>
+          <div class="time-slot selected">10:30 AM<span class="seats">8 seats left</span></div>
+          <div class="time-slot">12:00 PM<span class="seats">All available</span></div>
+          <div class="time-slot">2:30 PM<span class="seats" style="color:var(--color-error)">2 seats left</span></div>
+          <div class="time-slot disabled">4:00 PM<span class="seats">Sold out</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ FIXED CTA ═══ -->
+    <section class="ds-section" id="fixed-cta">
+      <h2>Fixed CTA</h2>
+      <div class="specimen">
+        <div class="specimen-label">Fixed CTA — Cart</div>
+        <div class="specimen-meta">Type: Trip / Flights / Type3 / Cart — sticky bottom action bar</div>
+        <div class="fixed-cta-demo">
+          <div class="fixed-cta-price"><span>Total (2 travelers)</span>$1,694</div>
+          <button class="btn primary md">Checkout →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ BOTTOM DRAWER ═══ -->
+    <section class="ds-section" id="bottom-drawer">
+      <h2>Bottom Drawer</h2>
+      <div class="specimen">
+        <div class="specimen-label">Bottom Drawer — Info</div>
+        <div class="specimen-meta">Type: Cart/Info × State: Open/Closed × Steps: 3/4 — mobile bottom sheet</div>
+        <div class="drawer-demo">
+          <div class="drawer-handle"><span></span></div>
+          <div class="drawer-content">
+            <h4>Traveler information</h4>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+              <div class="input-demo"><div class="input-label">First name</div><input class="input-field" value="George"></div>
+              <div class="input-demo"><div class="input-label">Last name</div><input class="input-field" value="Chang"></div>
+              <button class="btn primary md" style="width:100%;margin-top:8px">Continue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CHAT ═══ -->
+    <section class="ds-section" id="chat">
+      <h2>Chat Bubbles</h2>
+      <div class="specimen">
+        <div class="specimen-label">Chat Bubble — Zoya / You</div>
+        <div class="specimen-meta">Person: Zoya/You × Type: Latest/Old/Suggestion — Zoya AI assistant</div>
+        <div class="chat-demo">
+          <div class="chat-bubble zoya">Hey! 🦊 I'm Zoya, your travel assistant. Where would you like to go?</div>
+          <div class="chat-bubble user">I'm thinking about Japan in January</div>
+          <div class="chat-bubble zoya">Great choice! January is perfect for winter festivals and hot springs. Would you like me to plan a 7-day itinerary?</div>
+          <div style="display:flex;gap:6px;padding-left:4px">
+            <button class="btn secondary sm" style="font-size:12px;padding:4px 10px;border-radius:var(--radius-full)">Yes, plan it!</button>
+            <button class="btn secondary sm" style="font-size:12px;padding:4px 10px;border-radius:var(--radius-full)">Show me options</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CHAT INPUT ═══ -->
+    <section class="ds-section" id="chat-input">
+      <h2>Chat Input</h2>
+      <div class="specimen">
+        <div class="specimen-label">Chat Input</div>
+        <div class="specimen-meta">Type: Default / Secondary / Inputted / Disabled / Stop answer</div>
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:360px">
+          <div class="chat-demo" style="padding:12px">
+            <div class="chat-input-demo"><input type="text" placeholder="Ask Zoya anything..."><button class="btn primary icon-only sm" style="border-radius:50%;width:32px;height:32px;font-size:14px">↑</button></div>
+          </div>
+          <div class="chat-demo" style="padding:12px">
+            <div class="chat-input-demo"><input type="text" value="Find me a hotel near Shibuya"><button class="btn primary icon-only sm" style="border-radius:50%;width:32px;height:32px;font-size:14px">↑</button></div>
+          </div>
+          <div class="chat-demo" style="padding:12px;opacity:0.5">
+            <div class="chat-input-demo"><input type="text" placeholder="Ask Zoya anything..." disabled><button class="btn primary icon-only sm" style="border-radius:50%;width:32px;height:32px;font-size:14px;opacity:0.4" disabled>↑</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
