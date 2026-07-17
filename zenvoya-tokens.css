@@ -73,34 +73,6 @@
   --header-height: 64px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --page-bg: #110e18;
-    --page-fg: #e0dce6;
-    --card-bg: #1c1826;
-    --card-border: #2e2840;
-    --nav-bg: #1c1826;
-    --nav-border: #2e2840;
-    --section-label: var(--color-gray-400);
-    --tag-bg: #2a2a2a;
-    --tag-fg: #d4d4d4;
-    --color-primary-light: #2a2a2a;
-    --color-primary-ultra-light: #1a1a1a;
-  }
-}
-:root[data-theme="dark"] {
-  --page-bg: #110e18;
-  --page-fg: #e0dce6;
-  --card-bg: #1c1826;
-  --card-border: #2e2840;
-  --nav-bg: #1c1826;
-  --nav-border: #2e2840;
-  --section-label: var(--color-gray-400);
-  --tag-bg: #2a2a2a;
-  --tag-fg: #d4d4d4;
-  --color-primary-light: #2a2a2a;
-  --color-primary-ultra-light: #1a1a1a;
-}
 :root[data-theme="light"] {
   --page-bg: #faf9fc;
   --page-fg: var(--color-gray-600);

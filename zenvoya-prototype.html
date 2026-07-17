@@ -71,15 +71,13 @@ body {
   white-space: nowrap;
 }
 
-.logo-icon {
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-}
-
-.sidebar.collapsed .logo-text { display: none; }
+.logo-text-collapsed { display: none; }
+.sidebar.collapsed .logo-text-full { display: none; }
+.sidebar.collapsed .logo-text-collapsed { display: inline; }
 
 .sidebar-toggle {
+  position: relative;
+  z-index: 1000;
   margin-left: auto;
   width: 28px;
   height: 28px;
@@ -173,7 +171,7 @@ body {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  min-width: 200px;
+  min-width: 260px;
   background: var(--color-white);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-md);
@@ -186,14 +184,19 @@ body {
 .trip-ideas-menu.active { display: block; }
 
 .trip-ideas-item {
-  padding: 10px 14px;
-  font-size: 13px;
-  color: var(--color-gray-800);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
   cursor: pointer;
-  font-weight: 500;
 }
 
 .trip-ideas-item:hover { background: var(--color-gray-50); }
+
+.trip-ideas-item-thumb { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; }
+.trip-ideas-item-body { min-width: 0; }
+.trip-ideas-item-name { font-size: 13px; font-weight: 600; color: var(--color-gray-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trip-ideas-item-meta { font-size: 11px; color: var(--color-gray-500); margin-top: 1px; }
 
 .trip-ideas-empty {
   padding: 12px 14px;
@@ -224,7 +227,7 @@ body {
 
 .nav-divider { height: 1px; background: var(--color-gray-200); margin: 8px 12px; }
 
-.nav-children { padding-left: 32px; overflow: hidden; }
+.nav-children { padding-left: 0; overflow: hidden; }
 .nav-child {
   display: flex;
   align-items: center;
@@ -241,8 +244,6 @@ body {
 }
 .nav-child:hover { background: var(--color-gray-100); color: var(--color-gray-700); }
 .nav-child.active { background: var(--color-gray-100); color: var(--color-gray-700); }
-.nav-child .nav-child-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-gray-300); flex-shrink: 0; }
-.nav-child.active .nav-child-dot { background: var(--color-primary); }
 .sidebar.collapsed .nav-children { display: none; }
 
 .nav-new-chat {
@@ -262,6 +263,7 @@ body {
   font-family: var(--font-body);
 }
 .nav-new-chat:hover { background: var(--color-gray-100); color: var(--color-gray-600); }
+.nav-new-chat.active { background: var(--color-gray-100); color: var(--color-gray-700); }
 
 .user-name {
   font-size: 13px;
@@ -679,6 +681,96 @@ body {
 .itinerary-panel.enlarged .itin-map { width: 50%; height: 100vh; flex-shrink: 0; }
 .itinerary-panel.enlarged .itin-details { flex: 1; height: 100vh; overflow-y: auto; max-width: none; margin: 0; width: auto; }
 
+/* Compact trip header (default, non-enlarged) */
+.itin-thumb-float {
+  position: absolute;
+  top: 380px;
+  left: 20px;
+  width: 100px;
+  height: 80px;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-white);
+  box-shadow: var(--shadow-medium);
+  z-index: 500;
+}
+
+.itin-header-compact {
+  margin-bottom: 10px;
+  padding-top: 6px;
+}
+
+.itin-header-compact-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.itin-city-compact { margin-bottom: 0; }
+
+.itin-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.itin-days-inline { font-size: inherit; font-weight: inherit; color: inherit; margin-left: 6px; }
+
+.date-select {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-700);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.date-select:hover { background: var(--color-gray-50); }
+
+.date-select-label { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+.date-select-chevron { display: flex; align-items: center; color: var(--color-gray-400); transition: transform 0.2s; }
+
+.date-select.open .date-select-chevron { transform: rotate(180deg); }
+
+.date-select-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 220px;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-medium);
+  padding: 14px;
+  display: none;
+  cursor: default;
+  z-index: 20;
+}
+
+.date-select.open .date-select-dropdown { display: block; }
+
+.date-select-dropdown-row { font-size: 14px; font-weight: 600; color: var(--color-gray-900); margin-bottom: 4px; }
+.date-select-dropdown-hint { font-size: 12px; color: var(--color-gray-500); }
+
+.itin-header-enlarged { display: none; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+
+.itinerary-panel.enlarged .itin-thumb-float,
+.itinerary-panel.enlarged .itin-header-compact,
+.itinerary-panel.enlarged .itin-city-compact,
+.itinerary-panel.enlarged .itin-title-row { display: none; }
+
+.itinerary-panel.enlarged .itin-header-enlarged { display: flex; }
+
 .itin-hero {
   width: 100%;
   height: 240px;
@@ -753,6 +845,20 @@ body {
 
 .action-btn:hover { background: var(--color-gray-50); }
 
+.action-btn-primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+.action-btn-primary:hover { background: var(--color-primary-hover); }
+
+.action-btn-saved {
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-200);
+  color: var(--color-gray-700);
+}
+.action-btn-saved:hover { background: var(--color-gray-200); }
+
 .itin-section-title {
   font-size: 16px;
   font-weight: 600;
@@ -761,15 +867,13 @@ body {
 
 /* Day Items */
 .day-item {
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
+  border: none;
+  margin-bottom: 0;
   overflow: hidden;
-  transition: box-shadow 0.2s, border-color 0.2s;
 }
 
-.day-item:hover { box-shadow: var(--shadow-xsmall); }
 .day-item.hidden { display: none; }
+.day-item:not(.hidden) + .day-item:not(.hidden) { border-top: 1px solid var(--color-gray-200); }
 
 .day-pill-group {
   display: flex;
@@ -802,29 +906,38 @@ body {
 .day-header {
   display: flex;
   align-items: center;
-  padding: 12px 14px;
+  padding: 16px 4px;
   cursor: pointer;
-  gap: 10px;
+  gap: 14px;
   user-select: none;
 }
 
-.day-date { font-size: 13px; font-weight: 500; color: var(--color-gray-500); min-width: 70px; }
-.day-location { font-size: 14px; font-weight: 500; flex: 1; }
+.day-number { font-size: 20px; font-weight: 700; color: var(--color-gray-900); }
+
+.day-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.day-tag {
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-100);
+  color: var(--color-gray-700);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
 
 .day-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-gray-400);
+  color: var(--color-gray-500);
   transition: transform 0.25s;
-  font-size: 14px;
 }
 
 .day-item.expanded .day-icon { transform: rotate(180deg); }
-
-.day-flight-icon { color: var(--color-primary); }
 
 .day-body {
   display: grid;
@@ -836,20 +949,7 @@ body {
 
 .day-item.expanded .day-body { grid-template-rows: 1fr; }
 
-.day-body-inner { padding: 0 14px 14px; }
-
-.day-intro {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 16px;
-  padding: 10px;
-  background: var(--color-gray-50);
-  border-radius: var(--radius-sm);
-}
-
-.day-intro-avatar { width: 24px; height: 24px; flex-shrink: 0; }
-.day-intro-text { font-size: 13px; color: var(--color-gray-600); line-height: 1.4; }
+.day-body-inner { padding: 0 4px 14px; }
 
 .time-block { margin-bottom: 16px; }
 
@@ -872,7 +972,9 @@ body {
 }
 
 .time-block-activities.carousel .activity {
-  flex: 0 0 200px;
+  flex: 0 0 255px;
+  min-width: 0;
+  overflow: hidden;
   scroll-snap-align: start;
 }
 
@@ -887,23 +989,24 @@ body {
 .activity {
   display: flex;
   gap: 10px;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 10px;
   padding: 10px;
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xxsmall);
   cursor: grab;
 }
 
 .activity:active { cursor: grabbing; }
 .activity:hover { box-shadow: var(--shadow-xsmall); }
+.activity-stay { cursor: pointer; }
 
 .activity-handle {
   color: var(--color-gray-300);
   flex-shrink: 0;
   display: flex;
-  align-items: flex-start;
-  padding-top: 4px;
+  align-items: center;
   cursor: grab;
 }
 
@@ -962,6 +1065,7 @@ body {
   white-space: nowrap;
 }
 
+.activity-avatars { flex-shrink: 0; align-self: center; }
 .activity-avatars .stack-avatar { width: 20px; height: 20px; font-size: 9px; }
 
 .activity-trash {
@@ -969,8 +1073,7 @@ body {
   flex-shrink: 0;
   cursor: pointer;
   display: flex;
-  align-items: flex-start;
-  padding-top: 4px;
+  align-items: center;
   transition: color 0.15s;
 }
 
@@ -979,22 +1082,19 @@ body {
 .add-place-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  width: 100%;
-  padding: 10px;
-  border: 1px dashed var(--color-gray-300);
-  border-radius: var(--radius-sm);
-  background: none;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-gray-600);
-  font-family: var(--font-body);
   justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-gray-100);
+  cursor: pointer;
+  color: var(--color-gray-700);
   margin-top: 4px;
 }
 
-.add-place-btn:hover { background: var(--color-gray-50); border-color: var(--color-gray-400); }
+.add-place-btn:hover { background: var(--color-gray-200); }
 
 .itin-tabs {
   display: flex;
@@ -1055,13 +1155,68 @@ body {
 .booking-card-price { font-size: 16px; font-weight: 700; color: var(--color-gray-900); flex-shrink: 0; text-align: right; }
 .booking-card-price span { display: block; font-size: 11px; font-weight: 500; color: var(--color-gray-400); }
 
-.flying-by-row {
+.booking-card-side {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.booking-card-side .avatar-stack .stack-avatar { width: 20px; height: 20px; font-size: 9px; }
+
+.booking-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin: 20px 0 10px;
+}
+.booking-section-title:first-of-type { margin-top: 4px; }
+
+/* Finances tab */
+.finance-summary {
+  display: flex;
+  gap: 12px;
   margin-bottom: 8px;
 }
-.flying-by-row .avatar-stack { margin-left: 2px; }
+
+.finance-stat {
+  flex: 1;
+  background: var(--color-gray-50);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  min-width: 0;
+}
+
+.finance-stat-label { font-size: 12px; color: var(--color-gray-500); margin-bottom: 4px; }
+.finance-stat-value { font-size: 19px; font-weight: 700; color: var(--color-gray-900); }
+.finance-stat-value.positive { color: var(--color-success); }
+.finance-stat-value.negative { color: var(--color-error); }
+
+.finance-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+.finance-row:last-child { border-bottom: none; }
+
+.finance-row-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--color-gray-100);
+  color: var(--color-gray-600);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.finance-row-body { flex: 1; min-width: 0; }
+.finance-row-title { font-size: 13px; font-weight: 600; color: var(--color-gray-900); }
+.finance-row-meta { font-size: 12px; color: var(--color-gray-500); margin-top: 2px; }
+.finance-row-amount { font-size: 14px; font-weight: 700; color: var(--color-gray-900); flex-shrink: 0; }
 
 .reminder-banner {
   background: var(--color-gray-100);
@@ -1315,6 +1470,9 @@ body {
   align-items: center;
   gap: 4px;
 }
+
+.trip-card-avatars { margin-top: 10px; }
+.trip-card-avatars .stack-avatar { width: 22px; height: 22px; font-size: 10px; }
 
 .empty-state { text-align: center; padding: 60px 20px; color: var(--color-gray-400); font-size: 14px; }
 
@@ -1750,6 +1908,87 @@ body {
 .place-modal-item-title { font-size: 13px; font-weight: 600; color: var(--color-gray-900); }
 .place-modal-item-vibe { font-size: 12px; color: var(--color-gray-500); margin-top: 2px; }
 
+/* Location detail modal (Google Maps style) */
+.loc-modal-box { width: 420px; max-width: calc(100vw - 32px); max-height: calc(100vh - 64px); overflow-y: auto; }
+
+.loc-modal-hero {
+  position: relative;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+}
+
+.loc-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  color: var(--color-gray-700);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-xsmall);
+}
+.loc-modal-close:hover { background: var(--color-white); }
+
+.loc-modal-body { padding: 18px 20px 20px; }
+
+.loc-modal-title { font-size: 20px; font-weight: 700; color: var(--color-gray-900); margin-bottom: 6px; }
+
+.loc-modal-rating { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--color-gray-600); margin-bottom: 12px; flex-wrap: wrap; }
+.loc-modal-rating-value { font-weight: 600; color: var(--color-gray-900); }
+.loc-modal-stars { display: flex; align-items: center; color: #f5a623; }
+.loc-modal-stars svg { fill: #f5a623; }
+.loc-modal-dot { color: var(--color-gray-300); }
+.loc-modal-category { color: var(--color-gray-600); }
+
+.loc-modal-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--color-gray-700);
+  padding: 9px 0;
+  border-top: 1px solid var(--color-gray-100);
+}
+.loc-modal-row:first-of-type { border-top: 1px solid var(--color-gray-100); margin-top: 4px; }
+.loc-modal-row-icon { color: var(--color-gray-400); flex-shrink: 0; display: flex; align-items: center; padding-top: 1px; }
+.loc-modal-open { color: var(--color-success); font-weight: 600; }
+
+.loc-modal-actions { display: flex; gap: 8px; margin: 14px 0 4px; }
+
+.loc-modal-action {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-gray-100);
+  color: var(--color-gray-800);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.loc-modal-action:hover { background: var(--color-gray-200); }
+
+.loc-modal-section-title { font-size: 14px; font-weight: 700; color: var(--color-gray-900); margin: 18px 0 6px; }
+.loc-modal-desc { font-size: 13px; color: var(--color-gray-600); line-height: 1.6; }
+
+.loc-modal-avatars { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+.loc-modal-avatars-label { font-size: 12px; color: var(--color-gray-500); }
+
 /* ===================== HOME VIEW ===================== */
 #homeView { display: none; flex-direction: column; flex: 1; min-height: 0; }
 #homeView.active { display: flex; }
@@ -1764,7 +2003,49 @@ body {
 
 .home-section { margin-bottom: 36px; }
 
-.home-create-trip { max-width: 680px; }
+.home-create-trip-banner {
+  background: var(--color-gray-50);
+  border-radius: var(--radius-lg);
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.home-create-trip-banner .home-section-title { margin-bottom: 20px; }
+
+.home-create-trip { max-width: 480px; width: 100%; }
+
+.home-create-trip-input { padding: 4px 4px 4px 16px; }
+.home-create-trip-input .chat-input { font-size: 13px; padding: 6px 0; }
+
+.send-btn-sm { width: 36px; height: 36px; }
+.send-btn-sm svg { width: 15px; height: 15px; }
+
+.photo-collage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 20px;
+  padding: 10px 0;
+}
+
+.photo-collage-item {
+  width: 88px;
+  height: 62px;
+  border-radius: 8px;
+  border: 4px solid var(--color-white);
+  box-shadow: var(--shadow-medium);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  margin: 0 -8px;
+  transition: transform 0.2s, z-index 0.2s;
+}
+
+.photo-collage-item:hover { transform: scale(1.12) rotate(0deg) !important; z-index: 5; }
 
 .home-section-title {
   font-size: 16px;
@@ -1794,13 +2075,15 @@ body {
   border-radius: var(--radius-md);
   padding: 18px;
   background: var(--color-white);
+  display: flex;
+  flex-direction: column;
 }
 
 .stat-card-title { font-size: 13px; font-weight: 600; color: var(--color-gray-700); margin-bottom: 18px; }
 .stat-card-subsection-title { font-size: 12px; font-weight: 600; color: var(--color-gray-700); margin: 20px 0 10px; }
 
 /* Bar chart */
-.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; flex: 1; min-height: 120px; }
 
 .bar-chart-col {
   position: relative;
@@ -1964,15 +2247,8 @@ body {
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <a class="logo" href="#">
-        <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="32" height="32" rx="6" fill="#0a0a0a"/>
-          <path d="M8 12c0-1 .5-2 1.5-2.5L16 6l6.5 3.5C23.5 10 24 11 24 12v4c0 4-3.5 7-8 9-4.5-2-8-5-8-9v-4z" fill="white" opacity="0.9"/>
-          <circle cx="13" cy="14" r="1.5" fill="#0a0a0a"/>
-          <circle cx="19" cy="14" r="1.5" fill="#0a0a0a"/>
-          <path d="M13 18c1.5 1.5 4.5 1.5 6 0" stroke="#0a0a0a" stroke-width="1.2" stroke-linecap="round"/>
-          <path d="M10 9l-2-3M22 9l2-3" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
-        </svg>
-        <span class="logo-text">zenvoya</span>
+        <span class="logo-text-full">Zenvoya</span>
+        <span class="logo-text-collapsed">Z</span>
       </a>
       <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle sidebar">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>
@@ -2000,13 +2276,14 @@ body {
         <span class="header-title" id="headerTitle">New Chat</span>
         <div class="header-right" id="headerRight">
           <div class="trip-ideas-wrap">
-            <button class="new-chat-btn" onclick="toggleTripIdeasMenu(event)"><span id="tripIdeasIcon" style="display:flex;"></span> <span>Trip ideas in this thread</span></button>
+            <button class="new-chat-btn" onclick="toggleTripIdeasMenu(event)"><span id="tripIdeasIcon" style="display:flex;"></span> <span>Trip ideas from this chat</span></button>
             <div class="trip-ideas-menu" id="tripIdeasMenu"></div>
           </div>
         </div>
       </header>
       <div class="chat-container">
         <div class="chat-start-view" id="chatStartView">
+          <div class="photo-collage" id="chatCollage"></div>
           <div class="chat-start-greeting">
             <h2>What should we explore today?</h2>
             <p>Plan trips, book flights, find stays — Zoya has you covered.</p>
@@ -2096,8 +2373,7 @@ body {
 <div class="mobile-menu" id="mobileMenu">
   <div class="mobile-menu-header">
     <a class="logo" href="#">
-      <svg class="logo-icon" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="6" fill="#0a0a0a"/><path d="M8 12c0-1 .5-2 1.5-2.5L16 6l6.5 3.5C23.5 10 24 11 24 12v4c0 4-3.5 7-8 9-4.5-2-8-5-8-9v-4z" fill="white" opacity="0.9"/><circle cx="13" cy="14" r="1.5" fill="#0a0a0a"/><circle cx="19" cy="14" r="1.5" fill="#0a0a0a"/><path d="M13 18c1.5 1.5 4.5 1.5 6 0" stroke="#0a0a0a" stroke-width="1.2" stroke-linecap="round"/><path d="M10 9l-2-3M22 9l2-3" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
-      <span class="logo-text">zenvoya</span>
+      <span class="logo-text-full">Zenvoya</span>
     </a>
     <button class="mobile-menu-close" onclick="closeMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
   </div>
@@ -2139,6 +2415,11 @@ body {
   </div>
 </div>
 
+<!-- Location Detail Modal -->
+<div class="modal-overlay" id="locationModalOverlay" onclick="closeLocationModalOnOverlay(event)">
+  <div class="modal-box loc-modal-box" id="locationModalBox"></div>
+</div>
+
 <script>
 function lucide(name, size) {
   size = size || 18;
@@ -2173,6 +2454,10 @@ function lucide(name, size) {
     'minimize': '<path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/>',
     'grip-vertical': '<circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>',
     'trash-2': '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
+    'star': '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    'phone': '<path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>',
+    'globe': '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+    'clock': '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
   };
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+icons[name]+'</svg>';
 }
@@ -2193,11 +2478,15 @@ const ME = { name: 'George (You)', initial: 'G', color: 'var(--color-accent-gree
 
 const TRIP_THUMB = 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-ultra-light))';
 
+function tripBg(trip) {
+  return trip && trip.img ? `url('${trip.img}') center/cover no-repeat` : (trip ? trip.thumbGradient : TRIP_THUMB);
+}
+
 const TRIPS = {
   paris: {
     id: 'paris', name: 'Paris', country: 'France', dates: 'Oct 3 – Oct 7',
     desc: 'For a 4-day trip to Paris with light shopping, art museums and lots of vegetarian options.',
-    thumbGradient: TRIP_THUMB,
+    thumbGradient: TRIP_THUMB, img: 'images/trips/paris.jpg',
     members: [ME, friendById('mia'), friendById('liam')],
     days: [
       { date: 'Fri, Oct 3', location: 'New York City', isFlight: true,
@@ -2265,7 +2554,7 @@ const TRIPS = {
   barcelona: {
     id: 'barcelona', name: 'Barcelona', country: 'Spain', dates: 'May 8 – May 11',
     desc: 'For a 4-day trip to Barcelona with beach walks, tapas tours and modernist architecture.',
-    thumbGradient: TRIP_THUMB,
+    thumbGradient: TRIP_THUMB, img: 'images/trips/barcelona.jpg',
     members: [ME, friendById('mia')],
     days: [
       { date: 'Thu, May 8', location: 'New York City', isFlight: true,
@@ -2310,7 +2599,7 @@ const TRIPS = {
   santorini: {
     id: 'santorini', name: 'Santorini', country: 'Greece', dates: 'Jun 5 – Jun 9',
     desc: 'For a 4-day trip to Santorini with stunning sunsets, volcanic beaches and local wine tasting.',
-    thumbGradient: TRIP_THUMB,
+    thumbGradient: TRIP_THUMB, img: 'images/trips/santorini.jpg',
     members: [ME, friendById('ava')],
     days: [
       { date: 'Thu, Jun 5', location: 'New York City', isFlight: true,
@@ -2355,7 +2644,7 @@ const TRIPS = {
   rome: {
     id: 'rome', name: 'Rome', country: 'Italy', dates: 'Sep 12 – Sep 16',
     desc: 'For a 4-day trip to Rome with ancient ruins, authentic Italian cuisine and Renaissance art.',
-    thumbGradient: TRIP_THUMB,
+    thumbGradient: TRIP_THUMB, img: 'images/trips/rome.jpg',
     members: [ME],
     days: [
       { date: 'Fri, Sep 12', location: 'New York City', isFlight: true,
@@ -2400,7 +2689,7 @@ const TRIPS = {
   tokyo: {
     id: 'tokyo', name: 'Tokyo', country: 'Japan', dates: 'Nov 12 – Nov 17',
     desc: 'For a 5-day trip to Tokyo mixing classic sights, food markets and neon-lit nightlife.',
-    thumbGradient: TRIP_THUMB,
+    thumbGradient: TRIP_THUMB, img: 'images/trips/tokyo.jpg',
     members: [ME, friendById('noah'), friendById('zoe')],
     days: [
       { date: 'Wed, Nov 12', location: 'New York City', isFlight: true,
@@ -2469,7 +2758,7 @@ const TRIPS = {
   lisbon: {
     id: 'lisbon', name: 'Lisbon', country: 'Portugal', dates: 'Apr 10 – Apr 13',
     desc: 'For a 4-day trip to Lisbon with pastel-tiled streets, fado music and coastal day trips.',
-    thumbGradient: TRIP_THUMB,
+    thumbGradient: TRIP_THUMB, img: 'images/trips/lisbon.jpg',
     members: [ME],
     days: [
       { date: 'Fri, Apr 10', location: 'New York City', isFlight: true,
@@ -2510,7 +2799,7 @@ const TRIPS = {
   kyoto: {
     id: 'kyoto', name: 'Kyoto', country: 'Japan', dates: 'Mar 20 – Mar 23',
     desc: 'For a 4-day trip to Kyoto with ancient temples, bamboo groves and spring cherry blossoms.',
-    thumbGradient: TRIP_THUMB,
+    thumbGradient: TRIP_THUMB, img: 'images/trips/kyoto.jpg',
     members: [ME],
     days: [
       { date: 'Fri, Mar 20', location: 'New York City', isFlight: true,
@@ -2555,7 +2844,7 @@ const TRIPS = {
   reykjavik: {
     id: 'reykjavik', name: 'Reykjavik', country: 'Iceland', dates: 'Feb 14 – Feb 17',
     desc: 'For a 4-day trip to Reykjavik with the Blue Lagoon, waterfalls and northern lights.',
-    thumbGradient: TRIP_THUMB,
+    thumbGradient: TRIP_THUMB, img: 'images/trips/reykjavik.jpg',
     members: [ME],
     days: [
       { date: 'Sat, Feb 14', location: 'New York City', isFlight: true,
@@ -2596,6 +2885,20 @@ const TRIPS = {
 };
 
 const SAVED_TRIP_IDS = ['paris', 'tokyo', 'santorini'];
+
+const COLLAGE_TRIP_IDS = ['paris', 'barcelona', 'tokyo', 'kyoto', 'santorini', 'rome'];
+const COLLAGE_ROTATIONS = [-8, 5, -6, 4, -3, 7];
+const COLLAGE_OFFSETS = [6, -8, 10, -4, 8, -6];
+
+function photoCollageHTML() {
+  const items = COLLAGE_TRIP_IDS
+    .map((id, i) => ({ t: TRIPS[id], i }))
+    .filter(({ t }) => t && t.img);
+  if (!items.length) return '';
+  return `<div class="photo-collage">
+    ${items.map(({ t, i }) => `<div class="photo-collage-item" style="background-image:url('${t.img}');transform:rotate(${COLLAGE_ROTATIONS[i % COLLAGE_ROTATIONS.length]}deg) translateY(${COLLAGE_OFFSETS[i % COLLAGE_OFFSETS.length]}px);"></div>`).join('')}
+  </div>`;
+}
 
 const FRIEND_ACTIVITY = [
   { friend: friendById('mia'), action: 'added a new stop to', tripId: 'paris', tripName: 'Paris trip for shopping', time: '2h ago' },
@@ -2691,6 +2994,19 @@ function locationCardsHTML() {
 
 function itineraryHTML(tripId) {
   const trip = TRIPS[tripId] || TRIPS.paris;
+  const isSaved = SAVED_TRIP_IDS.includes(trip.id);
+  const avatarsHTML = `
+    <div class="avatar-stack">
+      ${trip.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+      <div class="stack-add" onclick="openAddFriendsModal('${trip.id}')" title="Add people">${lucide('plus',14)}</div>
+    </div>`;
+  const saveBtnHTML = isSaved
+    ? `<button class="action-btn action-btn-saved" style="flex:none;padding:8px 14px;">${lucide('check',14)} Trip Saved</button>`
+    : `<button class="action-btn action-btn-primary" style="flex:none;padding:8px 14px;" onclick="saveTripToMyTrips('${trip.id}')">${lucide('bookmark',14)} Save trip</button>`;
+  const tabs = isSaved
+    ? [['updates', 'Updates'], ['itinerary', 'Itinerary'], ['flights', 'Flights'], ['stay', 'Stay'], ['finances', 'Finances']]
+    : [['itinerary', 'Itinerary'], ['flights', 'Flights'], ['stay', 'Stay'], ['finances', 'Finances']];
+  const defaultTab = isSaved ? 'updates' : 'itinerary';
   return `
     <div class="itin-content">
       <div class="itin-toolbar">
@@ -2698,34 +3014,47 @@ function itineraryHTML(tripId) {
         <button class="itin-toolbar-btn" onclick="closeItinPanel()" title="Close">${lucide('x', 16)}</button>
       </div>
       <div class="itin-map" id="itinMap-${trip.id}"></div>
+      <div class="itin-thumb-float" style="background:${tripBg(trip)};"></div>
       <div class="itin-details">
-        <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:16px;">
-          <div style="width:100px;height:80px;border-radius:var(--radius-md);flex-shrink:0;background:${trip.thumbGradient};"></div>
+        <div class="itin-header-compact">
+          <div class="itin-header-compact-right">
+            ${isSaved ? avatarsHTML : ''}
+            <div class="date-select" onclick="toggleDateDropdown(event, this)">
+              <span class="date-select-label">${lucide('calendar', 14)} ${trip.dates}</span>
+              <span class="date-select-chevron">${lucide('chevron-down', 12)}</span>
+              <div class="date-select-dropdown" onclick="event.stopPropagation()">
+                <div class="date-select-dropdown-row">${trip.dates}</div>
+                <div class="date-select-dropdown-hint">${trip.days.length} days · Tap to edit trip dates</div>
+              </div>
+            </div>
+            ${saveBtnHTML}
+            <button class="action-btn" style="flex:none;padding:8px;" title="Share">${lucide('share',14)}</button>
+          </div>
+        </div>
+        <div class="itin-title-row">
+          <div class="itin-city itin-city-compact">${trip.name} <span class="itin-days-inline">${trip.days.length} days</span></div>
+        </div>
+
+        <div class="itin-header-enlarged">
+          <div style="width:100px;height:80px;border-radius:var(--radius-md);flex-shrink:0;background:${tripBg(trip)};"></div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
               <div class="itin-city">${trip.name}</div>
               <div style="display:flex;gap:8px;">
                 <button class="action-btn" style="flex:none;padding:8px 14px;">${lucide('calendar',14)} ${trip.days.length} day <span style="color:var(--color-gray-400);margin-left:2px;">${lucide('chevron-down',12)}</span></button>
-                <button class="action-btn" style="flex:none;padding:8px 14px;">${lucide('bookmark',14)} Save trip</button>
+                ${saveBtnHTML}
                 <button class="action-btn" style="flex:none;padding:8px 14px;">${lucide('share',14)} Share</button>
               </div>
             </div>
             <div class="itin-country">${trip.country}</div>
-            <div style="display:flex;gap:12px;margin-top:8px;align-items:center;">
-              <div class="avatar-stack">
-                ${trip.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
-                <div class="stack-add" onclick="openAddFriendsModal('${trip.id}')" title="Add people">${lucide('plus',14)}</div>
-              </div>
-            </div>
+            ${isSaved ? `<div style="display:flex;gap:12px;margin-top:8px;align-items:center;">${avatarsHTML}</div>` : ''}
           </div>
         </div>
         <div class="itin-tabs">
-          <button class="itin-tab active" data-tab="itinerary" onclick="switchItinTab(this,'itinerary')">Itinerary</button>
-          <button class="itin-tab" data-tab="flights" onclick="switchItinTab(this,'flights')">Flights</button>
-          <button class="itin-tab" data-tab="stay" onclick="switchItinTab(this,'stay')">Stay</button>
-          <button class="itin-tab" data-tab="finances" onclick="switchItinTab(this,'finances')">Finances</button>
+          ${tabs.map(([id, label]) => `<button class="itin-tab ${id === defaultTab ? 'active' : ''}" data-tab="${id}" onclick="switchItinTab(this,'${id}')">${label}</button>`).join('')}
         </div>
-        <div class="itin-tab-panel" data-panel="itinerary">
+        ${isSaved ? `<div class="itin-tab-panel" data-panel="updates" ${defaultTab === 'updates' ? '' : 'style="display:none;"'}>${tripUpdatesHTML(trip)}</div>` : ''}
+        <div class="itin-tab-panel" data-panel="itinerary" ${defaultTab === 'itinerary' ? '' : 'style="display:none;"'}>
           <div class="day-pill-group">
             <button class="day-pill active" data-day="all" onclick="filterToDay(null)">All</button>
             ${trip.days.map((d, i) => `<button class="day-pill" data-day="${i}" onclick="filterToDay(${i})">Day ${i + 1}</button>`).join('')}
@@ -2734,7 +3063,7 @@ function itineraryHTML(tripId) {
         </div>
         <div class="itin-tab-panel" data-panel="flights" style="display:none;">${flightsTabHTML(trip)}</div>
         <div class="itin-tab-panel" data-panel="stay" style="display:none;">${stayTabHTML(trip)}</div>
-        <div class="itin-tab-panel" data-panel="finances" style="display:none;"><div class="empty-state">Finances tracking coming soon.</div></div>
+        <div class="itin-tab-panel" data-panel="finances" style="display:none;">${financesTabHTML(trip)}</div>
       </div>
     </div>`;
 }
@@ -2749,6 +3078,7 @@ function activityHTML(trip, dayIndex, blockIndex, actIndex, a, members) {
   const avatarMembers = a.members || members || trip.members;
   return `
     <div class="activity" draggable="true"
+      onclick="openActivityModal('${trip.id}',${dayIndex},${blockIndex},${actIndex})"
       ondragstart="activityDragStart(event,${dayIndex},${blockIndex},${actIndex})"
       ondragover="event.preventDefault();"
       ondrop="activityDrop(event,'${trip.id}',${dayIndex},${blockIndex},${actIndex})">
@@ -2762,9 +3092,9 @@ function activityHTML(trip, dayIndex, blockIndex, actIndex, a, members) {
           <span class="activity-title">${a.title}</span>
         </div>
         <div class="activity-desc">${a.desc}</div>
-        <div class="avatar-stack activity-avatars">
-          ${avatarMembers.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
-        </div>
+      </div>
+      <div class="avatar-stack activity-avatars">
+        ${avatarMembers.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
       </div>
       <span class="activity-trash" title="Remove" onclick="event.stopPropagation(); removeActivity('${trip.id}',${dayIndex},${blockIndex},${actIndex})">${lucide('trash-2', 14)}</span>
     </div>`;
@@ -2776,21 +3106,64 @@ function distributeMembers(members, count) {
   return groups;
 }
 
+const ACTIVITY_TAG_MAP = {
+  '✈': 'Flight',
+  '🛍': 'Shopping', '🧥': 'Shopping', '👜': 'Shopping', '🛒': 'Shopping',
+  '⛪': 'Culture', '⛩': 'Culture', '🏯': 'Culture', '🏮': 'Culture', '🎋': 'Culture', '🎭': 'Culture',
+  '🏛': 'History', '🏰': 'History',
+  '🌅': 'Sunset', '🌌': 'Nightlife', '🌃': 'Nightlife', '🎆': 'Nightlife',
+  '🖼': 'Art', '🎨': 'Art',
+  '🏖': 'Beach', '💦': 'Adventure',
+  '🍷': 'Food', '🍣': 'Food', '🍢': 'Food', '🍝': 'Food', '☕': 'Food',
+  '🗼': 'Landmark', '⛲': 'Landmark',
+  '🕹': 'Entertainment', '🎵': 'Music',
+  '🌿': 'Nature', '🌳': 'Nature', '♨': 'Relax',
+  '🏘': 'Explore', '📍': 'Explore',
+};
+
+function deriveDayTags(day, index, totalDays) {
+  if (day.isFlight) return [index === 0 ? 'Departure' : 'Return'];
+  const tags = [];
+  (day.blocks || []).forEach(b => {
+    (b.activities || []).forEach(a => {
+      const tag = ACTIVITY_TAG_MAP[a.icon];
+      if (tag && !tags.includes(tag)) tags.push(tag);
+    });
+  });
+  return tags.slice(0, 2).length ? tags.slice(0, 2) : ['Explore'];
+}
+
+function stayCardHTML(trip) {
+  return `
+    <div class="activity activity-stay" onclick="openStayModal('${trip.id}')">
+      <span class="activity-handle" style="visibility:hidden;">${lucide('grip-vertical', 14)}</span>
+      <div class="activity-thumb" style="background:${TRIP_THUMB};">🛏</div>
+      <div class="activity-body">
+        <div class="activity-title-row">
+          <span class="activity-title">${trip.name} Central Hotel</span>
+        </div>
+        <div class="activity-desc">Staying here tonight</div>
+      </div>
+      <div class="avatar-stack activity-avatars">
+        ${trip.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+      </div>
+    </div>`;
+}
+
 function dayItemHTML(trip, day, index) {
   const expandable = day.blocks && day.blocks.length > 0;
+  const tags = deriveDayTags(day, index, trip.days.length);
+  const showStay = expandable && !(day.isFlight && index === trip.days.length - 1);
   return `
     <div class="day-item expanded" data-day-item="${index}">
       <div class="day-header" onclick="toggleDay(this)">
-        <span class="day-date">${day.date}</span>
-        <span class="day-location">${day.location}</span>
-        ${day.isFlight ? '<span class="day-flight-icon">' + lucide(index === 0 ? 'plane-takeoff' : 'plane-landing', 16) + '</span>' : ''}
-        <span class="day-icon">${lucide('chevron-down', 16)}</span>
+        <span class="day-icon">${lucide('chevron-down', 14)}</span>
+        <span class="day-number">Day ${index + 1}</span>
+        <div class="day-tags">
+          ${tags.map(t => `<span class="day-tag">${t}</span>`).join('')}
+        </div>
       </div>
       ${expandable ? `<div class="day-body"><div class="day-body-inner">
-        <div class="day-intro">
-          ${ZOYA_SVG.replace('zoya-avatar', 'day-intro-avatar')}
-          <span class="day-intro-text">${day.intro}</span>
-        </div>
         ${day.blocks.map((b, blockIndex) => {
           const multi = b.activities.length > 1;
           const memberGroups = multi ? distributeMembers(trip.members, b.activities.length) : null;
@@ -2802,12 +3175,14 @@ function dayItemHTML(trip, day, index) {
             </div>
           </div>`;
         }).join('')}
-        <button class="add-place-btn" onclick="openAddPlaceModal('${trip.id}', ${index})">${lucide('plus', 14)} Add another place</button>
+        ${showStay ? stayCardHTML(trip) : ''}
+        <button class="add-place-btn" onclick="openAddPlaceModal('${trip.id}', ${index})" title="Add place or ideas">${lucide('plus', 16)}</button>
       </div></div>` : ''}
     </div>`;
 }
 
 function toggleDay(headerEl) {
+  if (selectedDayIndex !== null) return;
   headerEl.closest('.day-item').classList.toggle('expanded');
 }
 
@@ -2817,6 +3192,19 @@ function switchItinTab(btn, tab) {
   const panels = btn.closest('.itin-details').querySelectorAll('.itin-tab-panel');
   panels.forEach(p => { p.style.display = p.dataset.panel === tab ? '' : 'none'; });
 }
+
+function toggleDateDropdown(e, el) {
+  e.stopPropagation();
+  const wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.date-select.open').forEach(d => d.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.date-select')) {
+    document.querySelectorAll('.date-select.open').forEach(d => d.classList.remove('open'));
+  }
+});
 
 function toggleEnlarge() {
   const panel = document.getElementById('itinPanel');
@@ -2839,6 +3227,27 @@ function reRenderItinerary(tripId, keepDayExpanded) {
       if (items[keepDayExpanded]) items[keepDayExpanded].classList.add('expanded');
     }
   }, 0);
+}
+
+function saveTripToMyTrips(tripId) {
+  if (!SAVED_TRIP_IDS.includes(tripId)) SAVED_TRIP_IDS.push(tripId);
+  reRenderItinerary(tripId);
+}
+
+function tripUpdatesHTML(trip) {
+  const updates = FRIEND_ACTIVITY.filter(a => a.tripId === trip.id);
+  if (!updates.length) return `<div class="empty-state">No updates yet on this trip.</div>`;
+  return `<div class="friend-activity-list">
+    ${updates.map(a => `
+      <div class="friend-activity-item">
+        <div class="friend-avatar" style="background:${a.friend.color};">${a.friend.initial}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="friend-activity-text"><b>${a.friend.name}</b> ${a.action} <b>${a.tripName}</b></div>
+          <div class="friend-activity-time">${a.time}</div>
+        </div>
+      </div>
+    `).join('')}
+  </div>`;
 }
 
 /* ===================== ACTIVITY REORDER / REMOVE ===================== */
@@ -2963,6 +3372,130 @@ function closePlaceModalOnOverlay(e) {
   if (e.target.id === 'placeModalOverlay') closePlaceModal();
 }
 
+/* ===================== LOCATION DETAIL MODAL ===================== */
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function findActivityByTitle(trip, title) {
+  for (const day of trip.days) {
+    for (const block of (day.blocks || [])) {
+      for (const a of (block.activities || [])) {
+        if (a.title === title) return a;
+      }
+    }
+  }
+  return null;
+}
+
+function locationModalHTML(loc) {
+  const h = hashStr(loc.title);
+  const rating = (4.2 + (h % 8) / 10).toFixed(1);
+  const reviews = 200 + (h % 4000);
+  const openNow = h % 2 === 0;
+  const closeHour = 5 + (h % 6);
+  const hoursText = openNow ? `Open now · Closes ${closeHour}:00 PM` : `Closed · Opens 9:00 AM tomorrow`;
+  const category = loc.category || 'Place';
+  return `
+    <div class="loc-modal-hero" style="background:${loc.gradient};">
+      <span>${loc.icon || '📍'}</span>
+      <button class="loc-modal-close" onclick="closeLocationModal()">${lucide('x', 16)}</button>
+    </div>
+    <div class="loc-modal-body">
+      <div class="loc-modal-title">${loc.title}</div>
+      <div class="loc-modal-rating">
+        <span class="loc-modal-rating-value">${rating}</span>
+        <span class="loc-modal-stars">${lucide('star', 14)}</span>
+        <span>(${reviews.toLocaleString()})</span>
+        <span class="loc-modal-dot">·</span>
+        <span class="loc-modal-category">${category}</span>
+      </div>
+      <div class="loc-modal-row">
+        <span class="loc-modal-row-icon">${lucide('map-pin', 15)}</span>
+        <span>${loc.address}</span>
+      </div>
+      <div class="loc-modal-row">
+        <span class="loc-modal-row-icon">${lucide('clock', 15)}</span>
+        <span class="${openNow ? 'loc-modal-open' : ''}">${hoursText}</span>
+      </div>
+      <div class="loc-modal-actions">
+        <button class="loc-modal-action" onclick="alert('Opening directions…')">${lucide('arrow-right', 16)}<span>Directions</span></button>
+        <button class="loc-modal-action" onclick="alert('Saved to your trip!')">${lucide('bookmark', 16)}<span>Save</span></button>
+        <button class="loc-modal-action" onclick="alert('Link copied!')">${lucide('share', 16)}<span>Share</span></button>
+      </div>
+      <div class="loc-modal-section-title">About</div>
+      <div class="loc-modal-desc">${loc.desc}</div>
+      ${loc.members && loc.members.length ? `
+      <div class="loc-modal-avatars">
+        <span class="loc-modal-avatars-label">Going:</span>
+        <div class="avatar-stack">
+          ${loc.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+        </div>
+      </div>` : ''}
+    </div>`;
+}
+
+function openLocationModal(loc) {
+  document.getElementById('locationModalBox').innerHTML = locationModalHTML(loc);
+  document.getElementById('locationModalOverlay').classList.add('active');
+}
+
+function closeLocationModal() {
+  document.getElementById('locationModalOverlay').classList.remove('active');
+}
+
+function closeLocationModalOnOverlay(e) {
+  if (e.target.id === 'locationModalOverlay') closeLocationModal();
+}
+
+function openActivityModal(tripId, dayIndex, blockIndex, actIndex) {
+  const trip = TRIPS[tripId];
+  if (!trip) return;
+  const a = trip.days[dayIndex].blocks[blockIndex].activities[actIndex];
+  openLocationModal({
+    title: a.title,
+    icon: a.icon,
+    desc: a.desc,
+    category: ACTIVITY_TAG_MAP[a.icon] || 'Place',
+    address: `${trip.name}, ${trip.country}`,
+    gradient: tripBg(trip),
+    members: a.members || trip.members,
+  });
+}
+
+function openStayModal(tripId) {
+  const trip = TRIPS[tripId];
+  if (!trip) return;
+  openLocationModal({
+    title: trip.name + ' Central Hotel',
+    icon: '🛏',
+    desc: `Your home base for this trip — comfortable rooms in the heart of ${trip.name}.`,
+    category: 'Hotel',
+    address: `${trip.name}, ${trip.country}`,
+    gradient: tripBg(trip),
+    members: trip.members,
+  });
+}
+
+function openPinModal(tripId, pinIndex) {
+  const trip = TRIPS[tripId];
+  if (!trip) return;
+  const p = trip.pins[pinIndex];
+  if (!p) return;
+  const matched = findActivityByTitle(trip, p.label);
+  openLocationModal({
+    title: p.label,
+    icon: matched ? matched.icon : p.icon,
+    desc: matched ? matched.desc : `Explore ${p.label}, one of the highlights of your ${trip.name} trip.`,
+    category: ACTIVITY_TAG_MAP[matched ? matched.icon : p.icon] || 'Place',
+    address: `${trip.name}, ${trip.country}`,
+    gradient: tripBg(trip),
+    members: trip.members,
+  });
+}
+
 function initPlaceModalMap(trip) {
   const container = document.getElementById('placeModalMap');
   if (!container || typeof L === 'undefined') return;
@@ -3012,31 +3545,45 @@ function moreOptionsBannerHTML(label) {
     </div>`;
 }
 
+function bookingCardHTML(opts) {
+  const avatars = opts.avatars && opts.avatars.length ? `
+    <div class="avatar-stack">
+      ${opts.avatars.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+    </div>` : '';
+  return `
+    <div class="booking-card">
+      <div class="booking-card-icon">${lucide(opts.icon, 20)}</div>
+      <div class="booking-card-body">
+        <div class="booking-card-title">${opts.title}</div>
+        <div class="booking-card-meta">${opts.meta}</div>
+      </div>
+      <div class="booking-card-side">
+        ${avatars}
+        <div class="booking-card-price">$${opts.price}<span>${opts.priceLabel}</span></div>
+      </div>
+    </div>`;
+}
+
 function flightsTabHTML(trip) {
   const booked = trip.members.slice(0, Math.min(2, trip.members.length));
   const notBooked = trip.members.slice(booked.length);
-  const flights = [
-    { route: 'JFK → ' + (trip.pins[0] ? trip.pins[0].label : trip.name), date: trip.days[0] ? trip.days[0].date : '', price: 612 },
-    { route: (trip.pins[0] ? trip.pins[0].label : trip.name) + ' → JFK', date: trip.days[trip.days.length - 1] ? trip.days[trip.days.length - 1].date : '', price: 588 },
+  const dest = trip.pins[0] ? trip.pins[0].label : trip.name;
+  const depDate = trip.days[0] ? trip.days[0].date : '';
+  const retDate = trip.days[trip.days.length - 1] ? trip.days[trip.days.length - 1].date : '';
+  const bookedFlights = [
+    { title: 'JFK → ' + dest, meta: depDate + ' · Nonstop · 8h 15m', price: 612 },
+    { title: dest + ' → JFK', meta: retDate + ' · Nonstop · 8h 15m', price: 588 },
+  ];
+  const savedFlights = [
+    { title: 'JFK → ' + dest, meta: depDate + ' · 1 stop · 9h 40m · Delta', price: 545 },
+    { title: dest + ' → JFK', meta: retDate + ' · Nonstop · 7h 55m · Air France', price: 601 },
   ];
   return `
     ${reminderBannerHTML(notBooked, "Haven't booked flights yet")}
-    ${flights.map(f => `
-      <div class="flying-by-row">
-        <span style="font-size:13px;font-weight:600;color:var(--color-gray-700);">Booked</span>
-        <div class="avatar-stack">
-          ${(booked.length ? booked : [ME]).map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
-        </div>
-      </div>
-      <div class="booking-card">
-        <div class="booking-card-icon">${lucide('plane', 20)}</div>
-        <div class="booking-card-body">
-          <div class="booking-card-title">${f.route}</div>
-          <div class="booking-card-meta">${f.date} · Nonstop · 8h 15m</div>
-        </div>
-        <div class="booking-card-price">$${f.price}<span>per person</span></div>
-      </div>
-    `).join('')}
+    <div class="booking-section-title">Booked</div>
+    ${bookedFlights.map(f => bookingCardHTML({ icon: 'plane', title: f.title, meta: f.meta, price: f.price, priceLabel: 'per person', avatars: booked.length ? booked : [ME] })).join('')}
+    <div class="booking-section-title">Saved</div>
+    ${savedFlights.map(f => bookingCardHTML({ icon: 'plane', title: f.title, meta: f.meta, price: f.price, priceLabel: 'per person' })).join('')}
     ${moreOptionsBannerHTML('More flight options available')}
   `;
 }
@@ -3044,23 +3591,72 @@ function flightsTabHTML(trip) {
 function stayTabHTML(trip) {
   const booked = trip.members.slice(0, Math.min(2, trip.members.length));
   const notBooked = trip.members.slice(booked.length);
+  const nights = Math.max(trip.days.length - 2, 1);
+  const savedStays = [
+    { title: 'Riverside Boutique Hotel', meta: nights + ' nights · ★ 4.5 (860 reviews)', price: 152 },
+    { title: trip.name + ' Grand', meta: nights + ' nights · ★ 4.9 (2,310 reviews)', price: 230 },
+  ];
   return `
     ${reminderBannerHTML(notBooked, "Haven't booked a stay yet")}
-    <div class="flying-by-row">
-      <span style="font-size:13px;font-weight:600;color:var(--color-gray-700);">Booked</span>
-      <div class="avatar-stack">
-        ${(booked.length ? booked : [ME]).map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
-      </div>
-    </div>
-    <div class="booking-card">
-      <div class="booking-card-icon">${lucide('bed', 20)}</div>
-      <div class="booking-card-body">
-        <div class="booking-card-title">${trip.name} Central Hotel</div>
-        <div class="booking-card-meta">${trip.days.length - 2} nights · ★ 4.7 (1,204 reviews)</div>
-      </div>
-      <div class="booking-card-price">$189<span>per night</span></div>
-    </div>
+    <div class="booking-section-title">Booked</div>
+    ${bookingCardHTML({ icon: 'bed', title: trip.name + ' Central Hotel', meta: nights + ' nights · ★ 4.7 (1,204 reviews)', price: 189, priceLabel: 'per night', avatars: booked.length ? booked : [ME] })}
+    <div class="booking-section-title">Saved</div>
+    ${savedStays.map(s => bookingCardHTML({ icon: 'bed', title: s.title, meta: s.meta, price: s.price, priceLabel: 'per night' })).join('')}
     ${moreOptionsBannerHTML('More stay options available')}
+  `;
+}
+
+/* ===================== FINANCES TAB ===================== */
+function tripExpenses(trip) {
+  const m = trip.members.length ? trip.members : [ME];
+  const payer = (i) => m[i % m.length];
+  const nights = Math.max(trip.days.length - 2, 1);
+  return [
+    { icon: 'plane', title: 'Flights — round trip', payer: payer(0), amount: (612 + 588) * m.length, date: trip.days[0] ? trip.days[0].date : '' },
+    { icon: 'bed', title: trip.name + ' Central Hotel', payer: payer(1), amount: 189 * nights, date: trip.days[1] ? trip.days[1].date : '' },
+    { icon: 'shopping-cart', title: 'Group dinner', payer: payer(0), amount: 96, date: trip.days[2] ? trip.days[2].date : (trip.days[0] ? trip.days[0].date : '') },
+    { icon: 'map-pin', title: 'Museum tickets', payer: payer(2), amount: 54, date: trip.days[1] ? trip.days[1].date : '' },
+  ];
+}
+
+function financeRowHTML(e) {
+  return `
+    <div class="finance-row">
+      <div class="finance-row-icon">${lucide(e.icon, 16)}</div>
+      <div class="finance-row-body">
+        <div class="finance-row-title">${e.title}</div>
+        <div class="finance-row-meta">${e.date ? e.date + ' · ' : ''}Paid by ${e.payer.name.replace(' (You)', '')}</div>
+      </div>
+      <div class="avatar-stack" style="margin-right:2px;"><div class="stack-avatar" style="background:${e.payer.color};${e.payer.textColor ? 'color:'+e.payer.textColor+';' : ''}" title="${e.payer.name}">${e.payer.initial}</div></div>
+      <div class="finance-row-amount">$${e.amount.toLocaleString()}</div>
+    </div>`;
+}
+
+function financesTabHTML(trip) {
+  const expenses = tripExpenses(trip);
+  const memberCount = trip.members.length || 1;
+  const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const perPerson = total / memberCount;
+  const paidByMe = expenses.filter(e => e.payer === ME).reduce((sum, e) => sum + e.amount, 0);
+  const balance = paidByMe - perPerson;
+  const owed = balance >= 0;
+  return `
+    <div class="finance-summary">
+      <div class="finance-stat">
+        <div class="finance-stat-label">Group total</div>
+        <div class="finance-stat-value">$${Math.round(total).toLocaleString()}</div>
+      </div>
+      <div class="finance-stat">
+        <div class="finance-stat-label">Per person avg</div>
+        <div class="finance-stat-value">$${Math.round(perPerson).toLocaleString()}</div>
+      </div>
+      <div class="finance-stat">
+        <div class="finance-stat-label">${owed ? "You're owed" : 'You owe'}</div>
+        <div class="finance-stat-value ${owed ? 'positive' : 'negative'}">$${Math.round(Math.abs(balance)).toLocaleString()}</div>
+      </div>
+    </div>
+    <div class="booking-section-title">All expenses</div>
+    ${expenses.map(financeRowHTML).join('')}
   `;
 }
 
@@ -3302,7 +3898,7 @@ function chatTripCardsHTML(tripIds) {
     const t = TRIPS[id];
     if (!t) return '';
     return `<div class="location-card" onclick="showItinerary('${id}')">
-      <div style="height:120px;background:${t.thumbGradient};"></div>
+      <div style="height:120px;background:${tripBg(t)};"></div>
       <div class="location-card-info">
         <div class="location-card-name">${t.name}</div>
         <div class="location-card-country">${t.country}</div>
@@ -3322,7 +3918,18 @@ function toggleTripIdeasMenu(e) {
   const menu = document.getElementById('tripIdeasMenu');
   const ids = getThreadTripIds();
   menu.innerHTML = ids.length
-    ? ids.map(id => `<div class="trip-ideas-item" onclick="showItinerary('${id}'); closeTripIdeasMenu();">${TRIPS[id] ? TRIPS[id].name : id}</div>`).join('')
+    ? ids.map(id => {
+        const t = TRIPS[id];
+        if (!t) return `<div class="trip-ideas-item" onclick="showItinerary('${id}'); closeTripIdeasMenu();"><div class="trip-ideas-item-body"><div class="trip-ideas-item-name">${id}</div></div></div>`;
+        const saved = SAVED_TRIP_IDS.includes(id);
+        return `<div class="trip-ideas-item" onclick="showItinerary('${id}'); closeTripIdeasMenu();">
+          <div class="trip-ideas-item-thumb" style="background:${tripBg(t)};"></div>
+          <div class="trip-ideas-item-body">
+            <div class="trip-ideas-item-name">${t.name}</div>
+            <div class="trip-ideas-item-meta">${t.days.length} days · ${saved ? 'Saved' : 'Not saved'}</div>
+          </div>
+        </div>`;
+      }).join('')
     : `<div class="trip-ideas-empty">No trips mentioned yet</div>`;
   menu.classList.toggle('active');
 }
@@ -3336,19 +3943,19 @@ document.addEventListener('click', () => closeTripIdeasMenu());
 
 function renderNav() {
   const chatChildren = CHATS.map(c =>
-    `<div class="nav-child ${c.id === activeChatId ? 'active' : ''}" onclick="selectChat('${c.id}', event)"><span class="nav-child-dot"></span><span class="nav-label">${c.name}</span></div>`
+    `<div class="nav-child ${currentView === 'chat' && c.id === activeChatId ? 'active' : ''}" onclick="selectChat('${c.id}', event)"><span class="nav-label">${c.name}</span></div>`
   ).join('');
-  const chatActive = currentView === 'chat' && !activeChatId;
+  const newChatActive = currentView === 'chat' && !activeChatId;
   const navHTML = `
     <div class="nav-item ${currentView === 'home' ? 'active' : ''}" onclick="openHomeView()"><span class="nav-icon">${lucide('home',18)}</span><span class="nav-label">Home</span></div>
-    <div class="nav-item ${chatActive ? 'active' : ''}" onclick="resetFlow()"><span class="nav-icon">${lucide('message-square',18)}</span><span class="nav-label">Chat</span><span class="nav-arrow">${lucide('chevron-down',14)}</span></div>
+    <div class="nav-item" onclick="resetFlow()"><span class="nav-icon">${lucide('message-square',18)}</span><span class="nav-label">Chat</span><span class="nav-arrow">${lucide('chevron-down',14)}</span></div>
     <div class="nav-children">
-      <button class="nav-new-chat" onclick="resetFlow()"><span class="nav-icon" style="width:14px;">${lucide('plus',14)}</span><span class="nav-label">New chat</span></button>
+      <button class="nav-new-chat ${newChatActive ? 'active' : ''}" onclick="resetFlow()"><span class="nav-icon" style="width:14px;">${lucide('plus',14)}</span><span class="nav-label">New chat</span></button>
       ${chatChildren}
     </div>
-    <div class="nav-item ${currentView === 'trips' ? 'active' : ''}" onclick="openTripsView()"><span class="nav-icon">${lucide('plane',18)}</span><span class="nav-label">Trips</span></div>
+    <div class="nav-item ${currentView === 'trips' ? 'active' : ''}" onclick="openTripsView()"><span class="nav-icon">${lucide('bookmark',18)}</span><span class="nav-label">Saved trips</span></div>
     <div class="nav-item ${currentView === 'friends' ? 'active' : ''}" onclick="openFriendsView()"><span class="nav-icon">${lucide('users',18)}</span><span class="nav-label">Friends</span></div>
-    <div class="nav-item"><span class="nav-icon">${lucide('shopping-cart',18)}</span><span class="nav-label">Book</span></div>
+    <div class="nav-item"><span class="nav-icon">${lucide('shopping-cart',18)}</span><span class="nav-label">Book flights / stays</span></div>
   `;
   document.getElementById('navSection').innerHTML = navHTML;
   const mobileNav = document.getElementById('mobileNavSection');
@@ -3445,7 +4052,7 @@ function recommendedCarouselHTML() {
       const f = FRIENDS.find(fr => fr.name === v.friendName);
       if (!t) return '';
       return `<div class="carousel-card" onclick="showItinerary('${v.tripId}')">
-        <div class="trip-card-thumb" style="background:${t.thumbGradient};"></div>
+        <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
         <div class="trip-card-body">
           <div class="trip-card-name">${t.name}</div>
           <div class="trip-card-meta">${t.country}</div>
@@ -3459,20 +4066,48 @@ function recommendedCarouselHTML() {
   </div>`;
 }
 
+function latestTripsCarouselHTML() {
+  return `<div class="carousel">
+    ${SAVED_TRIP_IDS.map(id => {
+      const t = TRIPS[id];
+      if (!t) return '';
+      return `<div class="carousel-card" onclick="showItinerary('${id}')">
+        <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
+        <div class="trip-card-body">
+          <div class="trip-card-name">${t.name}</div>
+          <div class="trip-card-meta">${t.country} · ${t.dates}</div>
+          <div class="avatar-stack trip-card-avatars">
+            ${t.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
 function homeHTML() {
   return `
     <h1 class="home-welcome">Welcome back, George</h1>
 
     <div class="home-section">
-      <div class="home-section-title">Create new trip</div>
-      <div class="home-create-trip">
-        <div class="chat-input-wrapper">
-          <input class="chat-input" id="homeCreateTripInput" placeholder="Ask anything travel" onkeydown="if(event.key==='Enter') createTripFromHome();" />
-          <button class="send-btn" onclick="createTripFromHome()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
+      <div class="home-create-trip-banner">
+        ${photoCollageHTML()}
+        <div class="home-section-title">Plan new trip</div>
+        <div class="home-create-trip">
+          <div class="chat-input-wrapper home-create-trip-input">
+            <input class="chat-input" id="homeCreateTripInput" placeholder="Ask anything travel" onkeydown="if(event.key==='Enter') createTripFromHome();" />
+            <button class="send-btn send-btn-sm" onclick="createTripFromHome()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
         </div>
       </div>
+    </div>
+
+    <div class="home-section">
+      <div class="home-section-title">Latest trips</div>
+      <div class="home-section-sub">Pick up where you left off</div>
+      ${latestTripsCarouselHTML()}
     </div>
 
     <div class="home-section">
@@ -3538,7 +4173,7 @@ function initHomeMap() {
     if (!t) return;
     const icon = L.divIcon({
       className: '',
-      html: `<div class="squarcle-marker"><div class="squarcle" style="width:52px;height:52px;background:${t.thumbGradient};font-weight:700;color:var(--color-gray-700);">${t.name.charAt(0)}</div><div class="squarcle-label">${t.name}</div></div>`,
+      html: `<div class="squarcle-marker"><div class="squarcle" style="width:52px;height:52px;background:${tripBg(t)};font-weight:700;color:var(--color-gray-700);">${t.img ? '' : t.name.charAt(0)}</div><div class="squarcle-label">${t.name}</div></div>`,
       iconSize: [52, 74],
       iconAnchor: [26, 66],
     });
@@ -3562,11 +4197,14 @@ function tripsHTML() {
         ${SAVED_TRIP_IDS.map(id => {
           const t = TRIPS[id];
           return `<div class="trip-card" onclick="showItinerary('${id}')">
-            <div class="trip-card-thumb" style="background:${t.thumbGradient};"></div>
+            <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
             <div class="trip-card-body">
               <div class="trip-card-name">${t.name}</div>
               <div class="trip-card-meta">${t.country}</div>
               <div class="trip-card-dates">${lucide('calendar',12)} ${t.dates}</div>
+              <div class="avatar-stack trip-card-avatars">
+                ${t.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+              </div>
             </div>
           </div>`;
         }).join('')}
@@ -3658,11 +4296,11 @@ function renderMapPins(trip) {
   leafletMarkers.forEach(m => leafletMap.removeLayer(m));
   leafletMarkers = [];
 
-  trip.pins.forEach(p => {
+  trip.pins.forEach((p, pinIndex) => {
     const isSelected = selectedDayIndex !== null && p.day === selectedDayIndex;
     const isDimmed = selectedDayIndex !== null && p.day !== selectedDayIndex;
     const html = isSelected
-      ? `<div class="map-pin-marker"><div class="map-pin-squarcle" style="background:${trip.thumbGradient};"><span class="map-pin-badge">${p.day + 1}</span>${p.icon || p.label.charAt(0)}</div><div class="map-pin-label">${p.label}</div></div>`
+      ? `<div class="map-pin-marker"><div class="map-pin-squarcle" style="background:${tripBg(trip)};"><span class="map-pin-badge">${p.day + 1}</span>${p.icon || p.label.charAt(0)}</div><div class="map-pin-label">${p.label}</div></div>`
       : `<div class="map-pin-marker${isDimmed ? ' dimmed' : ''}"><div class="map-pin-dot"><span>${p.day + 1}</span></div><div class="map-pin-label">${p.label}</div></div>`;
     const icon = L.divIcon({
       className: '',
@@ -3671,7 +4309,7 @@ function renderMapPins(trip) {
       iconAnchor: isSelected ? [38, 90] : [13, 40],
     });
     const marker = L.marker([p.lat, p.lng], { icon }).addTo(leafletMap);
-    marker.on('click', () => filterToDay(p.day));
+    marker.on('click', () => { filterToDay(p.day); openPinModal(trip.id, pinIndex); });
     leafletMarkers.push(marker);
   });
 }
@@ -3793,6 +4431,7 @@ renderStep(0, false);
 openHomeView();
 applyResponsiveSidebar();
 document.getElementById('tripIdeasIcon').innerHTML = lucide('lightbulb', 14);
+document.getElementById('chatCollage').innerHTML = photoCollageHTML();
 </script>
 </body>
 </html>
