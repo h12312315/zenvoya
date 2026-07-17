@@ -232,7 +232,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 8px;
+  padding: 10px 8px 10px 18px;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 13px;
@@ -245,25 +245,7 @@ body {
 .nav-child:hover { background: var(--color-gray-100); color: var(--color-gray-700); }
 .nav-child.active { background: var(--color-gray-100); color: var(--color-gray-700); }
 .sidebar.collapsed .nav-children { display: none; }
-
-.nav-new-chat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 8px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--color-gray-400);
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
-  border: none;
-  background: none;
-  width: 100%;
-  font-family: var(--font-body);
-}
-.nav-new-chat:hover { background: var(--color-gray-100); color: var(--color-gray-600); }
-.nav-new-chat.active { background: var(--color-gray-100); color: var(--color-gray-700); }
+.nav-child-icon { width: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--color-gray-400); }
 
 .user-name {
   font-size: 13px;
@@ -274,6 +256,20 @@ body {
   text-overflow: ellipsis;
 }
 .sidebar.collapsed .user-name { display: none; }
+
+.user-level-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-gray-500);
+  background: var(--color-gray-100);
+  border-radius: var(--radius-full);
+  padding: 3px 7px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  flex-shrink: 1;
+}
 
 .sidebar-footer {
   padding: 12px 20px;
@@ -2051,12 +2047,6 @@ body {
   font-size: 16px;
   font-weight: 600;
   color: var(--color-gray-900);
-  margin-bottom: 2px;
-}
-
-.home-section-sub {
-  font-size: 13px;
-  color: var(--color-gray-500);
   margin-bottom: 14px;
 }
 
@@ -2150,6 +2140,50 @@ body {
 .country-flags { display: flex; flex-wrap: wrap; gap: 10px; }
 .country-flag { font-size: 24px; cursor: default; }
 
+/* Avatar hover tooltip (name, join date, level) — usable on any avatar element */
+.avatar-tt { position: relative; }
+.avatar-tt:hover { z-index: 20; }
+
+.avatar-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, 4px);
+  background: var(--color-gray-900);
+  color: var(--color-white);
+  font-size: 11px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s, transform 0.15s;
+  pointer-events: none;
+  z-index: 30;
+  text-align: left;
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+
+.avatar-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--color-gray-900);
+}
+
+.avatar-tt:hover .avatar-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.avatar-tooltip-name { font-weight: 600; }
+.avatar-tooltip-meta { color: var(--color-gray-300); }
+
 /* Leaderboard */
 .leaderboard-row {
   display: flex;
@@ -2174,8 +2208,10 @@ body {
   flex-shrink: 0;
 }
 
-.leaderboard-name { font-size: 13px; font-weight: 500; color: var(--color-gray-800); width: 78px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.leaderboard-name-col { display: flex; flex-direction: column; gap: 1px; width: 96px; flex-shrink: 0; }
+.leaderboard-name { font-size: 13px; font-weight: 500; color: var(--color-gray-800); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .leaderboard-row.me .leaderboard-name { font-weight: 700; }
+.leaderboard-level { font-size: 11px; color: var(--color-gray-400); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .leaderboard-bar-track { flex: 1; height: 6px; border-radius: var(--radius-full); background: var(--color-gray-100); overflow: hidden; }
 .leaderboard-bar-fill { height: 100%; border-radius: var(--radius-full); background: var(--color-gray-300); }
@@ -2260,6 +2296,7 @@ body {
       <div class="user-section">
         <div class="user-avatar">G</div>
         <span class="user-name nav-label">George</span>
+        <span class="user-level-badge nav-label"></span>
         <button class="settings-btn" title="Settings">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
@@ -2273,7 +2310,7 @@ body {
     <div id="chatView">
       <header class="main-header">
         <button class="menu-btn" id="menuBtn" onclick="openMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></button>
-        <span class="header-title" id="headerTitle">New Chat</span>
+        <span class="header-title" id="headerTitle">Discover</span>
         <div class="header-right" id="headerRight">
           <div class="trip-ideas-wrap">
             <button class="new-chat-btn" onclick="toggleTripIdeasMenu(event)"><span id="tripIdeasIcon" style="display:flex;"></span> <span>Trip ideas from this chat</span></button>
@@ -2383,6 +2420,7 @@ body {
     <div class="user-section" style="padding:0;">
       <div class="user-avatar">G</div>
       <span class="user-name">George</span>
+      <span class="user-level-badge"></span>
       <button class="settings-btn" title="Settings"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
   </div>
@@ -2465,21 +2503,110 @@ function lucide(name, size) {
 const ZOYA_SVG = `<svg class="zoya-avatar" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="14" fill="#0a0a0a"/><path d="M7 11c0-.8.4-1.5 1.2-1.9L14 6l5.8 3.1c.8.4 1.2 1.1 1.2 1.9v3c0 3.5-3 6-7 7.5-4-1.5-7-4-7-7.5v-3z" fill="white" opacity="0.9"/><circle cx="11.5" cy="12.5" r="1.2" fill="#0a0a0a"/><circle cx="16.5" cy="12.5" r="1.2" fill="#0a0a0a"/><path d="M11.5 16c1.2 1.2 3.8 1.2 5 0" stroke="#0a0a0a" stroke-width="1" stroke-linecap="round"/><path d="M9 8.5l-1.5-2.5M19 8.5l1.5-2.5" stroke="white" stroke-width="1" stroke-linecap="round"/></svg>`;
 
 const FRIENDS = [
-  { id: 'mia', name: 'Mia Chen', initial: 'M', color: '#f97316' },
-  { id: 'liam', name: 'Liam Torres', initial: 'L', color: '#0ea5e9' },
-  { id: 'ava', name: 'Ava Patel', initial: 'A', color: '#a855f7' },
-  { id: 'noah', name: 'Noah Kim', initial: 'N', color: '#22c55e' },
-  { id: 'zoe', name: 'Zoe Martin', initial: 'Z', color: '#ec4899' },
+  { id: 'mia', name: 'Mia Chen', initial: 'M', color: '#f97316', level: 5, joinDate: 'Mar 2024' },
+  { id: 'liam', name: 'Liam Torres', initial: 'L', color: '#0ea5e9', level: 3, joinDate: 'Nov 2024' },
+  { id: 'ava', name: 'Ava Patel', initial: 'A', color: '#a855f7', level: 2, joinDate: 'Feb 2025' },
+  { id: 'noah', name: 'Noah Kim', initial: 'N', color: '#22c55e', level: 4, joinDate: 'Jun 2024' },
+  { id: 'zoe', name: 'Zoe Martin', initial: 'Z', color: '#ec4899', level: 4, joinDate: 'Aug 2024' },
 ];
 
 function friendById(id) { return FRIENDS.find(f => f.id === id); }
 
-const ME = { name: 'George (You)', initial: 'G', color: 'var(--color-accent-green)', textColor: 'var(--color-gray-800)' };
+const ME = { name: 'George (You)', initial: 'G', color: 'var(--color-accent-green)', textColor: 'var(--color-gray-800)', level: 6, joinDate: 'Jan 2024' };
+
+/* ===================== LEVELING SYSTEM ===================== */
+/* See LEVELS.md for the full reference table (titles, unlock criteria, tiers). */
+const LEVELS = [
+  { level: 1, title: 'Passenger', tier: 'Tier 1: Observer' },
+  { level: 2, title: 'Watcher', tier: 'Tier 1: Observer' },
+  { level: 3, title: 'Tracker', tier: 'Tier 2: Committer' },
+  { level: 4, title: 'Catalyst', tier: 'Tier 2: Committer' },
+  { level: 5, title: 'Anchor', tier: 'Tier 2: Committer' },
+  { level: 6, title: 'Tracer', tier: 'Tier 3: Experiencer' },
+  { level: 7, title: 'Curator', tier: 'Tier 3: Experiencer' },
+  { level: 8, title: 'Purist', tier: 'Tier 4: Legend' },
+  { level: 9, title: 'Architect', tier: 'Tier 4: Legend' },
+  { level: 10, title: 'Agent', tier: 'Tier 4: Legend' },
+];
+
+function levelInfo(level) { return LEVELS.find(l => l.level === level); }
+function levelTitle(level) { const l = levelInfo(level); return l ? l.title : ''; }
+function levelLabel(level) { return `Lv ${level}. ${levelTitle(level)}`; }
+
+function avatarTooltipHTML(person) {
+  if (!person || !person.name) return '';
+  return `<div class="avatar-tooltip">
+    <div class="avatar-tooltip-name">${person.name}</div>
+    ${person.joinDate ? `<div class="avatar-tooltip-meta">Joined ${person.joinDate}</div>` : ''}
+    ${person.level ? `<div class="avatar-tooltip-meta">${levelLabel(person.level)}</div>` : ''}
+  </div>`;
+}
+
+function stackAvatarHTML(m) {
+  return `<div class="stack-avatar avatar-tt" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}">${m.initial}${avatarTooltipHTML(m)}</div>`;
+}
+
+function friendAvatarHTML(f, extraStyle) {
+  if (!f) return '';
+  return `<div class="friend-avatar avatar-tt" style="background:${f.color};${extraStyle || ''}">${f.initial}${avatarTooltipHTML(f)}</div>`;
+}
 
 const TRIP_THUMB = 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary-ultra-light))';
 
 function tripBg(trip) {
   return trip && trip.img ? `url('${trip.img}') center/cover no-repeat` : (trip ? trip.thumbGradient : TRIP_THUMB);
+}
+
+const LOCATION_IMAGES = new Set([
+  'akihabara','alfama-castle','arashiyama-bamboo-grove','barcelona-el-prat-airport','barceloneta-beach',
+  'blue-lagoon','caldera-viewpoint','champs-elysees','charles-de-gaulle-airport','colosseum',
+  'eiffel-tower','el-born-tapas','fado-in-alfama','fiumicino-airport','fushimi-inari-shrine',
+  'gion-district','gullfoss-waterfall','kansai-airport','keflavik-airport','kinkaku-ji',
+  'le-marais','lisbon-airport','louvre-museum','meiji-shrine','montmartre',
+  'narita-airport','northern-lights-spot','oia-village','omotesando','park-guell',
+  'pena-palace-sintra','red-beach','sagrada-familia','saint-germain','santorini-airport',
+  'seine-river-cruise','senso-ji-temple','shibuya-crossing','shinjuku-golden-gai','teamlab-planets',
+  'trastevere','trevi-fountain','tsukiji-outer-market','vatican-museums','vineyard',
+]);
+
+function slugifyLocation(str) {
+  return (str || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function locImgFor(label) {
+  const slug = slugifyLocation(label);
+  return LOCATION_IMAGES.has(slug) ? `images/locations/${slug}.jpg` : null;
+}
+
+function hasPhotoBg(bg) {
+  return typeof bg === 'string' && bg.indexOf('url(') === 0;
+}
+
+function findPinForActivity(trip, title) {
+  const words = slugifyLocation(title).split('-');
+  let best = null, bestLen = 0;
+  (trip.pins || []).forEach(p => {
+    const pWords = slugifyLocation(p.label).split('-');
+    if (pWords.length > bestLen && pWords.every(w => words.includes(w))) { best = p; bestLen = pWords.length; }
+  });
+  return best;
+}
+
+function locBgForActivity(trip, title) {
+  const direct = locImgFor(title);
+  if (direct) return `url('${direct}') center/cover no-repeat`;
+  const pin = findPinForActivity(trip, title);
+  const pinImg = pin && locImgFor(pin.label);
+  return pinImg ? `url('${pinImg}') center/cover no-repeat` : tripBg(trip);
+}
+
+function locBg(label, trip) {
+  const img = locImgFor(label);
+  return img ? `url('${img}') center/cover no-repeat` : tripBg(trip);
 }
 
 const TRIPS = {
@@ -2938,12 +3065,12 @@ const RECENT_COUNTRIES = [
 ];
 
 const LEADERBOARD = [
-  { name: 'George (You)', initial: 'G', color: 'var(--color-accent-green)', textColor: 'var(--color-gray-800)', count: 34, isMe: true },
-  { name: 'Mia Chen', initial: 'M', color: '#f97316', count: 29 },
-  { name: 'Noah Kim', initial: 'N', color: '#22c55e', count: 26 },
-  { name: 'Zoe Martin', initial: 'Z', color: '#ec4899', count: 22 },
-  { name: 'Liam Torres', initial: 'L', color: '#0ea5e9', count: 19 },
-  { name: 'Ava Patel', initial: 'A', color: '#a855f7', count: 15 },
+  { ...ME, count: 34, isMe: true },
+  { ...friendById('mia'), count: 29 },
+  { ...friendById('noah'), count: 26 },
+  { ...friendById('zoe'), count: 22 },
+  { ...friendById('liam'), count: 19 },
+  { ...friendById('ava'), count: 15 },
 ];
 
 const RECOMMENDED_TRIP_IDS = ['lisbon', 'kyoto', 'reykjavik', 'barcelona'];
@@ -2997,7 +3124,7 @@ function itineraryHTML(tripId) {
   const isSaved = SAVED_TRIP_IDS.includes(trip.id);
   const avatarsHTML = `
     <div class="avatar-stack">
-      ${trip.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+      ${trip.members.map(stackAvatarHTML).join('')}
       <div class="stack-add" onclick="openAddFriendsModal('${trip.id}')" title="Add people">${lucide('plus',14)}</div>
     </div>`;
   const saveBtnHTML = isSaved
@@ -3076,6 +3203,7 @@ const TIME_RANGES = {
 
 function activityHTML(trip, dayIndex, blockIndex, actIndex, a, members) {
   const avatarMembers = a.members || members || trip.members;
+  const bg = locBgForActivity(trip, a.title);
   return `
     <div class="activity" draggable="true"
       onclick="openActivityModal('${trip.id}',${dayIndex},${blockIndex},${actIndex})"
@@ -3083,9 +3211,9 @@ function activityHTML(trip, dayIndex, blockIndex, actIndex, a, members) {
       ondragover="event.preventDefault();"
       ondrop="activityDrop(event,'${trip.id}',${dayIndex},${blockIndex},${actIndex})">
       <span class="activity-handle" title="Drag to reorder">${lucide('grip-vertical', 14)}</span>
-      <div class="activity-thumb" style="background:${TRIP_THUMB};">
+      <div class="activity-thumb" style="background:${bg};">
         <span class="activity-badge">${dayIndex + 1}</span>
-        ${a.icon}
+        ${hasPhotoBg(bg) ? '' : a.icon}
       </div>
       <div class="activity-body">
         <div class="activity-title-row">
@@ -3094,7 +3222,7 @@ function activityHTML(trip, dayIndex, blockIndex, actIndex, a, members) {
         <div class="activity-desc">${a.desc}</div>
       </div>
       <div class="avatar-stack activity-avatars">
-        ${avatarMembers.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+        ${avatarMembers.map(stackAvatarHTML).join('')}
       </div>
       <span class="activity-trash" title="Remove" onclick="event.stopPropagation(); removeActivity('${trip.id}',${dayIndex},${blockIndex},${actIndex})">${lucide('trash-2', 14)}</span>
     </div>`;
@@ -3134,10 +3262,11 @@ function deriveDayTags(day, index, totalDays) {
 }
 
 function stayCardHTML(trip) {
+  const bg = tripBg(trip);
   return `
     <div class="activity activity-stay" onclick="openStayModal('${trip.id}')">
       <span class="activity-handle" style="visibility:hidden;">${lucide('grip-vertical', 14)}</span>
-      <div class="activity-thumb" style="background:${TRIP_THUMB};">🛏</div>
+      <div class="activity-thumb" style="background:${bg};">${hasPhotoBg(bg) ? '' : '🛏'}</div>
       <div class="activity-body">
         <div class="activity-title-row">
           <span class="activity-title">${trip.name} Central Hotel</span>
@@ -3145,7 +3274,7 @@ function stayCardHTML(trip) {
         <div class="activity-desc">Staying here tonight</div>
       </div>
       <div class="avatar-stack activity-avatars">
-        ${trip.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+        ${trip.members.map(stackAvatarHTML).join('')}
       </div>
     </div>`;
 }
@@ -3240,7 +3369,7 @@ function tripUpdatesHTML(trip) {
   return `<div class="friend-activity-list">
     ${updates.map(a => `
       <div class="friend-activity-item">
-        <div class="friend-avatar" style="background:${a.friend.color};">${a.friend.initial}</div>
+        ${friendAvatarHTML(a.friend)}
         <div style="flex:1;min-width:0;">
           <div class="friend-activity-text"><b>${a.friend.name}</b> ${a.action} <b>${a.tripName}</b></div>
           <div class="friend-activity-time">${a.time}</div>
@@ -3400,7 +3529,7 @@ function locationModalHTML(loc) {
   const category = loc.category || 'Place';
   return `
     <div class="loc-modal-hero" style="background:${loc.gradient};">
-      <span>${loc.icon || '📍'}</span>
+      ${hasPhotoBg(loc.gradient) ? '' : `<span>${loc.icon || '📍'}</span>`}
       <button class="loc-modal-close" onclick="closeLocationModal()">${lucide('x', 16)}</button>
     </div>
     <div class="loc-modal-body">
@@ -3431,7 +3560,7 @@ function locationModalHTML(loc) {
       <div class="loc-modal-avatars">
         <span class="loc-modal-avatars-label">Going:</span>
         <div class="avatar-stack">
-          ${loc.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+          ${loc.members.map(stackAvatarHTML).join('')}
         </div>
       </div>` : ''}
     </div>`;
@@ -3460,7 +3589,7 @@ function openActivityModal(tripId, dayIndex, blockIndex, actIndex) {
     desc: a.desc,
     category: ACTIVITY_TAG_MAP[a.icon] || 'Place',
     address: `${trip.name}, ${trip.country}`,
-    gradient: tripBg(trip),
+    gradient: locBgForActivity(trip, a.title),
     members: a.members || trip.members,
   });
 }
@@ -3491,7 +3620,7 @@ function openPinModal(tripId, pinIndex) {
     desc: matched ? matched.desc : `Explore ${p.label}, one of the highlights of your ${trip.name} trip.`,
     category: ACTIVITY_TAG_MAP[matched ? matched.icon : p.icon] || 'Place',
     address: `${trip.name}, ${trip.country}`,
-    gradient: tripBg(trip),
+    gradient: locBg(p.label, trip),
     members: trip.members,
   });
 }
@@ -3530,7 +3659,7 @@ function reminderBannerHTML(notBooked, label) {
   return `
     <div class="reminder-banner">
       <div class="avatar-stack">
-        ${notBooked.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+        ${notBooked.map(stackAvatarHTML).join('')}
       </div>
       <span class="reminder-banner-text">${label}</span>
       <button class="remind-btn" onclick="alert('Reminder sent!')">Send reminder</button>
@@ -3548,7 +3677,7 @@ function moreOptionsBannerHTML(label) {
 function bookingCardHTML(opts) {
   const avatars = opts.avatars && opts.avatars.length ? `
     <div class="avatar-stack">
-      ${opts.avatars.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+      ${opts.avatars.map(stackAvatarHTML).join('')}
     </div>` : '';
   return `
     <div class="booking-card">
@@ -3627,7 +3756,7 @@ function financeRowHTML(e) {
         <div class="finance-row-title">${e.title}</div>
         <div class="finance-row-meta">${e.date ? e.date + ' · ' : ''}Paid by ${e.payer.name.replace(' (You)', '')}</div>
       </div>
-      <div class="avatar-stack" style="margin-right:2px;"><div class="stack-avatar" style="background:${e.payer.color};${e.payer.textColor ? 'color:'+e.payer.textColor+';' : ''}" title="${e.payer.name}">${e.payer.initial}</div></div>
+      <div class="avatar-stack" style="margin-right:2px;">${stackAvatarHTML(e.payer)}</div>
       <div class="finance-row-amount">$${e.amount.toLocaleString()}</div>
     </div>`;
 }
@@ -3691,7 +3820,7 @@ function renderStep(step, animate, openItin) {
     msgs.style.display = 'none';
     inputArea.style.display = 'none';
     activeChatId = null;
-    headerTitle.textContent = 'New Chat';
+    headerTitle.textContent = 'Discover';
     renderNav();
   }
   else if (step === 1) {
@@ -3888,9 +4017,9 @@ const CHATS = [
 let activeChatId = null;
 
 function getChatTitle() {
-  if (!activeChatId) return 'New Chat';
+  if (!activeChatId) return 'Discover';
   const chat = CHATS.find(c => c.id === activeChatId);
-  return chat ? chat.name : 'New Chat';
+  return chat ? chat.name : 'Discover';
 }
 
 function chatTripCardsHTML(tripIds) {
@@ -3943,14 +4072,12 @@ document.addEventListener('click', () => closeTripIdeasMenu());
 
 function renderNav() {
   const chatChildren = CHATS.map(c =>
-    `<div class="nav-child ${currentView === 'chat' && c.id === activeChatId ? 'active' : ''}" onclick="selectChat('${c.id}', event)"><span class="nav-label">${c.name}</span></div>`
+    `<div class="nav-child ${currentView === 'chat' && c.id === activeChatId ? 'active' : ''}" onclick="selectChat('${c.id}', event)"><span class="nav-child-icon">${lucide('message-square',14)}</span><span class="nav-label">${c.name}</span></div>`
   ).join('');
-  const newChatActive = currentView === 'chat' && !activeChatId;
   const navHTML = `
     <div class="nav-item ${currentView === 'home' ? 'active' : ''}" onclick="openHomeView()"><span class="nav-icon">${lucide('home',18)}</span><span class="nav-label">Home</span></div>
-    <div class="nav-item" onclick="resetFlow()"><span class="nav-icon">${lucide('message-square',18)}</span><span class="nav-label">Chat</span><span class="nav-arrow">${lucide('chevron-down',14)}</span></div>
+    <div class="nav-item ${currentView === 'chat' && !activeChatId ? 'active' : ''}" onclick="resetFlow()"><span class="nav-icon">${lucide('search',18)}</span><span class="nav-label">Discover</span><span class="nav-arrow">${lucide('chevron-down',14)}</span></div>
     <div class="nav-children">
-      <button class="nav-new-chat ${newChatActive ? 'active' : ''}" onclick="resetFlow()"><span class="nav-icon" style="width:14px;">${lucide('plus',14)}</span><span class="nav-label">New chat</span></button>
       ${chatChildren}
     </div>
     <div class="nav-item ${currentView === 'trips' ? 'active' : ''}" onclick="openTripsView()"><span class="nav-icon">${lucide('bookmark',18)}</span><span class="nav-label">Saved trips</span></div>
@@ -3960,6 +4087,16 @@ function renderNav() {
   document.getElementById('navSection').innerHTML = navHTML;
   const mobileNav = document.getElementById('mobileNavSection');
   if (mobileNav) mobileNav.innerHTML = navHTML;
+}
+
+function renderUserFooter() {
+  document.querySelectorAll('.user-avatar').forEach(el => {
+    el.classList.add('avatar-tt');
+    el.innerHTML = ME.initial + avatarTooltipHTML(ME);
+  });
+  document.querySelectorAll('.user-level-badge').forEach(el => {
+    el.textContent = levelLabel(ME.level);
+  });
 }
 
 function selectChat(chatId, e) {
@@ -4037,8 +4174,11 @@ function leaderboardHTML() {
   return LEADERBOARD.map((p, i) => `
     <div class="leaderboard-row ${p.isMe ? 'me' : ''}">
       <span class="leaderboard-rank">${i + 1}</span>
-      <div class="leaderboard-avatar" style="background:${p.color};${p.textColor ? 'color:'+p.textColor+';' : ''}">${p.initial}</div>
-      <span class="leaderboard-name">${p.name}</span>
+      <div class="leaderboard-avatar avatar-tt" style="background:${p.color};${p.textColor ? 'color:'+p.textColor+';' : ''}">${p.initial}${avatarTooltipHTML(p)}</div>
+      <div class="leaderboard-name-col">
+        <span class="leaderboard-name">${p.name}</span>
+        ${p.level ? `<span class="leaderboard-level">${levelLabel(p.level)}</span>` : ''}
+      </div>
       <div class="leaderboard-bar-track"><div class="leaderboard-bar-fill" style="width:${(p.count / max) * 100}%;"></div></div>
       <span class="leaderboard-count">${p.count}</span>
     </div>
@@ -4057,7 +4197,7 @@ function recommendedCarouselHTML() {
           <div class="trip-card-name">${t.name}</div>
           <div class="trip-card-meta">${t.country}</div>
           <div class="carousel-card-visitor">
-            <div class="friend-avatar" style="background:${f ? f.color : 'var(--color-gray-300)'};">${f ? f.initial : v.friendName.charAt(0)}</div>
+            ${f ? friendAvatarHTML(f) : `<div class="friend-avatar" style="background:var(--color-gray-300);">${v.friendName.charAt(0)}</div>`}
             <span>${v.friendName}</span>
           </div>
         </div>
@@ -4077,7 +4217,7 @@ function latestTripsCarouselHTML() {
           <div class="trip-card-name">${t.name}</div>
           <div class="trip-card-meta">${t.country} · ${t.dates}</div>
           <div class="avatar-stack trip-card-avatars">
-            ${t.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+            ${t.members.map(stackAvatarHTML).join('')}
           </div>
         </div>
       </div>`;
@@ -4105,14 +4245,12 @@ function homeHTML() {
     </div>
 
     <div class="home-section">
-      <div class="home-section-title">Latest trips</div>
-      <div class="home-section-sub">Pick up where you left off</div>
+      <div class="home-section-title">Your latest trips</div>
       ${latestTripsCarouselHTML()}
     </div>
 
     <div class="home-section">
       <div class="home-section-title">Your travel status</div>
-      <div class="home-section-sub">Trips taken this year and how you stack up against friends</div>
       <div class="status-grid">
         <div class="stat-card">
           <div class="stat-card-title">Trips in 2026</div>
@@ -4129,13 +4267,11 @@ function homeHTML() {
 
     <div class="home-section">
       <div class="home-section-title">New trips for you</div>
-      <div class="home-section-sub">A few places we think you'd love next</div>
       <div class="home-map-card" id="homeMap"></div>
     </div>
 
     <div class="home-section">
       <div class="home-section-title">Your friends also visited</div>
-      <div class="home-section-sub">See where your travel circle has been</div>
       ${recommendedCarouselHTML()}
     </div>
   `;
@@ -4203,7 +4339,7 @@ function tripsHTML() {
               <div class="trip-card-meta">${t.country}</div>
               <div class="trip-card-dates">${lucide('calendar',12)} ${t.dates}</div>
               <div class="avatar-stack trip-card-avatars">
-                ${t.members.map(m => `<div class="stack-avatar" style="background:${m.color};${m.textColor ? 'color:'+m.textColor+';' : ''}" title="${m.name}">${m.initial}</div>`).join('')}
+                ${t.members.map(stackAvatarHTML).join('')}
               </div>
             </div>
           </div>`;
@@ -4235,8 +4371,8 @@ function friendsHTML() {
     <div class="home-section-title">Your friends</div>
     <div class="friends-avatar-carousel">
       ${FRIENDS.map(f => `
-        <div class="friends-avatar-item" title="${f.name}">
-          <div class="friend-avatar" style="background:${f.color};width:48px;height:48px;font-size:16px;">${f.initial}</div>
+        <div class="friends-avatar-item">
+          ${friendAvatarHTML(f, 'width:48px;height:48px;font-size:16px;')}
           <span>${f.name.split(' ')[0]}</span>
         </div>
       `).join('')}
@@ -4246,7 +4382,7 @@ function friendsHTML() {
     <div class="friend-activity-list">
       ${FRIEND_ACTIVITY.map(a => `
         <div class="friend-activity-item" ${a.tripId ? `onclick="showItinerary('${a.tripId}')" style="cursor:pointer;"` : ''}>
-          <div class="friend-avatar" style="background:${a.friend.color};">${a.friend.initial}</div>
+          ${friendAvatarHTML(a.friend)}
           <div style="flex:1;min-width:0;">
             <div class="friend-activity-text"><b>${a.friend.name}</b> ${a.action} <b>${a.tripName}</b></div>
             <div class="friend-activity-time">${a.time}</div>
@@ -4299,8 +4435,9 @@ function renderMapPins(trip) {
   trip.pins.forEach((p, pinIndex) => {
     const isSelected = selectedDayIndex !== null && p.day === selectedDayIndex;
     const isDimmed = selectedDayIndex !== null && p.day !== selectedDayIndex;
+    const pinBg = locBg(p.label, trip);
     const html = isSelected
-      ? `<div class="map-pin-marker"><div class="map-pin-squarcle" style="background:${tripBg(trip)};"><span class="map-pin-badge">${p.day + 1}</span>${p.icon || p.label.charAt(0)}</div><div class="map-pin-label">${p.label}</div></div>`
+      ? `<div class="map-pin-marker"><div class="map-pin-squarcle" style="background:${pinBg};"><span class="map-pin-badge">${p.day + 1}</span>${hasPhotoBg(pinBg) ? '' : (p.icon || p.label.charAt(0))}</div><div class="map-pin-label">${p.label}</div></div>`
       : `<div class="map-pin-marker${isDimmed ? ' dimmed' : ''}"><div class="map-pin-dot"><span>${p.day + 1}</span></div><div class="map-pin-label">${p.label}</div></div>`;
     const icon = L.divIcon({
       className: '',
@@ -4427,6 +4564,7 @@ function copyShareLink() {
 }
 
 renderNav();
+renderUserFooter();
 renderStep(0, false);
 openHomeView();
 applyResponsiveSidebar();
