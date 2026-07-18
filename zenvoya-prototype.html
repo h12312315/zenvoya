@@ -1985,6 +1985,432 @@ body {
 .loc-modal-avatars { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
 .loc-modal-avatars-label { font-size: 12px; color: var(--color-gray-500); }
 
+/* ===================== BOOKING RESULTS (in chat) ===================== */
+.result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 0;
+  animation: messageIn 0.35s ease;
+}
+
+.result-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  padding: 2px 0 2px;
+}
+.result-summary-sep { color: var(--color-gray-300); font-weight: 400; }
+.result-summary-meta { font-size: 13px; font-weight: 500; color: var(--color-gray-500); }
+
+.result-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.15s;
+}
+.result-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  border-color: var(--color-primary);
+}
+
+/* Flight result card */
+.flight-card { padding: 12px 16px; }
+.flight-card-legs { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+
+.flight-leg { display: flex; align-items: center; gap: 12px; }
+
+.airline-tile {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-gray-200);
+  background: var(--color-white);
+  color: var(--color-gray-700);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.flight-leg-body { flex: 1; min-width: 0; }
+
+.flight-leg-times {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.flight-leg-times .arrow { color: var(--color-gray-400); font-weight: 500; }
+.flight-leg-plus { font-size: 11px; font-weight: 600; color: var(--color-error); }
+
+.flight-leg-meta {
+  font-size: 12px;
+  color: var(--color-gray-500);
+  margin-top: 2px;
+}
+.flight-leg-meta .sep { color: var(--color-gray-300); margin: 0 5px; }
+
+.result-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  flex-shrink: 0;
+  text-align: right;
+}
+.result-price span {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-gray-400);
+  margin-top: 1px;
+}
+
+/* Stay result card */
+.stay-card { padding: 0; overflow: hidden; align-items: stretch; gap: 0; }
+
+.stay-card-photo {
+  width: 132px;
+  flex-shrink: 0;
+  background: var(--color-gray-100) center/cover no-repeat;
+}
+
+.stay-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+}
+.stay-card-info { flex: 1; min-width: 0; }
+.stay-card-name { font-size: 15px; font-weight: 600; color: var(--color-gray-900); }
+
+.stay-score-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+
+.stay-score {
+  min-width: 34px;
+  height: 26px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stay-score-label { font-size: 13px; font-weight: 600; color: var(--color-gray-800); }
+.stay-score-reviews { font-size: 12px; color: var(--color-gray-500); }
+.stay-card-refund { font-size: 12px; font-weight: 600; color: var(--color-success); margin-top: 6px; }
+.stay-card-dist { font-size: 12px; color: var(--color-gray-500); margin-top: 2px; }
+
+/* ===================== BOOKING DETAIL MODAL ===================== */
+.book-modal-box {
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+}
+
+.book-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 0;
+}
+
+.book-modal-title { font-size: 20px; font-weight: 700; color: var(--color-gray-900); }
+.book-modal-price { font-size: 20px; font-weight: 700; color: var(--color-gray-900); white-space: nowrap; }
+.book-modal-price span { display: block; font-size: 11px; font-weight: 500; color: var(--color-gray-400); text-align: right; }
+
+.book-modal-actions { display: flex; gap: 8px; padding: 14px 20px 16px; border-bottom: 1px solid var(--color-gray-200); }
+
+.book-modal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-gray-200);
+  background: var(--color-gray-100);
+  color: var(--color-gray-800);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.book-modal-btn:hover { background: var(--color-gray-200); }
+
+.book-modal-btn.primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+  flex: 1;
+}
+.book-modal-btn.primary:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+
+.book-modal-body { padding: 4px 20px 20px; overflow-y: auto; flex: 1; }
+
+/* Flight itinerary timeline */
+.itin-leg { padding: 16px 0; }
+.itin-leg + .itin-leg { border-top: 1px solid var(--color-gray-200); }
+
+.itin-leg-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.itin-leg-head-title { font-size: 15px; font-weight: 700; color: var(--color-gray-900); }
+.itin-leg-head-title span { font-weight: 500; color: var(--color-gray-600); }
+
+.itin-seg { padding-left: 4px; }
+
+.itin-stop {
+  display: flex;
+  gap: 12px;
+  position: relative;
+}
+.itin-stop-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--color-gray-300);
+  background: var(--color-white);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.itin-stop-body { padding-bottom: 4px; }
+.itin-stop-time { font-size: 14px; font-weight: 600; color: var(--color-gray-900); }
+.itin-stop-place { font-size: 13px; color: var(--color-gray-600); margin-top: 1px; }
+
+.itin-travel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-gray-500);
+  font-size: 12px;
+  padding: 8px 0;
+}
+.itin-travel-rail { width: 9px; display: flex; justify-content: center; flex-shrink: 0; }
+.itin-travel-rail div { width: 1px; height: 100%; min-height: 20px; background: var(--color-gray-200); }
+.itin-travel-text { display: flex; align-items: center; gap: 6px; }
+
+.itin-seg-meta { font-size: 12px; color: var(--color-gray-500); padding: 6px 0 0 21px; }
+.itin-seg-operator { font-size: 12px; color: var(--color-gray-400); padding: 2px 0 0 21px; }
+
+.itin-layover {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--color-gray-100);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  margin: 12px 0;
+  font-size: 12px;
+  color: var(--color-gray-600);
+}
+.itin-layover-left { display: flex; align-items: center; gap: 7px; }
+.itin-layover-left b { font-weight: 600; color: var(--color-gray-800); }
+.itin-layover-code { font-weight: 600; color: var(--color-gray-500); }
+
+/* Stay detail modal */
+.stay-modal-photos { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 4px 0 16px; }
+.stay-modal-photo { height: 160px; border-radius: var(--radius-md); background: var(--color-gray-100) center/cover no-repeat; }
+
+.stay-modal-facts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  padding: 4px 0 14px;
+  font-size: 13px;
+  color: var(--color-gray-600);
+}
+.stay-modal-fact { display: flex; align-items: center; gap: 6px; }
+.stay-modal-fact svg { color: var(--color-gray-400); flex-shrink: 0; }
+
+.stay-modal-map { height: 150px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 12px; background: var(--color-gray-100); }
+
+.stay-modal-amenities { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+.stay-modal-amenity { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-gray-700); }
+.stay-modal-amenity svg { color: var(--color-gray-400); flex-shrink: 0; }
+
+/* ===================== BOOK VIEW (search form) ===================== */
+#bookView { display: none; flex-direction: column; flex: 1; min-height: 0; }
+#bookView.active { display: flex; }
+
+.book-segmented { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+
+.book-segment {
+  padding: 9px 16px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: none;
+  color: var(--color-gray-600);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.book-segment:hover { background: var(--color-gray-100); }
+.book-segment.active { background: var(--color-primary); color: var(--color-white); }
+
+.book-form-card {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  background: var(--color-white);
+  overflow: hidden;
+}
+
+.book-form-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+.book-form-header h2 { font-size: 22px; font-weight: 700; color: var(--color-gray-900); }
+
+.book-form-body { padding: 20px; }
+
+.book-form-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.book-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray-800);
+}
+.book-stepper svg { color: var(--color-gray-500); }
+.book-stepper-dot { color: var(--color-gray-300); }
+
+.book-stepper-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--color-gray-200);
+  background: var(--color-white);
+  color: var(--color-gray-600);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.book-stepper-btn:hover { background: var(--color-gray-100); }
+.book-stepper-btn:disabled { color: var(--color-gray-300); cursor: default; background: var(--color-white); }
+
+.book-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.book-field-row { display: flex; gap: 10px; }
+.book-field-row > * { flex: 1; min-width: 0; }
+
+.book-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 0 14px;
+  height: 52px;
+  background: var(--color-white);
+  transition: border-color 0.15s;
+}
+.book-field:focus-within { border-color: var(--color-primary); }
+.book-field svg { color: var(--color-gray-500); flex-shrink: 0; }
+
+.book-field input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 14px;
+  font-family: var(--font-body);
+  color: var(--color-gray-900);
+  height: 100%;
+}
+.book-field input::placeholder { color: var(--color-gray-400); }
+
+.book-field-split { display: flex; align-items: center; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); height: 52px; }
+.book-field-split:focus-within { border-color: var(--color-primary); }
+.book-field-split .book-field { border: none; height: 100%; flex: 1; min-width: 0; }
+.book-field-split .book-field:focus-within { border: none; }
+.book-field-split-divider { width: 1px; align-self: stretch; background: var(--color-gray-200); margin: 8px 0; flex-shrink: 0; }
+
+.book-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 9px 16px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--color-gray-100);
+  color: var(--color-gray-800);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background 0.15s;
+}
+.book-add-btn:hover { background: var(--color-gray-200); }
+
+.book-search-btn {
+  width: 100%;
+  padding: 15px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.book-search-btn:hover { background: var(--color-primary-hover); }
+.book-search-btn:disabled { background: var(--color-gray-300); cursor: default; }
+
+.book-form-hint { font-size: 12px; color: var(--color-gray-500); text-align: center; margin-top: 12px; }
+
+@media (max-width: 768px) {
+  .book-modal-box { width: 100%; }
+  .stay-card-photo { width: 104px; }
+  .book-field-row { flex-direction: column; }
+  .stay-modal-amenities { grid-template-columns: 1fr; }
+}
+
 /* ===================== HOME VIEW ===================== */
 #homeView { display: none; flex-direction: column; flex: 1; min-height: 0; }
 #homeView.active { display: flex; }
@@ -2338,12 +2764,12 @@ body {
                 <div class="suggestion-card-title">Suggest a trip</div>
                 <div class="suggestion-card-desc">Get personalized destination ideas based on your preferences</div>
               </div>
-              <div class="suggestion-card" onclick="advanceStep()">
+              <div class="suggestion-card" onclick="startBookingChat('flights')">
                 <div class="suggestion-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
                 <div class="suggestion-card-title">Book flights</div>
                 <div class="suggestion-card-desc">Find and compare the best flight deals for your trip</div>
               </div>
-              <div class="suggestion-card" onclick="advanceStep()">
+              <div class="suggestion-card" onclick="startBookingChat('stays')">
                 <div class="suggestion-card-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M12 15a1 1 0 0 0-1 1v2h2v-2a1 1 0 0 0-1-1"/><path d="M2 20h20"/></svg></div>
                 <div class="suggestion-card-title">Book stays</div>
                 <div class="suggestion-card-desc">Discover hotels, apartments and unique accommodations</div>
@@ -2388,6 +2814,15 @@ body {
         <span class="header-title">Friends</span>
       </header>
       <div class="view-content" id="friendsContent"></div>
+    </div>
+
+    <!-- Book Flights / Stays View -->
+    <div id="bookView">
+      <header class="main-header">
+        <button class="menu-btn" onclick="openMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></button>
+        <span class="header-title">Book flights / stays</span>
+      </header>
+      <div class="view-content" id="bookContent"></div>
     </div>
 
     <!-- Mobile Itinerary View -->
@@ -2458,6 +2893,11 @@ body {
   <div class="modal-box loc-modal-box" id="locationModalBox"></div>
 </div>
 
+<!-- Flight / Stay Detail Modal -->
+<div class="modal-overlay" id="bookModalOverlay" onclick="closeBookModalOnOverlay(event)">
+  <div class="modal-box book-modal-box" id="bookModalBox"></div>
+</div>
+
 <script>
 function lucide(name, size) {
   size = size || 18;
@@ -2496,6 +2936,15 @@ function lucide(name, size) {
     'phone': '<path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/>',
     'globe': '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
     'clock': '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    'minus': '<path d="M5 12h14"/>',
+    'user': '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    'wifi': '<path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/>',
+    'wind': '<path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/>',
+    'waves': '<path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>',
+    'dumbbell': '<path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/><path d="m2.5 21.5 1.4-1.4"/><path d="m20.1 3.9 1.4-1.4"/><path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/><path d="m9.6 14.4 4.8-4.8"/>',
+    'circle-parking': '<circle cx="12" cy="12" r="10"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',
+    'utensils': '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
+    'ticket': '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>',
   };
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+icons[name]+'</svg>';
 }
@@ -3735,6 +4184,421 @@ function stayTabHTML(trip) {
   `;
 }
 
+/* ===================== BOOKING — DATA ===================== */
+const BOOK_DESTS = ['Rome', 'Paris', 'Barcelona', 'Tokyo', 'Lisbon', 'Kyoto', 'Santorini', 'Reykjavik'];
+const BOOK_ORIGINS = ['New York', 'San Francisco', 'Chicago', 'Los Angeles', 'London'];
+
+const CITY_AIRPORT = {
+  'New York': 'JFK', 'San Francisco': 'SFO', 'Chicago': 'ORD', 'Los Angeles': 'LAX', 'London': 'LHR',
+  'Rome': 'FCO', 'Paris': 'CDG', 'Barcelona': 'BCN', 'Tokyo': 'NRT',
+  'Lisbon': 'LIS', 'Kyoto': 'KIX', 'Santorini': 'JTR', 'Reykjavik': 'KEF',
+};
+
+const AIRPORT_NAMES = {
+  JFK: 'John F. Kennedy International Airport', SFO: 'San Francisco International Airport',
+  ORD: "O'Hare International Airport", LAX: 'Los Angeles International Airport',
+  FCO: 'Leonardo da Vinci–Fiumicino Airport', CDG: 'Paris Charles de Gaulle Airport',
+  BCN: 'Barcelona El Prat Airport', NRT: 'Narita International Airport',
+  LIS: 'Humberto Delgado Airport', KIX: 'Kansai International Airport',
+  JTR: 'Santorini (Thira) Airport', KEF: 'Keflavík International Airport',
+  LHR: 'London Heathrow Airport', MAD: 'Adolfo Suárez Madrid–Barajas Airport',
+  AMS: 'Amsterdam Airport Schiphol', FRA: 'Frankfurt Airport',
+};
+
+const CITY_SHORT = { 'New York': 'NYC', 'San Francisco': 'SF', 'Los Angeles': 'LA' };
+
+const AIRLINES = [
+  { code: 'AA', name: 'American', operator: 'Republic Airways as American Eagle' },
+  { code: 'AZ', name: 'ITA Airways' },
+  { code: 'DL', name: 'Delta', operator: 'SkyWest Airlines as Delta Connection' },
+  { code: 'AF', name: 'Air France' },
+  { code: 'UA', name: 'United' },
+  { code: 'BA', name: 'British Airways' },
+];
+
+const AIRCRAFT = ['Embraer 175', 'Airbus A320', 'Boeing 737-800', 'Airbus A330-300', 'Boeing 787-9'];
+const HUB_CODES = ['MAD', 'LHR', 'AMS', 'FRA', 'CDG'];
+
+const STAY_NAMES = [
+  'The Frederick Hotel', 'Casa Lumina', 'The Rowan', 'Hotel Duvall',
+  'Villa Serena', 'The Astor House', 'Maison Verde', 'The Chandler',
+];
+
+const STAY_AMENITIES = [
+  ['wifi', 'Free WiFi'], ['wind', 'Air Conditioning'], ['waves', 'Pool'],
+  ['dumbbell', 'Fitness Center'], ['circle-parking', 'On-site Parking'], ['utensils', 'Restaurant'],
+];
+
+const CITY_PHOTOS = {
+  Rome: ['trastevere', 'colosseum', 'trevi-fountain', 'vatican-museums'],
+  Paris: ['le-marais', 'montmartre', 'saint-germain', 'champs-elysees'],
+  Barcelona: ['el-born-tapas', 'barceloneta-beach', 'park-guell', 'sagrada-familia'],
+  Tokyo: ['omotesando', 'shibuya-crossing', 'shinjuku-golden-gai', 'akihabara'],
+  Lisbon: ['alfama-castle', 'fado-in-alfama', 'pena-palace-sintra', 'vineyard'],
+  Kyoto: ['gion-district', 'arashiyama-bamboo-grove', 'kinkaku-ji', 'fushimi-inari-shrine'],
+  Santorini: ['oia-village', 'caldera-viewpoint', 'red-beach', 'vineyard'],
+  Reykjavik: ['northern-lights-spot', 'blue-lagoon', 'gullfoss-waterfall', 'keflavik-airport'],
+};
+
+const CITY_STREETS = {
+  Rome: ['Via del Corso', 'Via Nazionale', 'Via Cavour'],
+  Paris: ['Rue de Rivoli', 'Boulevard Saint-Germain', 'Rue Saint-Honoré'],
+  Barcelona: ["Av. del Marquès de l'Argentera", 'Carrer de Balmes', 'Passeig de Gràcia'],
+  Tokyo: ['Omotesando', 'Chuo-dori', 'Meiji-dori'],
+  Lisbon: ['Rua Augusta', 'Avenida da Liberdade', 'Rua Garrett'],
+  Kyoto: ['Shijo-dori', 'Kawaramachi-dori', 'Karasuma-dori'],
+  Santorini: ['Oia Main Street', 'Fira Central', 'Caldera Road'],
+  Reykjavik: ['Laugavegur', 'Skólavörðustígur', 'Austurstræti'],
+};
+
+const CITY_DIAL = {
+  Rome: '+39', Paris: '+33', Barcelona: '+34', Tokyo: '+81',
+  Lisbon: '+351', Kyoto: '+81', Santorini: '+30', Reykjavik: '+354',
+};
+
+// hashStr is a plain rolling hash, so seeds differing only in a trailing index
+// ("…#0", "…#1") hash to consecutive integers and every % bucket below would
+// march in lockstep. Avalanche the bits so generated options look unrelated.
+function seedHash(str) {
+  let n = hashStr(str);
+  n = (n ^ 61) ^ (n >>> 16);
+  n = (n + (n << 3)) >>> 0;
+  n = (n ^ (n >>> 4)) >>> 0;
+  n = Math.imul(n, 0x27d4eb2d) >>> 0;
+  return (n ^ (n >>> 15)) >>> 0;
+}
+
+function cityShort(city) { return CITY_SHORT[city] || city; }
+function airportName(code) { return `${AIRPORT_NAMES[code] || code} (${code})`; }
+function bookTrip(dest) { return TRIPS[(dest || '').toLowerCase()] || null; }
+
+function bookDates(dest) {
+  const trip = bookTrip(dest);
+  return trip ? trip.dates : 'Sep 12 – Sep 16';
+}
+
+function bookDayLabel(dest, last) {
+  const trip = bookTrip(dest);
+  if (!trip || !trip.days.length) return '';
+  return (last ? trip.days[trip.days.length - 1] : trip.days[0]).date;
+}
+
+function bookNights(dest) {
+  const trip = bookTrip(dest);
+  return trip ? Math.max(trip.days.length - 1, 1) : 4;
+}
+
+function fmtTime(mins) {
+  const m = ((mins % 1440) + 1440) % 1440;
+  const ap = Math.floor(m / 60) >= 12 ? 'pm' : 'am';
+  const h = Math.floor(m / 60) % 12 || 12;
+  return `${h}:${String(m % 60).padStart(2, '0')}${ap}`;
+}
+
+function fmtDur(mins) {
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return m ? `${h}h ${m}m` : `${h}h`;
+}
+
+function stopsLabel(stops) {
+  return stops === 0 ? 'Nonstop' : stops === 1 ? '1 stop' : `${stops} stops`;
+}
+
+function dayOffset(leg) { return Math.floor(leg.arrMin / 1440); }
+
+/* ===================== BOOKING — GENERATORS ===================== */
+function makeFlightLeg(fromCity, toCity, seed, title, dateLabel) {
+  const h = seedHash(seed);
+  const airline = AIRLINES[h % AIRLINES.length];
+  const stops = h % 3;
+  const depMin = 6 * 60 + (h % 15) * 60 + ((h >> 4) % 2) * 30;
+  const layoverMin = 75 + (h % 4) * 15;
+  const airMin = 7 * 60 + (h % 6) * 60 + ((h >> 2) % 2) * 30;
+  const fromCode = CITY_AIRPORT[fromCity], toCode = CITY_AIRPORT[toCity];
+
+  const hubs = HUB_CODES.filter(c => c !== fromCode && c !== toCode);
+  const codes = [fromCode];
+  for (let i = 0; i < stops; i++) codes.push(hubs[(h + i * 3) % hubs.length]);
+  codes.push(toCode);
+
+  const segMin = Math.round(airMin / (stops + 1));
+  const segs = [];
+  let t = depMin;
+  for (let i = 0; i <= stops; i++) {
+    const sh = seedHash(`${seed}|${i}`);
+    const dur = i === stops ? airMin - segMin * stops : segMin;
+    segs.push({
+      from: codes[i], to: codes[i + 1],
+      depMin: t, arrMin: t + dur, durMin: dur,
+      flightNo: `${airline.code} ${1000 + (sh % 8000)}`,
+      aircraft: AIRCRAFT[sh % AIRCRAFT.length],
+      cabin: 'Economy',
+    });
+    t += dur + layoverMin;
+  }
+
+  return {
+    airline, title, dateLabel, stops, segs, layoverMin,
+    from: fromCode, to: toCode,
+    depMin, arrMin: depMin + airMin + stops * layoverMin,
+    durMin: airMin + stops * layoverMin,
+  };
+}
+
+function generateFlights(origin, dest) {
+  return [0, 1, 2, 3].map(i => {
+    const seed = `${origin}>${dest}#${i}`;
+    return {
+      origin, dest,
+      price: 480 + (seedHash(seed) % 12) * 60,
+      out: makeFlightLeg(origin, dest, `${seed}:out`, 'Departure', bookDayLabel(dest, false)),
+      back: makeFlightLeg(dest, origin, `${seed}:ret`, 'Return', bookDayLabel(dest, true)),
+    };
+  });
+}
+
+function stayScoreLabel(score) {
+  return score >= 9.2 ? 'Exceptional' : score >= 8.8 ? 'Excellent' : score >= 8.3 ? 'Very good' : 'Good';
+}
+
+function generateStays(dest) {
+  const trip = bookTrip(dest);
+  const nights = bookNights(dest);
+  const photos = CITY_PHOTOS[dest] || ['vineyard'];
+  const streets = CITY_STREETS[dest] || ['Main Street'];
+  return [0, 1, 2, 3].map(i => {
+    const h = seedHash(`${dest}~stay#${i}`);
+    const score = 8 + (h % 15) / 10;
+    return {
+      dest, nights, guests: 2,
+      name: STAY_NAMES[(h + i) % STAY_NAMES.length],
+      score: score.toFixed(1),
+      scoreLabel: stayScoreLabel(score),
+      reviews: 400 + (h % 2200),
+      refundable: h % 4 !== 0,
+      dist: (0.1 + (h % 20) / 20).toFixed(2),
+      price: 180 * nights + (h % 10) * 45,
+      photos: [photos[i % photos.length], photos[(i + 1) % photos.length]],
+      address: `${100 + (h % 800)} ${streets[h % streets.length]}, ${dest}${trip ? ', ' + trip.country : ''}`,
+      phone: `${CITY_DIAL[dest] || '+1'} ${100 + (h % 800)} ${1000 + (h % 9000)}`,
+      amenities: STAY_AMENITIES.filter((_, k) => k < 2 || ((h >> k) & 1)),
+      lat: trip ? trip.center[0] + ((h % 20) - 10) / 500 : 41.89,
+      lng: trip ? trip.center[1] + (((h >> 3) % 20) - 10) / 500 : 12.48,
+      zoom: trip ? trip.zoom : 13,
+    };
+  });
+}
+
+/* ===================== BOOKING — RESULT CARDS ===================== */
+function flightLegHTML(leg) {
+  const plus = dayOffset(leg);
+  return `
+    <div class="flight-leg">
+      <div class="airline-tile">${leg.airline.code}</div>
+      <div class="flight-leg-body">
+        <div class="flight-leg-times">
+          <span>${fmtTime(leg.depMin)}</span>
+          <span class="arrow">→</span>
+          <span>${fmtTime(leg.arrMin)}</span>
+          ${plus ? `<span class="flight-leg-plus">+${plus}</span>` : ''}
+        </div>
+        <div class="flight-leg-meta">${leg.from} – ${leg.to}<span class="sep">·</span>${fmtDur(leg.durMin)}<span class="sep">·</span>${stopsLabel(leg.stops)}</div>
+      </div>
+    </div>`;
+}
+
+function resultSummaryHTML(title, meta) {
+  return `
+    <div class="result-summary">
+      <span>${title}</span>
+      <span class="result-summary-sep">•</span>
+      <span class="result-summary-meta">${meta}</span>
+    </div>`;
+}
+
+function flightResultsHTML() {
+  const f = bookingFlow;
+  return `
+    <div class="result-list">
+      ${resultSummaryHTML(`${cityShort(f.origin)} → ${f.dest}`, bookDates(f.dest))}
+      ${f.flights.map((r, i) => `
+        <div class="result-card flight-card" onclick="openFlightModal(${i})">
+          <div class="flight-card-legs">
+            ${flightLegHTML(r.out)}
+            ${flightLegHTML(r.back)}
+          </div>
+          <div class="result-price">$${r.price.toLocaleString()}<span>round trip</span></div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function stayResultsHTML() {
+  const f = bookingFlow;
+  return `
+    <div class="result-list">
+      ${resultSummaryHTML(f.dest, `${bookDates(f.dest)} · ${bookNights(f.dest)} nights`)}
+      ${f.stays.map((s, i) => `
+        <div class="result-card stay-card" onclick="openStayResultModal(${i})">
+          <div class="stay-card-photo" style="background-image:url('images/locations/${s.photos[0]}.jpg');"></div>
+          <div class="stay-card-body">
+            <div class="stay-card-info">
+              <div class="stay-card-name">${s.name}</div>
+              <div class="stay-score-row">
+                <div class="stay-score">${s.score}</div>
+                <div>
+                  <div class="stay-score-label">${s.scoreLabel}</div>
+                  <div class="stay-score-reviews">${s.reviews.toLocaleString()} reviews</div>
+                </div>
+              </div>
+              ${s.refundable ? '<div class="stay-card-refund">Refundable</div>' : ''}
+              <div class="stay-card-dist">${s.dist} mi from center</div>
+            </div>
+            <div class="result-price">$${s.price.toLocaleString()}<span>${s.nights} nights</span></div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+/* ===================== BOOKING — DETAIL MODALS ===================== */
+function flightLegDetailHTML(leg) {
+  const rows = leg.segs.map((seg, i) => `
+    <div class="itin-stop">
+      <div class="itin-stop-dot"></div>
+      <div class="itin-stop-body">
+        <div class="itin-stop-time">${fmtTime(seg.depMin)}</div>
+        <div class="itin-stop-place">${airportName(seg.from)}</div>
+      </div>
+    </div>
+    <div class="itin-travel">
+      <div class="itin-travel-rail"><div></div></div>
+      <div class="itin-travel-text">${lucide('plane', 13)} Travel time: ${fmtDur(seg.durMin)}</div>
+    </div>
+    <div class="itin-stop">
+      <div class="itin-stop-dot"></div>
+      <div class="itin-stop-body">
+        <div class="itin-stop-time">${fmtTime(seg.arrMin)}</div>
+        <div class="itin-stop-place">${airportName(seg.to)}</div>
+      </div>
+    </div>
+    <div class="itin-seg-meta">${leg.airline.name} | ${seg.cabin} | ${seg.aircraft} | ${seg.flightNo}</div>
+    ${leg.airline.operator ? `<div class="itin-seg-operator">Plane and crew by ${leg.airline.operator}</div>` : ''}
+    ${i < leg.segs.length - 1 ? `
+      <div class="itin-layover">
+        <div class="itin-layover-left">${lucide('clock', 13)}<span>Layover: <b>${fmtDur(leg.layoverMin)}</b></span></div>
+        <div class="itin-layover-code">${seg.to}</div>
+      </div>` : ''}
+  `).join('');
+
+  return `
+    <div class="itin-leg">
+      <div class="itin-leg-head">
+        <div class="airline-tile">${leg.airline.code}</div>
+        <div class="itin-leg-head-title">${leg.title}: <span>${leg.dateLabel}</span></div>
+      </div>
+      ${rows}
+    </div>`;
+}
+
+function flightModalHTML(r) {
+  return `
+    <div class="book-modal-head">
+      <div class="book-modal-title">${cityShort(r.origin)} → ${r.dest}</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="book-modal-price">$${r.price.toLocaleString()}<span>round trip</span></div>
+        <button class="modal-close" onclick="closeBookModal()">${lucide('x', 16)}</button>
+      </div>
+    </div>
+    <div class="book-modal-actions">
+      <button class="book-modal-btn" onclick="alert('Added to your plan!')">${lucide('bookmark', 16)} Add to plan</button>
+      <button class="book-modal-btn primary" onclick="alert('Opening booking…')">Book ${lucide('chevron-right', 16)}</button>
+    </div>
+    <div class="book-modal-body">
+      ${flightLegDetailHTML(r.out)}
+      ${flightLegDetailHTML(r.back)}
+    </div>`;
+}
+
+function stayModalHTML(s) {
+  return `
+    <div class="book-modal-body" style="padding-top:16px;">
+      <div class="stay-modal-photos">
+        ${s.photos.map(p => `<div class="stay-modal-photo" style="background-image:url('images/locations/${p}.jpg');"></div>`).join('')}
+        <button class="loc-modal-close" onclick="closeBookModal()">${lucide('x', 16)}</button>
+      </div>
+      <div class="book-modal-head" style="padding:0;">
+        <div class="book-modal-title">${s.name}</div>
+        <div class="book-modal-price">$${s.price.toLocaleString()}<span>${s.nights} nights</span></div>
+      </div>
+      <div class="stay-score-row" style="margin-top:10px;">
+        <div class="stay-score">${s.score}</div>
+        <div>
+          <div class="stay-score-label">${s.scoreLabel}</div>
+          <div class="stay-score-reviews">${s.reviews.toLocaleString()} reviews</div>
+        </div>
+      </div>
+      <div class="book-modal-actions" style="padding:14px 0 16px;border-bottom:none;">
+        <button class="book-modal-btn" onclick="alert('Added to your plan!')">${lucide('bookmark', 16)} Add to plan</button>
+        <button class="book-modal-btn primary" onclick="alert('Opening room selection…')">Select room ${lucide('chevron-right', 16)}</button>
+      </div>
+      <div class="stay-modal-facts">
+        <span class="stay-modal-fact">${lucide('user', 15)} ${s.guests} guests</span>
+        <span class="stay-modal-fact">${lucide('bed', 15)} ${s.nights} nights</span>
+        <span class="stay-modal-fact">${lucide('map-pin', 15)} ${s.dist} mi from center</span>
+        <span class="stay-modal-fact">${lucide('dollar-sign', 15)} ${s.refundable ? 'Refundable' : 'Non-refundable'}</span>
+      </div>
+      <div class="loc-modal-section-title" style="margin-top:4px;">Location</div>
+      <div class="stay-modal-map" id="stayModalMap"></div>
+      <div class="loc-modal-row">
+        <span class="loc-modal-row-icon">${lucide('map-pin', 15)}</span>
+        <span>${s.address}</span>
+      </div>
+      <div class="loc-modal-row">
+        <span class="loc-modal-row-icon">${lucide('phone', 15)}</span>
+        <span>${s.phone}</span>
+      </div>
+      <div class="loc-modal-section-title">Amenities</div>
+      <div class="stay-modal-amenities">
+        ${s.amenities.map(([icon, label]) => `<div class="stay-modal-amenity">${lucide(icon, 16)} ${label}</div>`).join('')}
+      </div>
+    </div>`;
+}
+
+let stayModalMap = null;
+
+function openFlightModal(idx) {
+  const r = bookingFlow && bookingFlow.flights && bookingFlow.flights[idx];
+  if (!r) return;
+  document.getElementById('bookModalBox').innerHTML = flightModalHTML(r);
+  document.getElementById('bookModalOverlay').classList.add('active');
+}
+
+function openStayResultModal(idx) {
+  const s = bookingFlow && bookingFlow.stays && bookingFlow.stays[idx];
+  if (!s) return;
+  document.getElementById('bookModalBox').innerHTML = stayModalHTML(s);
+  document.getElementById('bookModalOverlay').classList.add('active');
+  setTimeout(() => {
+    const el = document.getElementById('stayModalMap');
+    if (!el) return;
+    if (stayModalMap) { stayModalMap.remove(); stayModalMap = null; }
+    stayModalMap = L.map(el, { zoomControl: false }).setView([s.lat, s.lng], s.zoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+    }).addTo(stayModalMap);
+    L.marker([s.lat, s.lng]).addTo(stayModalMap).bindTooltip(s.name);
+  }, 0);
+}
+
+function closeBookModal() {
+  document.getElementById('bookModalOverlay').classList.remove('active');
+  if (stayModalMap) { stayModalMap.remove(); stayModalMap = null; }
+}
+
+function closeBookModalOnOverlay(e) {
+  if (e.target.id === 'bookModalOverlay') closeBookModal();
+}
+
 /* ===================== FINANCES TAB ===================== */
 function tripExpenses(trip) {
   const m = trip.members.length ? trip.members : [ME];
@@ -3800,6 +4664,7 @@ function switchView(view) {
   document.getElementById('homeView').classList.toggle('active', view === 'home');
   document.getElementById('tripsView').classList.toggle('active', view === 'trips');
   document.getElementById('friendsView').classList.toggle('active', view === 'friends');
+  document.getElementById('bookView').classList.toggle('active', view === 'book');
   document.getElementById('mobileItinView').classList.remove('active');
 }
 
@@ -3938,7 +4803,138 @@ function showItinerary(tripId) {
   setTimeout(() => initLeafletMap(trip.id), 0);
 }
 
+/* ===================== BOOKING — CHAT FLOW ===================== */
+let bookingFlow = null;
+
+// Returns null when the text names no destination we have inventory for.
+function matchBookingDest(text) {
+  const t = text.toLowerCase();
+  let found = null;
+  for (const d of BOOK_DESTS) {
+    const i = t.indexOf(d.toLowerCase());
+    if (i === -1) continue;
+    // "to Rome" / "in Rome" wins over a bare mention, so "From Rome to Paris" reads correctly.
+    if (/\b(to|in)\s+$/.test(t.slice(0, i))) return d;
+    if (!found) found = d;
+  }
+  return found;
+}
+
+// Chat keeps the last destination when a follow-up doesn't name one
+// ("make it cheaper"), so it needs a fallback; the form does not.
+function parseBookingDest(text, fallback) {
+  return matchBookingDest(text) || fallback;
+}
+
+function parseBookingOrigin(text, fallback) {
+  const t = text.toLowerCase();
+  for (const o of BOOK_ORIGINS) {
+    const i = t.indexOf(o.toLowerCase());
+    if (i !== -1 && /\bfrom\s+$/.test(t.slice(0, i))) return o;
+  }
+  return fallback;
+}
+
+function wantsFlights(mode) { return mode === 'flights' || mode === 'both'; }
+function wantsStays(mode) { return mode === 'stays' || mode === 'both'; }
+
+const BOOK_MODE_LABEL = { flights: 'Book flights', stays: 'Book stays', both: 'Book flights + stays' };
+
+function bookingPrefill() {
+  const f = bookingFlow;
+  const dates = bookDates(f.dest);
+  if (f.mode === 'stays') return `${f.dest}, ${dates}, 2 guests`;
+  if (f.mode === 'both') return `From ${f.origin} to ${f.dest}, ${dates}, flight + hotel`;
+  return `From ${f.origin} to ${f.dest}, ${dates}`;
+}
+
+function bookingAskText(mode) {
+  if (mode === 'stays') return "Happy to help. Which city are you staying in, and what dates?";
+  if (mode === 'both') return "Happy to help. Where are you travelling from, where to, and when?";
+  return "Happy to help. Where are you flying from, where to, and when?";
+}
+
+function startBookingChat(mode, opts) {
+  opts = opts || {};
+  bookingFlow = {
+    mode,
+    origin: opts.origin || 'New York',
+    dest: opts.dest || 'Rome',
+    flights: null,
+    stays: null,
+  };
+  currentStep = 0;
+  activeChatId = null;
+  switchView('chat');
+  closeItinPanel();
+
+  const msgs = document.getElementById('chatMessages');
+  const input = document.getElementById('chatInput');
+  document.getElementById('chatStartView').style.display = 'none';
+  msgs.style.display = '';
+  document.getElementById('chatInputArea').style.display = '';
+  document.getElementById('headerTitle').textContent = BOOK_MODE_LABEL[mode];
+  msgs.innerHTML = zoyaMsg("Hi I'm Zoya, your personal travel assistant. What should we explore today?") +
+    userMsg(BOOK_MODE_LABEL[mode]);
+  renderNav();
+
+  if (opts.autoSearch) {
+    submitBookingSearch(bookingPrefill());
+    return;
+  }
+
+  setTimeout(() => {
+    msgs.innerHTML += zoyaMsg(bookingAskText(mode));
+    input.value = bookingPrefill();
+    input.focus();
+    scrollChat();
+  }, 700);
+  scrollChat();
+}
+
+function bookingReplyText() {
+  const f = bookingFlow;
+  const route = `${cityShort(f.origin)} → ${f.dest}`;
+  if (f.mode === 'stays') return `Here are the best places to stay in ${f.dest}.`;
+  if (f.mode === 'both') return `Here are the best ${route} flights and places to stay.`;
+  return `Here are the best ${route} options I found.`;
+}
+
+function submitBookingSearch(preset) {
+  const input = document.getElementById('chatInput');
+  const text = (preset !== undefined ? preset : input.value || '').trim();
+  if (!text) return;
+
+  const f = bookingFlow;
+  f.dest = parseBookingDest(text, f.dest);
+  if (wantsFlights(f.mode)) {
+    f.origin = parseBookingOrigin(text, f.origin);
+    f.flights = generateFlights(f.origin, f.dest);
+  }
+  if (wantsStays(f.mode)) f.stays = generateStays(f.dest);
+
+  const msgs = document.getElementById('chatMessages');
+  msgs.innerHTML += userMsg(text);
+  input.value = '';
+  scrollChat();
+
+  setTimeout(() => {
+    msgs.innerHTML += zoyaMsg(bookingReplyText());
+    scrollChat();
+    setTimeout(() => {
+      if (wantsFlights(f.mode)) msgs.innerHTML += flightResultsHTML();
+      if (wantsStays(f.mode)) msgs.innerHTML += stayResultsHTML();
+      scrollChat();
+      setTimeout(() => {
+        msgs.innerHTML += zoyaMsg('Tap any option to see the full details.');
+        scrollChat();
+      }, 450);
+    }, 500);
+  }, 600);
+}
+
 function advanceStep() {
+  if (bookingFlow) { submitBookingSearch(); return; }
   if (currentStep < 4) {
     currentStep++;
     renderStep(currentStep, true);
@@ -3946,6 +4942,7 @@ function advanceStep() {
 }
 
 function resetFlow() {
+  bookingFlow = null;
   currentStep = 0;
   renderStep(0, false);
 }
@@ -4082,7 +5079,7 @@ function renderNav() {
     </div>
     <div class="nav-item ${currentView === 'trips' ? 'active' : ''}" onclick="openTripsView()"><span class="nav-icon">${lucide('bookmark',18)}</span><span class="nav-label">Saved trips</span></div>
     <div class="nav-item ${currentView === 'friends' ? 'active' : ''}" onclick="openFriendsView()"><span class="nav-icon">${lucide('users',18)}</span><span class="nav-label">Friends</span></div>
-    <div class="nav-item"><span class="nav-icon">${lucide('shopping-cart',18)}</span><span class="nav-label">Book flights / stays</span></div>
+    <div class="nav-item ${currentView === 'book' ? 'active' : ''}" onclick="openBookView()"><span class="nav-icon">${lucide('shopping-cart',18)}</span><span class="nav-label">Book flights / stays</span></div>
   `;
   document.getElementById('navSection').innerHTML = navHTML;
   const mobileNav = document.getElementById('mobileNavSection');
@@ -4101,6 +5098,7 @@ function renderUserFooter() {
 
 function selectChat(chatId, e) {
   if (e) e.stopPropagation();
+  bookingFlow = null;
   activeChatId = chatId;
   const chat = CHATS.find(c => c.id === chatId);
   switchView('chat');
@@ -4362,6 +5360,187 @@ function openTripsView() {
   switchView('trips');
   closeItinPanel();
   document.getElementById('tripsContent').innerHTML = tripsHTML();
+  renderNav();
+}
+
+/* ===================== BOOK FLIGHTS / STAYS VIEW ===================== */
+const BOOK_TABS = [['stays', 'Stays'], ['flights', 'Flights'], ['activities', 'Activities'], ['both', 'Flights + Stays']];
+const BOOK_TAB_TITLE = { stays: 'Stays', flights: 'Flights', activities: 'Activities', both: 'Flights + Stays' };
+
+let bookTab = 'stays';
+let bookCounts = { guests: 2, rooms: 1 };
+
+function bookStepperHTML(key, icon, min) {
+  const n = bookCounts[key];
+  return `
+    <div class="book-stepper">
+      ${lucide(icon, 16)}
+      <button class="book-stepper-btn" onclick="stepBookCount('${key}',-1)" ${n <= min ? 'disabled' : ''} aria-label="Decrease">${lucide('minus', 12)}</button>
+      <span>${n}</span>
+      <button class="book-stepper-btn" onclick="stepBookCount('${key}',1)" aria-label="Increase">${lucide('plus', 12)}</button>
+    </div>`;
+}
+
+function bookFieldHTML(id, icon, placeholder, value) {
+  return `
+    <div class="book-field">
+      ${lucide(icon, 18)}
+      <input id="${id}" placeholder="${placeholder}" value="${value || ''}" oninput="syncBookSearchBtn()" />
+    </div>`;
+}
+
+function bookSplitFieldHTML(a, b) {
+  return `
+    <div class="book-field-split">
+      ${bookFieldHTML(a.id, a.icon, a.placeholder, a.value)}
+      <div class="book-field-split-divider"></div>
+      ${bookFieldHTML(b.id, b.icon, b.placeholder, b.value)}
+    </div>`;
+}
+
+function bookFormFieldsHTML() {
+  const dates = bookDates('Rome');
+  const [checkIn, checkOut] = dates.split('–').map(s => s.trim());
+
+  if (bookTab === 'stays') {
+    return `
+      <div class="book-form-controls">
+        ${bookStepperHTML('guests', 'user', 1)}
+        <span class="book-stepper-dot">•</span>
+        ${bookStepperHTML('rooms', 'bed', 1)}
+      </div>
+      <div class="book-field-group">
+        ${bookFieldHTML('bookDest', 'map-pin', 'Enter property name, city, neighbourhood or address')}
+        ${bookSplitFieldHTML(
+          { id: 'bookCheckIn', icon: 'calendar', placeholder: 'Check in', value: checkIn },
+          { id: 'bookCheckOut', icon: 'calendar', placeholder: 'Check out', value: checkOut })}
+      </div>
+      <button class="book-add-btn" onclick="alert('Add another stay to this trip')">${lucide('plus', 16)} Add stay</button>`;
+  }
+
+  if (bookTab === 'activities') {
+    return `
+      <div class="book-form-controls">
+        ${bookStepperHTML('guests', 'user', 1)}
+      </div>
+      <div class="book-field-group">
+        ${bookFieldHTML('bookDest', 'map-pin', 'Where are you going?')}
+        ${bookFieldHTML('bookDate', 'calendar', 'When?', checkIn)}
+      </div>`;
+  }
+
+  // 'flights' and 'both' share the same route + dates fields.
+  const roomStepper = bookTab === 'both'
+    ? `<span class="book-stepper-dot">•</span>${bookStepperHTML('rooms', 'bed', 1)}`
+    : '';
+  return `
+    <div class="book-form-controls">
+      ${bookStepperHTML('guests', 'user', 1)}
+      ${roomStepper}
+    </div>
+    <div class="book-field-group">
+      <div class="book-field-row">
+        ${bookFieldHTML('bookFrom', 'plane-takeoff', 'From where?', 'New York')}
+        ${bookFieldHTML('bookDest', 'plane-landing', 'Where to?')}
+      </div>
+      ${bookSplitFieldHTML(
+        { id: 'bookDepart', icon: 'calendar', placeholder: 'Depart', value: checkIn },
+        { id: 'bookReturn', icon: 'calendar', placeholder: 'Return', value: checkOut })}
+    </div>
+    <button class="book-add-btn" onclick="alert('Add another flight to this trip')">${lucide('plus', 16)} Add flight</button>`;
+}
+
+function bookHTML() {
+  return `
+    <div class="book-segmented">
+      ${BOOK_TABS.map(([id, label]) =>
+        `<button class="book-segment ${id === bookTab ? 'active' : ''}" onclick="setBookTab('${id}')">${label}</button>`).join('')}
+    </div>
+    <div class="book-form-card">
+      <div class="book-form-header"><h2>${BOOK_TAB_TITLE[bookTab]}</h2></div>
+      <div class="book-form-body">
+        ${bookFormFieldsHTML()}
+        <button class="book-search-btn" id="bookSearchBtn" disabled onclick="runBookSearch()">Search</button>
+        <div class="book-form-hint">Try ${BOOK_DESTS.slice(0, 4).join(', ')} or ${BOOK_DESTS[4]}.</div>
+      </div>
+    </div>`;
+}
+
+function renderBookView() {
+  document.getElementById('bookContent').innerHTML = bookHTML();
+  syncBookSearchBtn();
+}
+
+function setBookTab(tab) {
+  bookTab = tab;
+  renderBookView();
+}
+
+function stepBookCount(key, delta) {
+  bookCounts[key] = Math.max(1, bookCounts[key] + delta);
+  renderBookView();
+}
+
+function syncBookSearchBtn() {
+  const dest = document.getElementById('bookDest');
+  const btn = document.getElementById('bookSearchBtn');
+  if (btn && dest) btn.disabled = !dest.value.trim();
+}
+
+function runBookSearch() {
+  const destInput = document.getElementById('bookDest');
+  const raw = (destInput && destInput.value || '').trim();
+  if (!raw) return;
+
+  const dest = matchBookingDest(raw);
+  if (!dest) { showUnknownDest(raw); return; }
+
+  if (bookTab === 'activities') {
+    showActivityIdeas(dest);
+    return;
+  }
+
+  const fromInput = document.getElementById('bookFrom');
+  const origin = fromInput ? parseBookingOrigin(`from ${fromInput.value}`, 'New York') : 'New York';
+  startBookingChat(bookTab, { dest, origin, autoSearch: true });
+}
+
+// A one-shot chat with no follow-up search behind it.
+function openScriptedChat(title, userText, replyHTML) {
+  bookingFlow = null;
+  currentStep = 0;
+  activeChatId = null;
+  switchView('chat');
+  closeItinPanel();
+  document.getElementById('chatStartView').style.display = 'none';
+  document.getElementById('chatMessages').style.display = '';
+  document.getElementById('chatInputArea').style.display = '';
+  document.getElementById('headerTitle').textContent = title;
+  document.getElementById('chatMessages').innerHTML =
+    zoyaMsg("Hi I'm Zoya, your personal travel assistant. What should we explore today?") +
+    userMsg(userText) + replyHTML;
+  document.getElementById('chatInput').value = '';
+  renderNav();
+  scrollChat();
+}
+
+function showUnknownDest(raw) {
+  openScriptedChat('Discover', raw,
+    zoyaMsg(`I don't have anything for “${raw}” yet. I can help with ${BOOK_DESTS.slice(0, -1).join(', ')} or ${BOOK_DESTS[BOOK_DESTS.length - 1]}.`));
+}
+
+// Activities has no bookable inventory in the prototype — route it to the
+// destination's itinerary, which is where the real activity content lives.
+function showActivityIdeas(dest) {
+  const trip = bookTrip(dest);
+  openScriptedChat('Activities', `Things to do in ${dest}`,
+    zoyaMsg(`Here's what I'd plan in ${dest} — tap to open the day-by-day itinerary.`, trip ? [trip.id] : undefined));
+}
+
+function openBookView() {
+  switchView('book');
+  closeItinPanel();
+  renderBookView();
   renderNav();
 }
 
