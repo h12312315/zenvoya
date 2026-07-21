@@ -2963,6 +2963,73 @@ body {
 .stay-card-refund { font-size: 12px; font-weight: 600; color: var(--color-success); margin-top: 6px; }
 .stay-card-dist { font-size: 12px; color: var(--color-gray-500); margin-top: 2px; }
 
+/* Save badge on card thumbnails */
+.save-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.92);
+  color: var(--color-gray-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-xsmall);
+}
+.save-badge:hover { background: #fff; }
+.save-badge.active { background: var(--color-primary); color: #fff; }
+.save-badge.active svg { fill: #fff; }
+
+.act-card { cursor: pointer; }
+.act-card-meta { font-size: 12px; color: var(--color-gray-500); margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+.act-card-meta svg { color: #f5a623; fill: #f5a623; }
+
+/* Flight card in the tab (avatars + price stacked on the right) */
+.flight-card-tab .flight-card-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+.flight-card-av .stack-avatar { width: 22px; height: 22px; font-size: 10px; }
+
+/* Tour (activity) modal */
+.tour-facts { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; }
+.tour-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 2px 0 4px; }
+.tour-list li { display: flex; gap: 8px; font-size: 13px; line-height: 1.5; color: var(--color-gray-700); }
+.tour-list li svg { color: var(--color-success); flex-shrink: 0; margin-top: 1px; }
+.book-modal-btn.active { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+.book-modal-btn.active svg { fill: #fff; }
+
+/* Room options (stay modal) */
+.room-list { display: flex; flex-direction: column; gap: 10px; }
+.room-card {
+  display: flex;
+  gap: 12px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+.room-info { flex: 1; min-width: 0; }
+.room-name { font-size: 14px; font-weight: 700; color: var(--color-gray-900); }
+.room-meta { font-size: 12px; color: var(--color-gray-500); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+.room-perks { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; }
+.room-perks span { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--color-gray-600); }
+.room-perks svg { color: var(--color-success); }
+.room-refund { font-size: 12px; font-weight: 600; color: var(--color-success); margin-top: 8px; }
+.room-refund.no { color: var(--color-gray-400); }
+.room-cta { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; gap: 10px; flex-shrink: 0; }
+.room-price { font-size: 16px; font-weight: 700; color: var(--color-gray-900); text-align: right; }
+.room-price span { display: block; font-size: 11px; font-weight: 500; color: var(--color-gray-400); }
+.room-reserve { padding: 8px 18px; }
+
+/* Location modal — good to know */
+.loc-goodtoknow { display: flex; flex-direction: column; }
+.loc-gtk-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--color-gray-100); }
+.loc-gtk-item:last-child { border-bottom: none; }
+.loc-gtk-k { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--color-gray-600); }
+.loc-gtk-k svg { color: var(--color-gray-400); }
+.loc-gtk-v { font-size: 13px; font-weight: 600; color: var(--color-gray-900); text-align: right; }
+
 /* ===================== BOOKING DETAIL MODAL ===================== */
 .book-modal-box {
   width: 520px;
@@ -4691,9 +4758,9 @@ function itineraryHTML(tripId, isSaved) {
         </div>
         ${!isSaved ? `<div class="itin-tab-panel" data-panel="about" ${show('about')}>${aboutTripHTML(trip)}</div>` : ''}
         ${isSaved ? `<div class="itin-tab-panel" data-panel="updates" ${show('updates')}>${tripUpdatesHTML(trip)}</div>` : ''}
-        <div class="itin-tab-panel" data-panel="flights" ${show('flights')}>${isSaved ? flightsTabHTML(trip) : editorialFlightsHTML(trip)}</div>
-        <div class="itin-tab-panel" data-panel="stay" ${show('stay')}>${isSaved ? stayTabHTML(trip) : editorialStaysHTML(trip)}</div>
-        <div class="itin-tab-panel" data-panel="activity" ${show('activity')}>${activitiesTabHTML(trip)}</div>
+        <div class="itin-tab-panel" data-panel="flights" ${show('flights')}>${flightsTabHTML(trip, isSaved)}</div>
+        <div class="itin-tab-panel" data-panel="stay" ${show('stay')}>${stayTabHTML(trip, isSaved)}</div>
+        <div class="itin-tab-panel" data-panel="activity" ${show('activity')}>${activitiesTabHTML(trip, isSaved)}</div>
         <div class="itin-tab-panel" data-panel="itinerary" ${show('itinerary')}>
           ${trip.days.map((day, i) => dayItemHTML(trip, day, i)).join('')}
         </div>
@@ -5129,6 +5196,19 @@ function locationModalHTML(loc) {
       </div>
       <div class="loc-modal-section-title">About</div>
       <div class="loc-modal-desc">${loc.desc}</div>
+      <div class="loc-modal-section-title">Highlights</div>
+      <ul class="tour-list">
+        <li>${lucide('check', 15)} One of ${loc.address.split(',').slice(-1)[0].trim() || 'the city'}'s most-visited ${(category || 'spots').toLowerCase()}s</li>
+        <li>${lucide('check', 15)} Best visited ${openNow ? 'in the morning to beat the crowds' : 'around opening time'}</li>
+        <li>${lucide('check', 15)} Great photo spots throughout</li>
+      </ul>
+      <div class="loc-modal-section-title">Good to know</div>
+      <div class="loc-goodtoknow">
+        <div class="loc-gtk-item"><span class="loc-gtk-k">${lucide('clock', 14)} Typical visit</span><span class="loc-gtk-v">${1 + (h % 2)}–${2 + (h % 3)} hours</span></div>
+        <div class="loc-gtk-item"><span class="loc-gtk-k">${lucide('dollar-sign', 14)} Admission</span><span class="loc-gtk-v">${h % 3 === 0 ? 'Free' : '$' + (10 + (h % 22))}</span></div>
+        <div class="loc-gtk-item"><span class="loc-gtk-k">${lucide('star', 14)} Best time</span><span class="loc-gtk-v">${['Early morning', 'Late afternoon', 'Golden hour'][h % 3]}</span></div>
+        <div class="loc-gtk-item"><span class="loc-gtk-k">${lucide('map-pin', 14)} Getting there</span><span class="loc-gtk-v">${['Walkable from centre', 'Short metro ride', 'Quick taxi hop'][h % 3]}</span></div>
+      </div>
       ${loc.members && loc.members.length ? `
       <div class="loc-modal-avatars">
         <span class="loc-modal-avatars-label">Going:</span>
@@ -5267,8 +5347,8 @@ function bookingCardHTML(opts) {
 }
 
 /* ===================== TRIP DETAIL — EDITORIAL TABS ===================== */
-function tripFlights(trip) { if (!trip._flights) trip._flights = generateFlights('New York', trip.name); return trip._flights; }
-function tripStays(trip) { if (!trip._stays) trip._stays = generateStays(trip.name); return trip._stays; }
+function tripFlights(trip) { if (!trip._flights) trip._flights = generateFlights('New York', trip.name, 10); return trip._flights; }
+function tripStays(trip) { if (!trip._stays) trip._stays = generateStays(trip.name, 10); return trip._stays; }
 
 function openBookWith(tab, dest) {
   bookTab = tab;
@@ -5346,26 +5426,116 @@ function collectTripActivities(trip) {
   return out;
 }
 
-function activitiesTabHTML(trip) {
-  const items = collectTripActivities(trip);
-  if (!items.length) return `<div class="empty-state">No activities yet for this trip.</div>`;
-  return `
-    <div class="editorial-intro">Handpicked things to do in ${trip.name} — tap any for details.</div>
-    <div class="activity-rec-list">
-      ${items.map(({ a, di, bi, ai }) => {
-        const bg = locBgForActivity(trip, a.title);
-        const tag = ACTIVITY_TAG_MAP[a.icon] || 'Explore';
-        return `<div class="activity-rec" onclick="openActivityModal('${trip.id}',${di},${bi},${ai})">
-          <div class="activity-rec-img" style="background:${bg};">${hasPhotoBg(bg) ? '' : a.icon}</div>
-          <div class="activity-rec-body">
-            <span class="activity-rec-tag">${tag}</span>
-            <div class="activity-rec-title">${a.title}</div>
-            <div class="activity-rec-desc">${a.desc}</div>
-          </div>
-        </div>`;
-      }).join('')}
+const savedItems = new Set();
+function toggleSaveItem(title, btn) {
+  if (savedItems.has(title)) savedItems.delete(title); else savedItems.add(title);
+  if (btn) btn.classList.toggle('active');
+}
+
+const ACT_EXTRA = [
+  { suffix: 'Food & Wine Crawl', tag: 'Food', icon: '🍷' },
+  { suffix: 'Sunset Walking Tour', tag: 'Sunset', icon: '🌅' },
+  { suffix: 'Old Town Bike Ride', tag: 'Explore', icon: '🚲' },
+  { suffix: 'Rooftop Cocktail Evening', tag: 'Nightlife', icon: '🍸' },
+  { suffix: 'Local Cooking Class', tag: 'Food', icon: '🍝' },
+  { suffix: 'Hidden Courtyards Tour', tag: 'History', icon: '🏛' },
+];
+
+function activityPool(trip) {
+  if (trip._actPool) return trip._actPool;
+  const photos = CITY_PHOTOS[trip.name] || ['vineyard'];
+  const base = collectTripActivities(trip).map(o => ({
+    title: o.a.title, desc: o.a.desc, icon: o.a.icon,
+    tag: ACTIVITY_TAG_MAP[o.a.icon] || 'Explore', bg: locBgForActivity(trip, o.a.title),
+  }));
+  const extras = ACT_EXTRA.map((e, i) => ({
+    title: `${trip.name} ${e.suffix}`, tag: e.tag, icon: e.icon,
+    desc: `A local favourite in ${trip.name} — ${e.suffix.toLowerCase()} led by an expert guide who knows all the best spots.`,
+    bg: `url('images/locations/${photos[i % photos.length]}.jpg') center/cover no-repeat`,
+  }));
+  const pool = base.concat(extras).slice(0, 10);
+  pool.forEach((x, i) => {
+    const h = hashStr(trip.id + x.title + i);
+    x.rating = (4.3 + (h % 6) / 10).toFixed(1);
+    x.reviews = 150 + (h % 3200);
+    x.price = 25 + (h % 80);
+    x.duration = `${1 + (h % 4)}h`;
+    x.photos = [photos[i % photos.length], photos[(i + 1) % photos.length], photos[(i + 2) % photos.length]];
+  });
+  trip._actPool = pool;
+  return pool;
+}
+
+function activityCardHTML(trip, i) {
+  const x = activityPool(trip)[i];
+  const saved = savedItems.has(x.title);
+  return `<div class="carousel-card act-card" onclick="openTourModal('${trip.id}',${i})">
+    <div class="trip-card-thumb rank-card-thumb" style="background:${x.bg};">${hasPhotoBg(x.bg) ? '' : x.icon}
+      <button class="save-badge ${saved ? 'active' : ''}" onclick="event.stopPropagation();toggleSaveItem('${x.title.replace(/'/g, "\\'")}', this)" title="Save">${lucide('bookmark', 15)}</button>
     </div>
-  `;
+    <div class="trip-card-body">
+      <span class="activity-rec-tag">${x.tag}</span>
+      <div class="rank-card-title">${x.title}</div>
+      <div class="act-card-meta">${lucide('star', 12)} ${x.rating} · ${x.duration} · from $${x.price}</div>
+    </div>
+  </div>`;
+}
+
+function activitiesTabHTML(trip, isSaved) {
+  const ids = activityPool(trip).map((_, i) => i);
+  if (!ids.length) return `<div class="empty-state">No activities yet for this trip.</div>`;
+  const wrap = arr => `<div class="carousel">${arr.map(i => activityCardHTML(trip, i)).join('')}</div>`;
+  if (!isSaved) return `<div class="editorial-intro">Handpicked things to do in ${trip.name}.</div><div class="booking-section-title">Recommended</div>${wrap(ids)}`;
+  const booked = ids.slice(0, 2), saved = ids.slice(2, 7), rec = ids.slice(7);
+  return `<div class="editorial-intro">Things to do in ${trip.name}.</div>
+    <div class="booking-section-title">Booked</div>${wrap(booked)}
+    <div class="booking-section-title">Saved</div>${wrap(saved)}
+    ${rec.length ? `<div class="booking-section-title">Recommended</div>${wrap(rec)}` : ''}`;
+}
+
+function openTourModal(tripId, idx) {
+  const trip = TRIPS[tripId];
+  const x = activityPool(trip)[idx];
+  if (!x) return;
+  const saved = savedItems.has(x.title);
+  const highlights = [
+    'Skip-the-line entry with a local expert guide',
+    `Experience the best of ${trip.name} in about ${x.duration}`,
+    'Small-group experience — great for photos, light on crowds',
+    'Hotel pickup available on request',
+  ];
+  const included = ['Expert local guide', 'Entry tickets where applicable', 'Small-group experience', 'All taxes and fees'];
+  document.getElementById('bookModalBox').innerHTML = `
+    <div class="stay-modal-photos">
+      ${x.photos.slice(0, 2).map(p => `<div class="stay-modal-photo" style="background-image:url('images/locations/${p}.jpg');"></div>`).join('')}
+      <button class="loc-modal-close" onclick="closeBookModal()">${lucide('x', 16)}</button>
+    </div>
+    <div class="book-modal-body" style="padding-top:0;">
+      <span class="activity-rec-tag">${x.tag}</span>
+      <div class="book-modal-title" style="margin-top:4px;">${x.title}</div>
+      <div class="loc-modal-rating" style="margin-top:8px;">
+        <span class="loc-modal-rating-value">${x.rating}</span><span class="loc-modal-stars">${lucide('star', 14)}</span>
+        <span>(${x.reviews.toLocaleString()})</span><span class="loc-modal-dot">·</span><span>${trip.name}, ${trip.country}</span>
+      </div>
+      <div class="tour-facts">
+        <span class="stay-modal-fact">${lucide('clock', 15)} ${x.duration}</span>
+        <span class="stay-modal-fact">${lucide('users', 15)} Small group</span>
+        <span class="stay-modal-fact">${lucide('check', 15)} Free cancellation</span>
+      </div>
+      <div class="book-modal-actions" style="padding:14px 0 16px;">
+        <button class="book-modal-btn ${saved ? 'active' : ''}" onclick="toggleSaveItem('${x.title.replace(/'/g, "\\'")}', this); this.querySelector('span').textContent = this.classList.contains('active') ? 'Saved' : 'Save';">${lucide('bookmark', 16)} <span>${saved ? 'Saved' : 'Save'}</span></button>
+        <button class="book-modal-btn primary" onclick="alert('Opening booking…')">from $${x.price} · Book ${lucide('chevron-right', 16)}</button>
+      </div>
+      <div class="loc-modal-section-title">Highlights</div>
+      <ul class="tour-list">${highlights.map(h => `<li>${lucide('check', 15)} ${h}</li>`).join('')}</ul>
+      <div class="loc-modal-section-title">What's included</div>
+      <ul class="tour-list">${included.map(h => `<li>${lucide('check', 15)} ${h}</li>`).join('')}</ul>
+      <div class="loc-modal-section-title">About this experience</div>
+      <div class="loc-modal-desc">${x.desc}</div>
+      <div class="loc-modal-section-title">Cancellation policy</div>
+      <div class="loc-modal-desc">Free cancellation up to 24 hours before the experience starts for a full refund.</div>
+    </div>`;
+  document.getElementById('bookModalOverlay').classList.add('active');
 }
 
 /* ===================== BUDGET (per-city cost model) ===================== */
@@ -5964,46 +6134,59 @@ function recordSettlement(i) {
 function closeSplitModal() { document.getElementById('splitModalOverlay').classList.remove('active'); }
 function closeSplitModalOnOverlay(e) { if (e.target.id === 'splitModalOverlay') closeSplitModal(); }
 
-function flightsTabHTML(trip) {
-  const booked = trip.members.slice(0, Math.min(2, trip.members.length));
-  const notBooked = trip.members.slice(booked.length);
-  const dest = trip.pins[0] ? trip.pins[0].label : trip.name;
-  const depDate = trip.days[0] ? trip.days[0].date : '';
-  const retDate = trip.days[trip.days.length - 1] ? trip.days[trip.days.length - 1].date : '';
-  const bookedFlights = [
-    { title: 'JFK → ' + dest, meta: depDate + ' · Nonstop · 8h 15m', price: 612 },
-    { title: dest + ' → JFK', meta: retDate + ' · Nonstop · 8h 15m', price: 588 },
-  ];
-  const savedFlights = [
-    { title: 'JFK → ' + dest, meta: depDate + ' · 1 stop · 9h 40m · Delta', price: 545 },
-    { title: dest + ' → JFK', meta: retDate + ' · Nonstop · 7h 55m · Air France', price: 601 },
-  ];
+// Booked (2) / Saved (5) / Recommended (rest) for saved trips; a single
+// "Recommended" list for unsaved trips.
+function bookSections(isSaved, ids, cardFn) {
+  if (!isSaved) {
+    return `<div class="booking-section-title">Recommended</div>${ids.map(i => cardFn(i)).join('')}`;
+  }
+  const booked = ids.slice(0, 2), saved = ids.slice(2, 7), rec = ids.slice(7);
   return `
-    ${reminderBannerHTML(notBooked, "Haven't booked flights yet")}
-    <div class="booking-section-title">Booked</div>
-    ${bookedFlights.map(f => bookingCardHTML({ icon: 'plane', title: f.title, meta: f.meta, price: f.price, priceLabel: 'per person', avatars: booked.length ? booked : [ME] })).join('')}
-    <div class="booking-section-title">Saved</div>
-    ${savedFlights.map(f => bookingCardHTML({ icon: 'plane', title: f.title, meta: f.meta, price: f.price, priceLabel: 'per person' })).join('')}
-    ${moreOptionsBannerHTML('More flight options available')}
+    <div class="booking-section-title">Booked</div>${booked.map(i => cardFn(i, 'booked')).join('')}
+    <div class="booking-section-title">Saved</div>${saved.map(i => cardFn(i)).join('')}
+    ${rec.length ? `<div class="booking-section-title">Recommended</div>${rec.map(i => cardFn(i)).join('')}` : ''}
   `;
 }
 
-function stayTabHTML(trip) {
+function flightCardHTML(trip, i, group) {
+  const r = tripFlights(trip)[i];
   const booked = trip.members.slice(0, Math.min(2, trip.members.length));
-  const notBooked = trip.members.slice(booked.length);
-  const nights = Math.max(trip.days.length - 2, 1);
-  const savedStays = [
-    { title: 'Riverside Boutique Hotel', meta: nights + ' nights · ★ 4.5 (860 reviews)', price: 152 },
-    { title: trip.name + ' Grand', meta: nights + ' nights · ★ 4.9 (2,310 reviews)', price: 230 },
-  ];
-  return `
-    ${reminderBannerHTML(notBooked, "Haven't booked a stay yet")}
-    <div class="booking-section-title">Booked</div>
-    ${bookingCardHTML({ icon: 'bed', title: trip.name + ' Central Hotel', meta: nights + ' nights · ★ 4.7 (1,204 reviews)', price: 189, priceLabel: 'per night', avatars: booked.length ? booked : [ME] })}
-    <div class="booking-section-title">Saved</div>
-    ${savedStays.map(s => bookingCardHTML({ icon: 'bed', title: s.title, meta: s.meta, price: s.price, priceLabel: 'per night' })).join('')}
-    ${moreOptionsBannerHTML('More stay options available')}
-  `;
+  const av = group === 'booked' ? `<div class="avatar-stack flight-card-av">${(booked.length ? booked : [ME]).map(stackAvatarHTML).join('')}</div>` : '';
+  return `<div class="result-card flight-card flight-card-tab" onclick="openTripFlightModal('${trip.id}',${i})">
+    <div class="flight-card-legs">${flightLegHTML(r.out)}${flightLegHTML(r.back)}</div>
+    <div class="flight-card-side">${av}<div class="result-price">$${r.price.toLocaleString()}<span>round trip</span></div></div>
+  </div>`;
+}
+
+function stayCardTabHTML(trip, i) {
+  const s = tripStays(trip)[i];
+  return `<div class="result-card stay-card" onclick="openTripStayModal('${trip.id}',${i})">
+    <div class="stay-card-photo" style="background-image:url('images/locations/${s.photos[0]}.jpg');"></div>
+    <div class="stay-card-body">
+      <div class="stay-card-info">
+        <div class="stay-card-name">${s.name}</div>
+        <div class="stay-score-row">
+          <div class="stay-score">${s.score}</div>
+          <div><div class="stay-score-label">${s.scoreLabel}</div><div class="stay-score-reviews">${s.reviews.toLocaleString()} reviews</div></div>
+        </div>
+        ${s.refundable ? '<div class="stay-card-refund">Refundable</div>' : ''}
+        <div class="stay-card-dist">${s.dist} mi from center</div>
+      </div>
+      <div class="result-price">$${s.price.toLocaleString()}<span>${s.nights} nights</span></div>
+    </div>
+  </div>`;
+}
+
+function flightsTabHTML(trip, isSaved) {
+  const ids = tripFlights(trip).map((_, i) => i);
+  return `<div class="editorial-intro">Round-trip fares for ${trip.name}, from New York.</div>
+    <div class="result-list">${bookSections(isSaved, ids, (i, g) => flightCardHTML(trip, i, g))}</div>`;
+}
+
+function stayTabHTML(trip, isSaved) {
+  const ids = tripStays(trip).map((_, i) => i);
+  return `<div class="editorial-intro">Places to stay in ${trip.name}. Tap any to see photos, rooms and amenities.</div>
+    <div class="result-list">${bookSections(isSaved, ids, i => stayCardTabHTML(trip, i))}</div>`;
 }
 
 /* ===================== BOOKING — DATA ===================== */
@@ -6167,8 +6350,8 @@ function makeFlightLeg(fromCity, toCity, seed, title, dateLabel) {
   };
 }
 
-function generateFlights(origin, dest) {
-  return [0, 1, 2, 3].map(i => {
+function generateFlights(origin, dest, count) {
+  return Array.from({ length: count || 4 }, (_, i) => {
     const seed = `${origin}>${dest}#${i}`;
     return {
       origin, dest,
@@ -6183,12 +6366,12 @@ function stayScoreLabel(score) {
   return score >= 9.2 ? 'Exceptional' : score >= 8.8 ? 'Excellent' : score >= 8.3 ? 'Very good' : 'Good';
 }
 
-function generateStays(dest) {
+function generateStays(dest, count) {
   const trip = bookTrip(dest);
   const nights = bookNights(dest);
   const photos = CITY_PHOTOS[dest] || ['vineyard'];
   const streets = CITY_STREETS[dest] || ['Main Street'];
-  return [0, 1, 2, 3].map(i => {
+  return Array.from({ length: count || 4 }, (_, i) => {
     const h = seedHash(`${dest}~stay#${i}`);
     const score = 8 + (h % 15) / 10;
     return {
@@ -6359,8 +6542,8 @@ function stayModalHTML(s) {
         </div>
       </div>
       <div class="book-modal-actions" style="padding:14px 0 16px;border-bottom:none;">
-        <button class="book-modal-btn" onclick="alert('Added to your plan!')">${lucide('bookmark', 16)} Add to plan</button>
-        <button class="book-modal-btn primary" onclick="alert('Opening room selection…')">Select room ${lucide('chevron-right', 16)}</button>
+        <button class="book-modal-btn ${savedItems.has(s.name) ? 'active' : ''}" onclick="toggleSaveItem('${s.name.replace(/'/g, "\\'")}', this); this.querySelector('span').textContent = this.classList.contains('active') ? 'Saved' : 'Save hotel';">${lucide('bookmark', 16)} <span>${savedItems.has(s.name) ? 'Saved' : 'Save hotel'}</span></button>
+        <button class="book-modal-btn primary" onclick="this.closest('.book-modal-body').querySelector('.room-list').scrollIntoView({behavior:'smooth'})">Select room ${lucide('chevron-right', 16)}</button>
       </div>
       <div class="stay-modal-facts">
         <span class="stay-modal-fact">${lucide('user', 15)} ${s.guests} guests</span>
@@ -6382,7 +6565,31 @@ function stayModalHTML(s) {
       <div class="stay-modal-amenities">
         ${s.amenities.map(([icon, label]) => `<div class="stay-modal-amenity">${lucide(icon, 16)} ${label}</div>`).join('')}
       </div>
+      <div class="loc-modal-section-title">Choose your room</div>
+      ${stayRoomsHTML(s)}
     </div>`;
+}
+
+function stayRoomsHTML(s) {
+  const rooms = [
+    { name: 'Standard Queen Room', bed: '1 Queen Bed', sqft: '270 sq ft', price: s.price, refund: s.refundable, perks: ['Free WiFi'] },
+    { name: 'Deluxe King Room', bed: '1 King Bed', sqft: '340 sq ft', price: Math.round(s.price * 1.28), refund: true, perks: ['Free WiFi', 'Breakfast included'] },
+    { name: 'Junior Suite', bed: '1 King Bed · Sofa bed', sqft: '480 sq ft', price: Math.round(s.price * 1.7), refund: true, perks: ['Free WiFi', 'Breakfast included', 'Executive lounge access'] },
+  ];
+  return `<div class="room-list">
+    ${rooms.map(r => `<div class="room-card">
+      <div class="room-info">
+        <div class="room-name">${r.name}</div>
+        <div class="room-meta">${lucide('bed', 13)} ${r.bed} · ${r.sqft}</div>
+        <div class="room-perks">${r.perks.map(p => `<span>${lucide('check', 12)} ${p}</span>`).join('')}</div>
+        <div class="room-refund ${r.refund ? '' : 'no'}">${r.refund ? 'Free cancellation' : 'Non-refundable'}</div>
+      </div>
+      <div class="room-cta">
+        <div class="room-price">$${r.price.toLocaleString()}<span>${s.nights} nights</span></div>
+        <button class="book-modal-btn primary room-reserve" onclick="alert('Reserving ${r.name}…')">Reserve</button>
+      </div>
+    </div>`).join('')}
+  </div>`;
 }
 
 let stayModalMap = null;
