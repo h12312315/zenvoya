@@ -1798,20 +1798,30 @@ body {
   margin-top: 4px;
 }
 
-.trip-card {
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+/* Shared trip-card format (grid + carousel): no border, tall thumb, name + date on one line */
+.trip-card, .carousel-card {
   cursor: pointer;
-  background: var(--color-white);
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: transparent;
+  transition: transform 0.2s;
 }
+.trip-card:hover, .carousel-card:hover { transform: translateY(-3px); }
 
-.trip-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
+.trip-card-thumb {
+  height: 160px;
+  border-radius: var(--radius-md);
+  transition: box-shadow 0.2s;
+}
+.trip-card:hover .trip-card-thumb,
+.carousel-card:hover .trip-card-thumb { box-shadow: var(--shadow-medium); }
 
-.trip-card-thumb { height: 110px; }
+.trip-card-body { padding: 10px 2px 0; }
 
-.trip-card-body { padding: 12px 14px; }
+.trip-card-titlerow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
 
 .trip-card-name {
   font-size: 15px;
@@ -1820,22 +1830,22 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
+}
+.trip-card-date {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-900);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .trip-card-meta {
   font-size: 12px;
   color: var(--color-gray-500);
-  margin-top: 2px;
+  margin-top: 3px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.trip-card-dates {
-  font-size: 12px;
-  color: var(--color-gray-400);
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
 .trip-card-avatars { margin-top: 10px; }
@@ -1927,6 +1937,53 @@ body {
 /* #friendsMap itself becomes the .leaflet-container; ocean bg covers the
    uncovered strip above ±85° latitude and the brief tile-load flash. */
 .friends-map { position: absolute; inset: 0; background: #aad3df; font-family: var(--font-body); }
+
+/* Leaderboard floating at the bottom of the friends map */
+.friends-leaderboard-float {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  width: 340px;
+  max-width: calc(100% - 32px);
+  max-height: calc(100% - 32px);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-large);
+  padding: 14px 16px;
+  z-index: 1000;
+}
+.flb-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  margin-bottom: 6px;
+}
+.flb-title svg { color: var(--color-gray-500); }
+.flb-rows { display: flex; flex-direction: column; overflow-y: auto; }
+.flb-rows .leaderboard-row { padding: 6px 0; }
+.flb-toggle {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 4px 0 0;
+  border: none;
+  background: none;
+  color: var(--color-gray-700);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+.flb-toggle:hover { color: var(--color-gray-900); }
+.flb-toggle svg { transition: transform 0.2s; }
+.flb-toggle.expanded svg { transform: rotate(180deg); }
 
 .friends-side {
   flex: 1 1 50%;
@@ -3087,26 +3144,16 @@ body {
 }
 
 .carousel-card {
-  flex: 0 0 260px;
+  flex: 0 0 240px;
   scroll-snap-align: start;
   min-width: 0;
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  cursor: pointer;
-  background: var(--color-white);
-  transition: transform 0.2s, box-shadow 0.2s;
 }
-
-.carousel-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
 
 .carousel-card-visitor {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--color-gray-100);
   min-width: 0;
 }
 
@@ -3391,6 +3438,9 @@ const FRIENDS = [
   { id: 'ava', name: 'Ava Patel', initial: 'A', color: '#a855f7', level: 2, joinDate: 'Feb 2025' },
   { id: 'noah', name: 'Noah Kim', initial: 'N', color: '#22c55e', level: 4, joinDate: 'Jun 2024' },
   { id: 'zoe', name: 'Zoe Martin', initial: 'Z', color: '#ec4899', level: 4, joinDate: 'Aug 2024' },
+  { id: 'kai', name: 'Kai Nakamura', initial: 'K', color: '#6366f1', level: 5, joinDate: 'Sep 2024' },
+  { id: 'ethan', name: 'Ethan Brooks', initial: 'E', color: '#14b8a6', level: 3, joinDate: 'Jan 2025' },
+  { id: 'sofia', name: 'Sofia Rossi', initial: 'S', color: '#ef4444', level: 2, joinDate: 'Mar 2025' },
 ];
 
 function friendById(id) { return FRIENDS.find(f => f.id === id); }
@@ -3954,6 +4004,9 @@ const LEADERBOARD = [
   { ...friendById('zoe'), count: 22 },
   { ...friendById('liam'), count: 19 },
   { ...friendById('ava'), count: 15 },
+  { ...friendById('kai'), count: 12 },
+  { ...friendById('ethan'), count: 9 },
+  { ...friendById('sofia'), count: 6 },
 ];
 
 const RECOMMENDED_TRIP_IDS = ['lisbon', 'kyoto', 'reykjavik', 'barcelona'];
@@ -6018,9 +6071,10 @@ function countryFlagsHTML() {
   </div>`;
 }
 
-function leaderboardHTML() {
+function leaderboardHTML(limit) {
   const max = Math.max(...LEADERBOARD.map(p => p.count), 1);
-  return LEADERBOARD.map((p, i) => `
+  const rows = limit ? LEADERBOARD.slice(0, limit) : LEADERBOARD;
+  return rows.map((p, i) => `
     <div class="leaderboard-row ${p.isMe ? 'me' : ''}">
       <span class="leaderboard-rank">${i + 1}</span>
       <div class="leaderboard-avatar avatar-tt" style="background:${p.color};${p.textColor ? 'color:'+p.textColor+';' : ''}">${p.initial}${avatarTooltipHTML(p)}</div>
@@ -6043,12 +6097,37 @@ function recommendedCarouselHTML() {
       return `<div class="carousel-card" onclick="showItinerary('${v.tripId}', true)">
         <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
         <div class="trip-card-body">
-          <div class="trip-card-name">${t.name}</div>
+          <div class="trip-card-titlerow">
+            <span class="trip-card-name">${t.name}</span>
+            <span class="trip-card-date">${t.dates}</span>
+          </div>
           <div class="trip-card-meta">${t.country}</div>
           <div class="carousel-card-visitor">
             ${f ? friendAvatarHTML(f) : `<div class="friend-avatar" style="background:var(--color-gray-300);">${v.friendName.charAt(0)}</div>`}
             <span>${v.friendName}</span>
           </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// "We think you should try" — personalized recommendations (open unsaved).
+const SUGGESTED_TRIP_IDS = ['lisbon', 'kyoto', 'reykjavik', 'barcelona'];
+
+function suggestedCarouselHTML() {
+  return `<div class="carousel">
+    ${SUGGESTED_TRIP_IDS.map(id => {
+      const t = TRIPS[id];
+      if (!t) return '';
+      return `<div class="carousel-card" onclick="showItinerary('${id}', false)">
+        <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
+        <div class="trip-card-body">
+          <div class="trip-card-titlerow">
+            <span class="trip-card-name">${t.name}</span>
+            <span class="trip-card-date">${t.dates}</span>
+          </div>
+          <div class="trip-card-meta">${t.country}</div>
         </div>
       </div>`;
     }).join('')}
@@ -6063,8 +6142,11 @@ function latestTripsCarouselHTML() {
       return `<div class="carousel-card" onclick="showItinerary('${id}', true)">
         <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
         <div class="trip-card-body">
-          <div class="trip-card-name">${t.name}</div>
-          <div class="trip-card-meta">${t.country} · ${t.dates}</div>
+          <div class="trip-card-titlerow">
+            <span class="trip-card-name">${t.name}</span>
+            <span class="trip-card-date">${t.dates}</span>
+          </div>
+          <div class="trip-card-meta">${t.country}</div>
           <div class="avatar-stack trip-card-avatars">
             ${t.members.map(stackAvatarHTML).join('')}
           </div>
@@ -6184,9 +6266,11 @@ function tripsHTML() {
           return `<div class="trip-card" onclick="showItinerary('${id}', true)">
             <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
             <div class="trip-card-body">
-              <div class="trip-card-name">${t.name}</div>
+              <div class="trip-card-titlerow">
+                <span class="trip-card-name">${t.name}</span>
+                <span class="trip-card-date">${t.dates}</span>
+              </div>
               <div class="trip-card-meta">${t.country}</div>
-              <div class="trip-card-dates">${lucide('calendar',12)} ${t.dates}</div>
               <div class="avatar-stack trip-card-avatars">
                 ${t.members.map(stackAvatarHTML).join('')}
               </div>
@@ -6396,23 +6480,38 @@ function openBookView() {
 }
 
 /* ===================== FRIENDS VIEW ===================== */
+let leaderboardExpanded = false;
+
+function toggleLeaderboardAll(btn) {
+  leaderboardExpanded = !leaderboardExpanded;
+  document.getElementById('flbRows').innerHTML = leaderboardHTML(leaderboardExpanded ? 0 : 3);
+  btn.querySelector('.flb-toggle-label').textContent = leaderboardExpanded ? 'Show less' : 'Show all';
+  btn.classList.toggle('expanded', leaderboardExpanded);
+}
+
 function friendsHTML() {
+  leaderboardExpanded = false;
   return `
     <div class="friends-layout">
       <div class="friends-map-panel">
         <div class="friends-map" id="friendsMap"></div>
+        <div class="friends-leaderboard-float">
+          <div class="flb-title">${lucide('star', 14)} Activity leaderboard</div>
+          <div class="flb-rows" id="flbRows">${leaderboardHTML(3)}</div>
+          <button class="flb-toggle" onclick="toggleLeaderboardAll(this)">
+            <span class="flb-toggle-label">Show all</span>${lucide('chevron-down', 14)}
+          </button>
+        </div>
       </div>
       <div class="friends-side">
         <div class="home-section">
-          <div class="home-section-title">Activity leaderboard</div>
-          <div class="stat-card">
-            ${leaderboardHTML()}
-          </div>
+          <div class="home-section-title">Your friends also visited</div>
+          ${recommendedCarouselHTML()}
         </div>
 
         <div class="home-section">
-          <div class="home-section-title">Your friends also visited</div>
-          ${recommendedCarouselHTML()}
+          <div class="home-section-title">We think you should try</div>
+          ${suggestedCarouselHTML()}
         </div>
 
         <div class="home-section" style="margin-bottom:0;">
