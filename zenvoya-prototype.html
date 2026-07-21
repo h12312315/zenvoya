@@ -3976,9 +3976,11 @@ function locationCardsHTML() {
   ).join('')}</div>`;
 }
 
-function itineraryHTML(tripId) {
+function itineraryHTML(tripId, isSaved) {
   const trip = TRIPS[tripId] || TRIPS.paris;
-  const isSaved = SAVED_TRIP_IDS.includes(trip.id);
+  // Saved/unsaved is driven by where the trip was opened from (see showItinerary);
+  // fall back to actual saved membership when no context was passed.
+  if (isSaved === undefined) isSaved = SAVED_TRIP_IDS.includes(trip.id);
   const avatarsHTML = `
     <div class="avatar-stack">
       ${trip.members.map(stackAvatarHTML).join('')}
@@ -4205,7 +4207,7 @@ function reRenderItinerary(tripId, keepDayExpanded) {
   const itinPanel = document.getElementById('itinPanel');
   if (!itinPanel.classList.contains('active')) return;
   const wasEnlarged = itinPanel.classList.contains('enlarged');
-  itinPanel.innerHTML = itineraryHTML(tripId);
+  itinPanel.innerHTML = itineraryHTML(tripId, openItinSaved);
   if (wasEnlarged) itinPanel.classList.add('enlarged');
   setTimeout(() => {
     initLeafletMap(tripId);
@@ -4220,6 +4222,7 @@ function reRenderItinerary(tripId, keepDayExpanded) {
 
 function saveTripToMyTrips(tripId) {
   if (!SAVED_TRIP_IDS.includes(tripId)) SAVED_TRIP_IDS.push(tripId);
+  openItinSaved = true;
   reRenderItinerary(tripId);
 }
 
@@ -5553,7 +5556,7 @@ function renderStep(step, animate, openItin) {
       if (sel) sel.classList.add('selected');
     }, 50);
 
-    if (openItin) showItinerary(DESTINATIONS[selectedDestIdx].id);
+    if (openItin) showItinerary(DESTINATIONS[selectedDestIdx].id, false);
 
   }
 
@@ -5571,13 +5574,23 @@ function selectDestination(idx) {
     currentStep = 3;
     renderStep(3, false);
   } else if (currentStep >= 3) {
-    showItinerary(DESTINATIONS[idx].id);
+    showItinerary(DESTINATIONS[idx].id, false);
   }
 }
 
-function showItinerary(tripId) {
+// Tracks the state (saved/unsaved) of the currently open trip panel so
+// re-renders (drag/drop, add place, save) preserve the intended view.
+let openItinSaved = null;
+
+// `saved` overrides the state based on the entry point:
+//   unsaved → opened from chat or a recommendation (editorial "About trip" view)
+//   saved   → the user's own/upcoming trips, or a friend's trip
+// Omit it to fall back to actual saved membership.
+function showItinerary(tripId, saved) {
   const trip = TRIPS[tripId];
   if (!trip) return;
+  const isSaved = saved !== undefined ? saved : SAVED_TRIP_IDS.includes(tripId);
+  openItinSaved = isSaved;
   selectedDayIndex = null;
   const isMobile = window.innerWidth <= 768;
   if (isMobile) {
@@ -5591,13 +5604,13 @@ function showItinerary(tripId) {
     mobileItinView.classList.add('active');
     mobileItinView.querySelector('.header-title').textContent = trip.name;
     const content = document.getElementById('mobileItinContent');
-    content.innerHTML = itineraryHTML(tripId);
+    content.innerHTML = itineraryHTML(tripId, isSaved);
     const toolbar = content.querySelector('.itin-toolbar');
     if (toolbar) toolbar.remove();
   } else {
     const itinPanel = document.getElementById('itinPanel');
     itinPanel.classList.add('active');
-    itinPanel.innerHTML = itineraryHTML(tripId);
+    itinPanel.innerHTML = itineraryHTML(tripId, isSaved);
   }
   setTimeout(() => initLeafletMap(trip.id), 0);
 }
@@ -5823,7 +5836,7 @@ function chatTripCardsHTML(tripIds) {
   return `<div class="location-cards in-chat">${tripIds.map(id => {
     const t = TRIPS[id];
     if (!t) return '';
-    return `<div class="location-card" onclick="showItinerary('${id}')">
+    return `<div class="location-card" onclick="showItinerary('${id}', false)">
       <div style="height:120px;background:${tripBg(t)};"></div>
       <div class="location-card-info">
         <div class="location-card-name">${t.name}</div>
@@ -5846,9 +5859,9 @@ function toggleTripIdeasMenu(e) {
   menu.innerHTML = ids.length
     ? ids.map(id => {
         const t = TRIPS[id];
-        if (!t) return `<div class="trip-ideas-item" onclick="showItinerary('${id}'); closeTripIdeasMenu();"><div class="trip-ideas-item-body"><div class="trip-ideas-item-name">${id}</div></div></div>`;
+        if (!t) return `<div class="trip-ideas-item" onclick="showItinerary('${id}', false); closeTripIdeasMenu();"><div class="trip-ideas-item-body"><div class="trip-ideas-item-name">${id}</div></div></div>`;
         const saved = SAVED_TRIP_IDS.includes(id);
-        return `<div class="trip-ideas-item" onclick="showItinerary('${id}'); closeTripIdeasMenu();">
+        return `<div class="trip-ideas-item" onclick="showItinerary('${id}', false); closeTripIdeasMenu();">
           <div class="trip-ideas-item-thumb" style="background:${tripBg(t)};"></div>
           <div class="trip-ideas-item-body">
             <div class="trip-ideas-item-name">${t.name}</div>
@@ -5989,7 +6002,7 @@ function recommendedCarouselHTML() {
       const t = TRIPS[v.tripId];
       const f = FRIENDS.find(fr => fr.name === v.friendName);
       if (!t) return '';
-      return `<div class="carousel-card" onclick="showItinerary('${v.tripId}')">
+      return `<div class="carousel-card" onclick="showItinerary('${v.tripId}', true)">
         <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
         <div class="trip-card-body">
           <div class="trip-card-name">${t.name}</div>
@@ -6009,7 +6022,7 @@ function latestTripsCarouselHTML() {
     ${SAVED_TRIP_IDS.map(id => {
       const t = TRIPS[id];
       if (!t) return '';
-      return `<div class="carousel-card" onclick="showItinerary('${id}')">
+      return `<div class="carousel-card" onclick="showItinerary('${id}', true)">
         <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
         <div class="trip-card-body">
           <div class="trip-card-name">${t.name}</div>
@@ -6112,7 +6125,7 @@ function initHomeMap() {
       iconAnchor: [26, 66],
     });
     const marker = L.marker(t.center, { icon }).addTo(homeMap);
-    marker.on('click', () => showItinerary(id));
+    marker.on('click', () => showItinerary(id, false));
   });
 }
 
@@ -6130,7 +6143,7 @@ function tripsHTML() {
     ? `<div class="trip-list">
         ${SAVED_TRIP_IDS.map(id => {
           const t = TRIPS[id];
-          return `<div class="trip-card" onclick="showItinerary('${id}')">
+          return `<div class="trip-card" onclick="showItinerary('${id}', true)">
             <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
             <div class="trip-card-body">
               <div class="trip-card-name">${t.name}</div>
@@ -6368,7 +6381,7 @@ function friendsHTML() {
           <div class="home-section-title">Activities</div>
           <div class="friend-activity-list">
             ${FRIEND_ACTIVITY.map(a => `
-              <div class="friend-activity-item" ${a.tripId ? `onclick="showItinerary('${a.tripId}')" style="cursor:pointer;"` : ''}>
+              <div class="friend-activity-item" ${a.tripId ? `onclick="showItinerary('${a.tripId}', true)" style="cursor:pointer;"` : ''}>
                 ${friendAvatarHTML(a.friend)}
                 <div style="flex:1;min-width:0;">
                   <div class="friend-activity-text"><b>${a.friend.name}</b> ${a.action} <b>${a.tripName}</b></div>
@@ -6423,7 +6436,7 @@ function initFriendsMap() {
     });
     const marker = L.marker(t.center, { icon }).addTo(friendsMap);
     marker.bindTooltip(`${v.friendName} · ${t.name}`, { direction: 'top', offset: [0, -70] });
-    marker.on('click', () => showItinerary(v.tripId));
+    marker.on('click', () => showItinerary(v.tripId, true));
     points.push(t.center);
   });
 
@@ -6587,7 +6600,7 @@ function confirmAddFriends() {
     }
   });
   closeModal();
-  showItinerary(modalTripId);
+  showItinerary(modalTripId, openItinSaved);
 }
 
 function copyShareLink() {
