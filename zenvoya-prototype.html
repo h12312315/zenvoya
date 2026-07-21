@@ -708,6 +708,27 @@ body {
   box-shadow: var(--shadow-medium);
 }
 
+.itin-chat-cta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  margin-top: 6px;
+  margin-bottom: 14px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.itin-chat-cta:hover { background: var(--color-primary-hover); }
+
 .itin-header-compact {
   display: flex;
   align-items: center;
@@ -715,7 +736,7 @@ body {
   gap: 12px;
   flex-wrap: wrap;
   margin-bottom: 16px;
-  padding-top: 6px;
+  padding-top: 0;
 }
 
 .itin-header-compact-right {
@@ -1764,6 +1785,9 @@ body {
   .chat-input-area { padding: 12px 16px 16px; }
   .location-cards { gap: 8px; }
   .location-card img { height: 100px; }
+  /* "Trip ideas from this chat" is a desktop convenience — it doesn't fit the mobile header */
+  #chatView .header-right { display: none; }
+  .explore-toggle { margin-left: auto; }
 }
 
 @media (min-width: 769px) {
@@ -3134,6 +3158,126 @@ body {
 
 .home-map-card .leaflet-container { width: 100%; height: 100%; font-family: var(--font-body); }
 
+/* Reusable segmented toggle */
+.seg-toggle {
+  display: inline-flex;
+  background: var(--color-gray-100);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  gap: 2px;
+}
+.seg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-600);
+  cursor: pointer;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.seg-btn svg { width: 14px; height: 14px; }
+.seg-btn.active { background: var(--color-white); color: var(--color-gray-900); box-shadow: var(--shadow-xsmall); }
+
+/* Travel status card (Home) */
+.status-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.status-headline { font-size: 22px; font-weight: 800; color: var(--color-gray-900); line-height: 1.15; }
+.status-sub { font-size: 13px; color: var(--color-gray-500); margin-top: 4px; }
+.status-level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-900);
+  color: var(--color-white);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.status-level-badge svg { color: var(--color-accent-green); }
+
+/* Footprint map (Home) */
+.footprint-map-card {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  height: 640px;
+  position: relative;
+  background: #aad3df;
+}
+.footprint-map-card .leaflet-container { width: 100%; height: 100%; font-family: var(--font-body); }
+.footprint-toggle { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 1000; box-shadow: var(--shadow-small); }
+.footprint-seeall {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  box-shadow: var(--shadow-medium);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.footprint-seeall:hover { background: var(--color-gray-50); }
+
+/* Explore map view */
+.explore-map-layout { flex: 1; min-height: 0; width: 100%; display: none; }
+.explore-map-panel { flex: 1 1 50%; min-width: 0; position: relative; overflow: hidden; border-right: 1px solid var(--color-gray-200); background: #aad3df; }
+.explore-map { position: absolute; inset: 0; background: #aad3df; }
+.explore-map .leaflet-container { width: 100%; height: 100%; font-family: var(--font-body); }
+.explore-side { flex: 1 1 50%; min-width: 0; max-width: 680px; overflow-y: auto; padding: 24px; }
+
+.explore-toggle { margin: 0 auto; }
+
+@media (max-width: 900px) {
+  .explore-map-layout.active { flex-direction: column; overflow-y: auto; }
+  .explore-map-panel { flex: none; height: 300px; border-right: none; border-bottom: 1px solid var(--color-gray-200); }
+  .explore-side { flex: none; max-width: none; overflow: visible; }
+  .footprint-map-card { height: 460px; }
+}
+
+/* Trip attachment inside a chat message */
+.message-user-col { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; max-width: 80%; }
+.trip-attach {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 230px;
+  max-width: 100%;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.trip-attach:hover { box-shadow: var(--shadow-small); }
+.trip-attach-thumb { width: 46px; height: 46px; border-radius: var(--radius-sm); flex-shrink: 0; }
+.trip-attach-name { font-size: 13px; font-weight: 600; color: var(--color-gray-900); }
+.trip-attach-meta { font-size: 11px; color: var(--color-gray-500); margin-top: 1px; }
+
 /* Carousel */
 .carousel {
   display: flex;
@@ -3204,7 +3348,11 @@ body {
     <div id="chatView">
       <header class="main-header">
         <button class="menu-btn" id="menuBtn" onclick="openMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></button>
-        <span class="header-title" id="headerTitle">Discover</span>
+        <span class="header-title" id="headerTitle">Explore</span>
+        <div class="seg-toggle explore-toggle" id="exploreToggle" style="display:none;">
+          <button class="seg-btn active" data-mode="chat" onclick="setExploreMode('chat')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg> Chat</button>
+          <button class="seg-btn" data-mode="map" onclick="setExploreMode('map')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg> Map</button>
+        </div>
         <div class="header-right" id="headerRight">
           <div class="trip-ideas-wrap">
             <button class="new-chat-btn" onclick="toggleTripIdeasMenu(event)"><span id="tripIdeasIcon" style="display:flex;"></span> <span>Trip ideas from this chat</span></button>
@@ -3212,7 +3360,7 @@ body {
           </div>
         </div>
       </header>
-      <div class="chat-container">
+      <div class="chat-container" id="chatContainer">
         <div class="chat-start-view" id="chatStartView">
           <div class="photo-collage" id="chatCollage"></div>
           <div class="chat-start-greeting">
@@ -3254,6 +3402,13 @@ body {
             </button>
           </div>
         </div>
+      </div>
+      <!-- Explore Map View -->
+      <div class="explore-map-layout" id="exploreMapView">
+        <div class="explore-map-panel">
+          <div class="explore-map" id="exploreMap"></div>
+        </div>
+        <div class="explore-side" id="exploreSide"></div>
       </div>
     </div>
 
@@ -3986,6 +4141,7 @@ const MONTHLY_TRIPS = [
   { label: 'Dec', count: 1, places: ['Denver'] },
 ];
 const CURRENT_MONTH_IDX = 9; // Oct — matches currentDate context for this prototype
+const MONTH_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const RECENT_COUNTRIES = [
   { flag: '🇫🇷', name: 'France' },
@@ -4039,7 +4195,18 @@ function zoyaMsg(text, tripIds) {
   return `<div class="message bot"><div class="message-avatar">${ZOYA_SVG}</div><div class="message-bubble${cards ? ' has-cards' : ''}">${text}${cards}</div></div>`;
 }
 
-function userMsg(text) {
+function userMsg(text, tripIds) {
+  if (tripIds && tripIds.length) {
+    const t = TRIPS[tripIds[0]];
+    const attach = t ? `<div class="trip-attach" onclick="showItinerary('${t.id}', ${SAVED_TRIP_IDS.includes(t.id)})">
+      <div class="trip-attach-thumb" style="background:${tripBg(t)};"></div>
+      <div style="min-width:0;">
+        <div class="trip-attach-name">${t.name}</div>
+        <div class="trip-attach-meta">${t.country} · ${t.dates}</div>
+      </div>
+    </div>` : '';
+    return `<div class="message user"><div class="message-user-col">${attach}<div class="message-bubble">${text}</div></div></div>`;
+  }
   return `<div class="message user"><div class="message-bubble">${text}</div></div>`;
 }
 
@@ -4090,6 +4257,7 @@ function itineraryHTML(tripId, isSaved) {
         </div>
       </div>
       <div class="itin-details">
+        <button class="itin-chat-cta" onclick="chatWithAgent('${trip.id}', ${isSaved})">${lucide('message-square', 16)} Chat with agent about this trip</button>
         <div class="itin-header-compact">
           <div class="itin-city itin-city-compact">${trip.name} <span class="itin-days-inline">${trip.days.length} days</span></div>
           <div class="itin-header-compact-right">
@@ -5570,6 +5738,7 @@ function renderStep(step, animate, openItin) {
   const headerTitle = document.getElementById('headerTitle');
 
   switchView('chat');
+  ensureChatContainer();
   itinPanel.classList.remove('active');
 
   if (step === 0) {
@@ -5577,7 +5746,7 @@ function renderStep(step, animate, openItin) {
     msgs.style.display = 'none';
     inputArea.style.display = 'none';
     activeChatId = null;
-    headerTitle.textContent = 'Discover';
+    headerTitle.textContent = 'Explore';
     renderNav();
   }
   else if (step === 1) {
@@ -5651,7 +5820,78 @@ function renderStep(step, animate, openItin) {
 
   }
 
+  updateExploreToggle();
   scrollChat();
+}
+
+/* ===================== EXPLORE — CHAT / MAP TOGGLE ===================== */
+let exploreMap = null;
+let exploreMode = 'chat';
+
+// Force the chat UI (used whenever a chat flow renders).
+function ensureChatContainer() {
+  exploreMode = 'chat';
+  const cc = document.getElementById('chatContainer');
+  const em = document.getElementById('exploreMapView');
+  if (cc) cc.style.display = '';
+  if (em) { em.style.display = 'none'; em.classList.remove('active'); }
+  document.querySelectorAll('#exploreToggle .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === 'chat'));
+}
+
+// The Chat/Map toggle only makes sense on the Explore landing (no active chat).
+function updateExploreToggle() {
+  const show = currentView === 'chat' && !activeChatId;
+  const toggle = document.getElementById('exploreToggle');
+  if (toggle) toggle.style.display = show ? '' : 'none';
+  if (!show) ensureChatContainer();
+}
+
+function setExploreMode(mode) {
+  exploreMode = mode;
+  document.querySelectorAll('#exploreToggle .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('chatContainer').style.display = mode === 'chat' ? '' : 'none';
+  const em = document.getElementById('exploreMapView');
+  em.style.display = mode === 'map' ? 'flex' : 'none';
+  em.classList.toggle('active', mode === 'map');
+  if (mode === 'map') {
+    renderExploreSide();
+    setTimeout(initExploreMap, 0);
+  }
+}
+
+function renderExploreSide() {
+  document.getElementById('exploreSide').innerHTML = `
+    <div class="home-section"><div class="home-section-title">New trips for you</div>${tripCardsCarouselHTML(RECOMMENDED_TRIP_IDS)}</div>
+    <div class="home-section"><div class="home-section-title">Your friends also visited</div>${recommendedCarouselHTML()}</div>
+    <div class="home-section"><div class="home-section-title">Hidden gems</div>${tripCardsCarouselHTML(HIDDEN_GEMS_IDS)}</div>
+    <div class="home-section" style="margin-bottom:0;"><div class="home-section-title">Good for your budget</div>${tripCardsCarouselHTML(BUDGET_IDS)}</div>
+  `;
+}
+
+function initExploreMap() {
+  const container = document.getElementById('exploreMap');
+  if (!container || typeof L === 'undefined') return;
+  if (exploreMap) { exploreMap.remove(); exploreMap = null; }
+  exploreMap = L.map(container, { scrollWheelZoom: false, zoomControl: true, worldCopyJump: true, minZoom: 2 }).setView([30, 5], 2);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  }).addTo(exploreMap);
+  const points = [];
+  Object.keys(TRIPS).forEach(id => {
+    const t = TRIPS[id];
+    if (!t) return;
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="squarcle-marker"><div class="friend-trip-squarcle" style="background:${tripBg(t)};"></div><div class="map-pin-label">${t.name}</div></div>`,
+      iconSize: [58, 82],
+      iconAnchor: [29, 72],
+    });
+    const m = L.marker(t.center, { icon }).addTo(exploreMap);
+    m.on('click', () => showItinerary(id, false));
+    points.push(t.center);
+  });
+  if (points.length) exploreMap.fitBounds(points, { padding: [60, 60], maxZoom: 5 });
 }
 
 
@@ -5859,7 +6099,7 @@ function closeMobileItin() {
   switchView(lastMobileView);
   if (lastMobileView === 'home') {
     document.getElementById('homeContent').innerHTML = homeHTML();
-    setTimeout(initHomeMap, 0);
+    setTimeout(initFootprintMap, 0);
   } else if (lastMobileView === 'trips') {
     document.getElementById('tripsContent').innerHTML = tripsHTML();
   } else if (lastMobileView === 'friends') {
@@ -5918,9 +6158,9 @@ const CHATS = [
 let activeChatId = null;
 
 function getChatTitle() {
-  if (!activeChatId) return 'Discover';
+  if (!activeChatId) return 'Explore';
   const chat = CHATS.find(c => c.id === activeChatId);
-  return chat ? chat.name : 'Discover';
+  return chat ? chat.name : 'Explore';
 }
 
 function chatTripCardsHTML(tripIds) {
@@ -5977,7 +6217,7 @@ function renderNav() {
   ).join('');
   const navHTML = `
     <div class="nav-item ${currentView === 'home' ? 'active' : ''}" onclick="openHomeView()"><span class="nav-icon">${lucide('home',18)}</span><span class="nav-label">Home</span></div>
-    <div class="nav-item ${currentView === 'chat' && !activeChatId ? 'active' : ''}" onclick="resetFlow()"><span class="nav-icon">${lucide('search',18)}</span><span class="nav-label">Discover</span><span class="nav-arrow">${lucide('chevron-down',14)}</span></div>
+    <div class="nav-item ${currentView === 'chat' && !activeChatId ? 'active' : ''}" onclick="resetFlow()"><span class="nav-icon">${lucide('search',18)}</span><span class="nav-label">Explore</span><span class="nav-arrow">${lucide('chevron-down',14)}</span></div>
     <div class="nav-children">
       ${chatChildren}
     </div>
@@ -6006,6 +6246,8 @@ function selectChat(chatId, e) {
   activeChatId = chatId;
   const chat = CHATS.find(c => c.id === chatId);
   switchView('chat');
+  ensureChatContainer();
+  updateExploreToggle();
   document.getElementById('headerTitle').textContent = getChatTitle();
   closeItinPanel();
 
@@ -6024,11 +6266,49 @@ function selectChat(chatId, e) {
   msgs.style.display = '';
   inputArea.style.display = '';
   msgs.innerHTML = (chat && chat.messages ? chat.messages : []).map(m => {
-    return m.role === 'bot' ? zoyaMsg(m.text, m.tripIds) : userMsg(m.text);
+    return m.role === 'bot' ? zoyaMsg(m.text, m.tripIds) : userMsg(m.text, m.tripIds);
   }).join('');
   document.getElementById('chatInput').value = '';
   scrollChat();
   renderNav();
+}
+
+function renderChatFromMessages(chat) {
+  document.getElementById('chatStartView').style.display = 'none';
+  const msgs = document.getElementById('chatMessages');
+  msgs.style.display = '';
+  document.getElementById('chatInputArea').style.display = '';
+  currentStep = -1;
+  msgs.innerHTML = (chat.messages || []).map(m => m.role === 'bot' ? zoyaMsg(m.text, m.tripIds) : userMsg(m.text, m.tripIds)).join('');
+  document.getElementById('chatInput').value = '';
+}
+
+// "Chat with agent" from a trip panel. Saved trips (or no open chat) start a
+// fresh chat; an unsaved trip with a chat already open posts to that chat.
+function chatWithAgent(tripId, isSaved) {
+  const trip = TRIPS[tripId];
+  if (!trip) return;
+  const prompt = `Let's talk about my ${trip.name} trip.`;
+  const reply = `Love it — let's dig into your ${trip.name} trip. Want to tweak the itinerary, compare flights and stays, or add something to a day?`;
+  let chat = null;
+  if (!isSaved && activeChatId) {
+    const active = CHATS.find(c => c.id === activeChatId);
+    if (active && active.messages) chat = active;
+  }
+  if (!chat) {
+    chat = { id: 'chat-' + Date.now(), name: `${trip.name} trip`, tripId, tripIds: [tripId], messages: [] };
+    CHATS.unshift(chat);
+  }
+  chat.messages.push({ role: 'user', text: prompt, tripIds: [tripId] }, { role: 'bot', text: reply });
+  activeChatId = chat.id;
+  closeItinPanel();
+  switchView('chat');
+  ensureChatContainer();
+  updateExploreToggle();
+  document.getElementById('headerTitle').textContent = getChatTitle();
+  renderChatFromMessages(chat);
+  renderNav();
+  scrollChat();
 }
 
 function createTripFromHome() {
@@ -6112,12 +6392,15 @@ function recommendedCarouselHTML() {
   </div>`;
 }
 
-// "We think you should try" — personalized recommendations (open unsaved).
+// Recommendation lists (all open in the unsaved / editorial state).
 const SUGGESTED_TRIP_IDS = ['lisbon', 'kyoto', 'reykjavik', 'barcelona'];
+const HIDDEN_GEMS_IDS = ['lisbon', 'reykjavik', 'kyoto'];
+const BUDGET_IDS = ['lisbon', 'barcelona', 'rome'];
 
-function suggestedCarouselHTML() {
+// Generic trip-card carousel (recommendations → unsaved).
+function tripCardsCarouselHTML(ids) {
   return `<div class="carousel">
-    ${SUGGESTED_TRIP_IDS.map(id => {
+    ${ids.map(id => {
       const t = TRIPS[id];
       if (!t) return '';
       return `<div class="carousel-card" onclick="showItinerary('${id}', false)">
@@ -6133,6 +6416,8 @@ function suggestedCarouselHTML() {
     }).join('')}
   </div>`;
 }
+
+function suggestedCarouselHTML() { return tripCardsCarouselHTML(SUGGESTED_TRIP_IDS); }
 
 function latestTripsCarouselHTML() {
   return `<div class="carousel">
@@ -6157,48 +6442,51 @@ function latestTripsCarouselHTML() {
 }
 
 function homeHTML() {
+  footprintScope = 'mine';
+  const cm = MONTHLY_TRIPS[CURRENT_MONTH_IDX];
+  const monthName = MONTH_FULL[CURRENT_MONTH_IDX];
+  const places = cm.places;
+  const placesList = places.length > 1
+    ? places.slice(0, -1).join(', ') + ' and ' + places[places.length - 1]
+    : (places[0] || '');
+  const statusSub = cm.count
+    ? `Across ${places.length} ${places.length === 1 ? 'city' : 'cities'} — ${placesList}`
+    : 'A quiet month — time to plan your next adventure';
   return `
     <h1 class="home-welcome">Welcome back, George</h1>
 
     <div class="home-section">
-      <div class="home-create-trip-banner">
-        ${photoCollageHTML()}
-        <div class="home-section-title">Plan new trip</div>
-        <div class="home-create-trip">
-          <div class="chat-input-wrapper home-create-trip-input">
-            <input class="chat-input" id="homeCreateTripInput" placeholder="Ask anything travel" onkeydown="if(event.key==='Enter') createTripFromHome();" />
-            <button class="send-btn send-btn-sm" onclick="createTripFromHome()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
+      <div class="home-section-title">Your travel status</div>
+      <div class="stat-card">
+        <div class="status-head">
+          <div>
+            <div class="status-headline">${cm.count} ${cm.count === 1 ? 'trip' : 'trips'} this ${monthName}</div>
+            <div class="status-sub">${statusSub}</div>
           </div>
+          <span class="status-level-badge">${lucide('star', 14)} ${levelLabel(ME.level)}</span>
         </div>
+        <div class="stat-card-title">Trips in 2026</div>
+        ${barChartHTML()}
+        <div class="stat-card-subsection-title">Recent countries visited</div>
+        ${countryFlagsHTML()}
       </div>
     </div>
 
     <div class="home-section">
-      <div class="home-section-title">Your latest trips</div>
+      <div class="home-section-title">Trips coming up</div>
       ${latestTripsCarouselHTML()}
     </div>
 
     <div class="home-section">
-      <div class="home-section-title">Your travel status</div>
-      <div class="status-grid">
-        <div class="stat-card">
-          <div class="stat-card-title">Trips in 2026</div>
-          ${barChartHTML()}
-          <div class="stat-card-subsection-title">Recent countries visited</div>
-          ${countryFlagsHTML()}
+      <div class="home-section-title">Your footprint</div>
+      <div class="footprint-map-card">
+        <div class="seg-toggle footprint-toggle">
+          <button class="seg-btn active" data-scope="mine" onclick="setFootprintScope('mine')">Only yours</button>
+          <button class="seg-btn" data-scope="circle" onclick="setFootprintScope('circle')">You &amp; your circle</button>
         </div>
-        <div class="stat-card">
-          <div class="stat-card-title">Activity leaderboard</div>
-          ${leaderboardHTML()}
-        </div>
+        <div class="footprint-map" id="footprintMap" style="position:absolute;inset:0;"></div>
+        <button class="footprint-seeall" onclick="openTripsView()">${lucide('map-pin', 14)} See all</button>
       </div>
-    </div>
-
-    <div class="home-section">
-      <div class="home-section-title">New trips for you</div>
-      <div class="home-map-card" id="homeMap"></div>
     </div>
 
     <div class="home-section">
@@ -6208,52 +6496,69 @@ function homeHTML() {
   `;
 }
 
-let homeMap = null;
+let footprintMap = null;
+let footprintScope = 'mine';
 
-function initHomeMap() {
-  const container = document.getElementById('homeMap');
+function friendsSavedTripIds() { return [...new Set(FRIEND_VISITED_TRIPS.map(v => v.tripId))]; }
+
+// "Only yours" = your saved trips; "You & your circle" = your saved trips
+// plus your friends' saved trips.
+function footprintTripIds() {
+  return footprintScope === 'mine'
+    ? SAVED_TRIP_IDS.slice()
+    : [...new Set([...SAVED_TRIP_IDS, ...friendsSavedTripIds()])];
+}
+
+function setFootprintScope(scope) {
+  footprintScope = scope;
+  document.querySelectorAll('.footprint-toggle .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.scope === scope));
+  initFootprintMap();
+}
+
+function initFootprintMap() {
+  const container = document.getElementById('footprintMap');
   if (!container || typeof L === 'undefined') return;
+  if (footprintMap) { footprintMap.remove(); footprintMap = null; }
 
-  if (homeMap) {
-    homeMap.remove();
-    homeMap = null;
-  }
-
-  homeMap = L.map(container, {
-    scrollWheelZoom: false,
-    dragging: false,
-    doubleClickZoom: false,
-    boxZoom: false,
-    keyboard: false,
-    touchZoom: false,
-    zoomControl: false,
-    tap: false,
-  }).setView([35, 15], 2);
-
+  footprintMap = L.map(container, { scrollWheelZoom: false, zoomControl: true, worldCopyJump: true, minZoom: 2 }).setView([30, 5], 2);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
-  }).addTo(homeMap);
+  }).addTo(footprintMap);
 
-  RECOMMENDED_TRIP_IDS.forEach(id => {
+  const savedSet = new Set(SAVED_TRIP_IDS);
+  const friendByTrip = {};
+  FRIEND_VISITED_TRIPS.forEach(v => { if (!friendByTrip[v.tripId]) friendByTrip[v.tripId] = FRIENDS.find(f => f.name === v.friendName); });
+
+  const points = [];
+  footprintTripIds().forEach(id => {
     const t = TRIPS[id];
     if (!t) return;
+    const mine = savedSet.has(id);
+    const f = (!mine && footprintScope === 'circle') ? friendByTrip[id] : null;
+    const avatar = f ? `<div class="friend-trip-avatar" style="background:${f.color};${f.textColor ? 'color:' + f.textColor + ';' : ''}">${f.initial}</div>` : '';
     const icon = L.divIcon({
       className: '',
-      html: `<div class="squarcle-marker"><div class="squarcle" style="width:52px;height:52px;background:${tripBg(t)};font-weight:700;color:var(--color-gray-700);">${t.img ? '' : t.name.charAt(0)}</div><div class="squarcle-label">${t.name}</div></div>`,
-      iconSize: [52, 74],
-      iconAnchor: [26, 66],
+      html: `<div class="squarcle-marker">
+        <div class="friend-trip-squarcle" style="background:${tripBg(t)};">${avatar}</div>
+        <div class="map-pin-label">${t.name}</div>
+      </div>`,
+      iconSize: [58, 82],
+      iconAnchor: [29, 72],
     });
-    const marker = L.marker(t.center, { icon }).addTo(homeMap);
-    marker.on('click', () => showItinerary(id, false));
+    const marker = L.marker(t.center, { icon }).addTo(footprintMap);
+    marker.on('click', () => showItinerary(id, true));
+    points.push(t.center);
   });
+
+  if (points.length) footprintMap.fitBounds(points, { padding: [80, 80], maxZoom: 5 });
 }
 
 function openHomeView() {
   switchView('home');
   closeItinPanel();
   document.getElementById('homeContent').innerHTML = homeHTML();
-  setTimeout(initHomeMap, 0);
+  setTimeout(initFootprintMap, 0);
   renderNav();
 }
 
@@ -6460,7 +6765,7 @@ function openScriptedChat(title, userText, replyHTML) {
 }
 
 function showUnknownDest(raw) {
-  openScriptedChat('Discover', raw,
+  openScriptedChat('Explore', raw,
     zoyaMsg(`I don't have anything for “${raw}” yet. I can help with ${BOOK_DESTS.slice(0, -1).join(', ')} or ${BOOK_DESTS[BOOK_DESTS.length - 1]}.`));
 }
 
