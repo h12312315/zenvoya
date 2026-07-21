@@ -331,10 +331,14 @@ body {
 
 .header-right {
   margin-left: auto;
-  display: flex;
+  display: none;
   align-items: center;
   gap: 8px;
 }
+.header-right.show-tripideas { display: flex; }
+.new-chat-btn-primary { color: var(--color-primary); border-color: var(--color-primary-light); font-weight: 600; }
+.new-chat-btn-primary:hover { background: var(--color-primary-ultra-light); }
+.new-chat-btn-primary svg { color: var(--color-primary); }
 
 .header-btn {
   padding: 6px 12px;
@@ -570,8 +574,8 @@ body {
   align-items: center;
   gap: 8px;
   border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-lg);
-  padding: 6px 6px 6px 16px;
+  border-radius: var(--radius-full);
+  padding: 6px 6px 6px 18px;
   background: var(--color-white);
   transition: border-color 0.15s;
 }
@@ -594,7 +598,7 @@ body {
 .send-btn {
   width: 44px;
   height: 44px;
-  border-radius: var(--radius-md);
+  border-radius: 50%;
   background: var(--color-primary);
   border: none;
   cursor: pointer;
@@ -1982,8 +1986,8 @@ body {
   .chat-input-area { padding: 12px 16px 16px; }
   .location-cards { gap: 8px; }
   .location-card img { height: 100px; }
-  /* "Trip ideas from this chat" is a desktop convenience — it doesn't fit the mobile header */
-  #chatView .header-right { display: none; }
+  /* "Trips from this chat" is a desktop convenience — it doesn't fit the mobile header */
+  #chatView .header-right.show-tripideas { display: none; }
   .explore-toggle { margin-left: auto; }
 }
 
@@ -3439,19 +3443,36 @@ body {
 }
 .footprint-seeall:hover { background: var(--color-gray-50); }
 
-/* Explore map view */
-.explore-map-layout { flex: 1; min-height: 0; width: 100%; display: none; }
-.explore-map-panel { flex: 1 1 50%; min-width: 0; position: relative; overflow: hidden; border-right: 1px solid var(--color-gray-200); background: #aad3df; }
-.explore-map { position: absolute; inset: 0; background: #aad3df; }
-.explore-map .leaflet-container { width: 100%; height: 100%; font-family: var(--font-body); }
-.explore-side { flex: 1 1 50%; min-width: 0; max-width: 680px; overflow-y: auto; padding: 24px; }
+/* Maps view — map with a floating recommendations panel */
+#mapsView { display: none; flex-direction: column; flex: 1; min-height: 0; }
+#mapsView.active { display: flex; }
+.maps-body { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #aad3df; }
+.maps-map { position: absolute; inset: 0; background: #aad3df; }
+.maps-map .leaflet-container { width: 100%; height: 100%; font-family: var(--font-body); }
 
-.explore-toggle { margin: 0 auto; }
+.maps-scope-toggle { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 1000; box-shadow: var(--shadow-small); }
+
+.maps-panel {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  bottom: 18px;
+  width: 380px;
+  max-width: calc(100% - 36px);
+  z-index: 900;
+  overflow-y: auto;
+  padding: 20px;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-large);
+}
 
 @media (max-width: 900px) {
-  .explore-map-layout.active { flex-direction: column; overflow-y: auto; }
-  .explore-map-panel { flex: none; height: 300px; border-right: none; border-bottom: 1px solid var(--color-gray-200); }
-  .explore-side { flex: none; max-width: none; overflow: visible; }
+  .maps-body { overflow-y: auto; }
+  .maps-map { position: sticky; top: 0; height: 300px; inset: auto; }
+  .maps-scope-toggle { top: 14px; }
+  .maps-panel { position: static; width: auto; max-width: none; margin: 12px; box-shadow: var(--shadow-medium); }
   .footprint-map-card { height: 460px; }
 }
 
@@ -3546,13 +3567,9 @@ body {
       <header class="main-header">
         <button class="menu-btn" id="menuBtn" onclick="openMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></button>
         <span class="header-title" id="headerTitle">Explore</span>
-        <div class="seg-toggle explore-toggle" id="exploreToggle" style="display:none;">
-          <button class="seg-btn active" data-mode="chat" onclick="setExploreMode('chat')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg> Chat</button>
-          <button class="seg-btn" data-mode="map" onclick="setExploreMode('map')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg> Map</button>
-        </div>
         <div class="header-right" id="headerRight">
           <div class="trip-ideas-wrap">
-            <button class="new-chat-btn" onclick="toggleTripIdeasMenu(event)"><span id="tripIdeasIcon" style="display:flex;"></span> <span>Trip ideas from this chat</span></button>
+            <button class="new-chat-btn new-chat-btn-primary" onclick="toggleTripIdeasMenu(event)"><span id="tripIdeasIcon" style="display:flex;"></span> <span id="tripIdeasLabel">Trips from this chat</span></button>
             <div class="trip-ideas-menu" id="tripIdeasMenu"></div>
           </div>
         </div>
@@ -3600,13 +3617,6 @@ body {
           </div>
         </div>
       </div>
-      <!-- Explore Map View -->
-      <div class="explore-map-layout" id="exploreMapView">
-        <div class="explore-map-panel">
-          <div class="explore-map" id="exploreMap"></div>
-        </div>
-        <div class="explore-side" id="exploreSide"></div>
-      </div>
     </div>
 
     <!-- Home View -->
@@ -3633,7 +3643,7 @@ body {
         <button class="menu-btn" onclick="openMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></button>
         <span class="header-title">Friends</span>
       </header>
-      <div class="friends-view-content" id="friendsContent"></div>
+      <div class="view-content full-width" id="friendsContent"></div>
     </div>
 
     <!-- Book Flights / Stays View -->
@@ -3643,6 +3653,22 @@ body {
         <span class="header-title">Book flights / stays</span>
       </header>
       <div class="view-content" id="bookContent"></div>
+    </div>
+
+    <!-- Maps View -->
+    <div id="mapsView">
+      <header class="main-header">
+        <button class="menu-btn" onclick="openMobileMenu()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg></button>
+        <span class="header-title">Maps</span>
+      </header>
+      <div class="maps-body">
+        <div class="maps-map" id="mapsMap"></div>
+        <div class="seg-toggle maps-scope-toggle">
+          <button class="seg-btn active" data-scope="mine" onclick="setMapsScope('mine')">Yours</button>
+          <button class="seg-btn" data-scope="circle" onclick="setMapsScope('circle')">Yours &amp; Friends'</button>
+        </div>
+        <div class="maps-panel" id="mapsPanel"></div>
+      </div>
     </div>
 
     <!-- Mobile Itinerary View -->
@@ -6121,6 +6147,7 @@ function switchView(view) {
   document.getElementById('tripsView').classList.toggle('active', view === 'trips');
   document.getElementById('friendsView').classList.toggle('active', view === 'friends');
   document.getElementById('bookView').classList.toggle('active', view === 'book');
+  document.getElementById('mapsView').classList.toggle('active', view === 'maps');
   document.getElementById('mobileItinView').classList.remove('active');
 }
 
@@ -6220,43 +6247,36 @@ function renderStep(step, animate, openItin) {
   scrollChat();
 }
 
-/* ===================== EXPLORE — CHAT / MAP TOGGLE ===================== */
-let exploreMap = null;
-let exploreMode = 'chat';
-
-// Force the chat UI (used whenever a chat flow renders).
+/* ===================== EXPLORE / MAPS ===================== */
+// Explore is chat-only; the map lives on its own Maps page.
 function ensureChatContainer() {
-  exploreMode = 'chat';
   const cc = document.getElementById('chatContainer');
-  const em = document.getElementById('exploreMapView');
   if (cc) cc.style.display = '';
-  if (em) { em.style.display = 'none'; em.classList.remove('active'); }
-  document.querySelectorAll('#exploreToggle .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === 'chat'));
 }
 
-// The Chat/Map toggle only makes sense on the Explore landing (no active chat).
 function updateExploreToggle() {
-  const show = currentView === 'chat' && !activeChatId;
+  const onExplore = currentView === 'chat' && !activeChatId;
   const toggle = document.getElementById('exploreToggle');
-  if (toggle) toggle.style.display = show ? '' : 'none';
-  if (!show) ensureChatContainer();
-}
-
-function setExploreMode(mode) {
-  exploreMode = mode;
-  document.querySelectorAll('#exploreToggle .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-  document.getElementById('chatContainer').style.display = mode === 'chat' ? '' : 'none';
-  const em = document.getElementById('exploreMapView');
-  em.style.display = mode === 'map' ? 'flex' : 'none';
-  em.classList.toggle('active', mode === 'map');
-  if (mode === 'map') {
-    renderExploreSide();
-    setTimeout(initExploreMap, 0);
+  if (toggle) toggle.style.display = onExplore ? '' : 'none';
+  if (!onExplore) ensureChatContainer();
+  // "N trips from this chat" only inside an individual chat
+  const hr = document.getElementById('headerRight');
+  if (hr) {
+    const inChat = currentView === 'chat' && !!activeChatId;
+    hr.classList.toggle('show-tripideas', inChat);
+    if (inChat) {
+      const n = getThreadTripIds().length;
+      const label = document.getElementById('tripIdeasLabel');
+      if (label) label.textContent = `${n} trip${n === 1 ? '' : 's'} from this chat`;
+    }
   }
 }
 
-function renderExploreSide() {
-  document.getElementById('exploreSide').innerHTML = `
+let mapsMap = null;
+let mapsScope = 'mine';
+
+function mapsPanelHTML() {
+  return `
     <div class="home-section"><div class="home-section-title">New trips for you</div>${tripCardsCarouselHTML(RECOMMENDED_TRIP_IDS)}</div>
     <div class="home-section"><div class="home-section-title">Your friends also visited</div>${recommendedCarouselHTML()}</div>
     <div class="home-section"><div class="home-section-title">Hidden gems</div>${tripCardsCarouselHTML(HIDDEN_GEMS_IDS)}</div>
@@ -6264,30 +6284,53 @@ function renderExploreSide() {
   `;
 }
 
-function initExploreMap() {
-  const container = document.getElementById('exploreMap');
+function setMapsScope(scope) {
+  mapsScope = scope;
+  document.querySelectorAll('.maps-scope-toggle .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.scope === scope));
+  initMapsMap();
+}
+
+// Shared friend-trip marker builder for the footprint-style maps.
+function scopedTripMarker(map, id, scope, points) {
+  const t = TRIPS[id];
+  if (!t) return;
+  const mine = SAVED_TRIP_IDS.includes(id);
+  const friend = (!mine && scope === 'circle') ? FRIENDS.find(f => f.name === (FRIEND_VISITED_TRIPS.find(v => v.tripId === id) || {}).friendName) : null;
+  const avatar = friend ? `<div class="friend-trip-avatar" style="background:${friend.color};${friend.textColor ? 'color:' + friend.textColor + ';' : ''}">${friend.initial}</div>` : '';
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="squarcle-marker"><div class="friend-trip-squarcle" style="background:${tripBg(t)};">${avatar}</div><div class="map-pin-label">${t.name}</div></div>`,
+    iconSize: [58, 82],
+    iconAnchor: [29, 72],
+  });
+  const marker = L.marker(t.center, { icon }).addTo(map);
+  marker.on('click', () => showItinerary(id, true));
+  points.push(t.center);
+}
+
+function initMapsMap() {
+  const container = document.getElementById('mapsMap');
   if (!container || typeof L === 'undefined') return;
-  if (exploreMap) { exploreMap.remove(); exploreMap = null; }
-  exploreMap = L.map(container, { scrollWheelZoom: false, zoomControl: true, worldCopyJump: true, minZoom: 2 }).setView([30, 5], 2);
+  if (mapsMap) { mapsMap.remove(); mapsMap = null; }
+  mapsMap = L.map(container, { scrollWheelZoom: false, zoomControl: true, worldCopyJump: true, minZoom: 2 }).setView([30, 5], 2);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
-  }).addTo(exploreMap);
+  }).addTo(mapsMap);
+  const ids = mapsScope === 'mine' ? SAVED_TRIP_IDS.slice() : [...new Set([...SAVED_TRIP_IDS, ...friendsSavedTripIds()])];
   const points = [];
-  Object.keys(TRIPS).forEach(id => {
-    const t = TRIPS[id];
-    if (!t) return;
-    const icon = L.divIcon({
-      className: '',
-      html: `<div class="squarcle-marker"><div class="friend-trip-squarcle" style="background:${tripBg(t)};"></div><div class="map-pin-label">${t.name}</div></div>`,
-      iconSize: [58, 82],
-      iconAnchor: [29, 72],
-    });
-    const m = L.marker(t.center, { icon }).addTo(exploreMap);
-    m.on('click', () => showItinerary(id, false));
-    points.push(t.center);
-  });
-  if (points.length) exploreMap.fitBounds(points, { padding: [60, 60], maxZoom: 5 });
+  ids.forEach(id => scopedTripMarker(mapsMap, id, mapsScope, points));
+  if (points.length) mapsMap.fitBounds(points, { padding: [90, 90], maxZoom: 5 });
+}
+
+function openMapsView() {
+  mapsScope = 'mine';
+  switchView('maps');
+  closeItinPanel();
+  document.querySelectorAll('.maps-scope-toggle .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.scope === 'mine'));
+  document.getElementById('mapsPanel').innerHTML = mapsPanelHTML();
+  setTimeout(initMapsMap, 0);
+  renderNav();
 }
 
 
@@ -6617,6 +6660,7 @@ function renderNav() {
     <div class="nav-children">
       ${chatChildren}
     </div>
+    <div class="nav-item ${currentView === 'maps' ? 'active' : ''}" onclick="openMapsView()"><span class="nav-icon">${lucide('globe',18)}</span><span class="nav-label">Maps</span></div>
     <div class="nav-item ${currentView === 'trips' ? 'active' : ''}" onclick="openTripsView()"><span class="nav-icon">${lucide('bookmark',18)}</span><span class="nav-label">Saved trips</span></div>
     <div class="nav-item ${currentView === 'friends' ? 'active' : ''}" onclick="openFriendsView()"><span class="nav-icon">${lucide('users',18)}</span><span class="nav-label">Friends</span></div>
     <div class="nav-item ${currentView === 'book' ? 'active' : ''}" onclick="openBookView()"><span class="nav-icon">${lucide('shopping-cart',18)}</span><span class="nav-label">Book flights / stays</span></div>
@@ -6877,11 +6921,11 @@ function homeHTML() {
       <div class="home-section-title">Your footprint</div>
       <div class="footprint-map-card">
         <div class="seg-toggle footprint-toggle">
-          <button class="seg-btn active" data-scope="mine" onclick="setFootprintScope('mine')">Only yours</button>
-          <button class="seg-btn" data-scope="circle" onclick="setFootprintScope('circle')">You &amp; your circle</button>
+          <button class="seg-btn active" data-scope="mine" onclick="setFootprintScope('mine')">Yours</button>
+          <button class="seg-btn" data-scope="circle" onclick="setFootprintScope('circle')">Yours &amp; Friends'</button>
         </div>
         <div class="footprint-map" id="footprintMap" style="position:absolute;inset:0;"></div>
-        <button class="footprint-seeall" onclick="openTripsView()">${lucide('map-pin', 14)} See all</button>
+        <button class="footprint-seeall" onclick="openMapsView()">${lucide('globe', 14)} Explore more</button>
       </div>
     </div>
 
@@ -7221,43 +7265,46 @@ function toggleLeaderboardAll(btn) {
 function friendsHTML() {
   leaderboardExpanded = false;
   return `
-    <div class="friends-layout">
-      <div class="friends-map-panel">
-        <div class="friends-map" id="friendsMap"></div>
-        <div class="friends-leaderboard-float">
-          <div class="flb-title">${lucide('star', 14)} Activity leaderboard</div>
-          <div class="flb-rows" id="flbRows">${leaderboardHTML(3)}</div>
-          <button class="flb-toggle" onclick="toggleLeaderboardAll(this)">
-            <span class="flb-toggle-label">Show all</span>${lucide('chevron-down', 14)}
-          </button>
-        </div>
+    <div class="home-section">
+      <div class="home-section-title">Your friends' footprint</div>
+      <div class="footprint-map-card">
+        <div class="footprint-map" id="friendsMap" style="position:absolute;inset:0;"></div>
       </div>
-      <div class="friends-side">
-        <div class="home-section">
-          <div class="home-section-title">Your friends also visited</div>
-          ${recommendedCarouselHTML()}
-        </div>
+    </div>
 
-        <div class="home-section">
-          <div class="home-section-title">We think you should try</div>
-          ${suggestedCarouselHTML()}
-        </div>
+    <div class="home-section">
+      <div class="home-section-title">Your friends also visited</div>
+      ${recommendedCarouselHTML()}
+    </div>
 
-        <div class="home-section" style="margin-bottom:0;">
-          <div class="home-section-title">Activities</div>
-          <div class="friend-activity-list">
-            ${FRIEND_ACTIVITY.map(a => `
-              <div class="friend-activity-item" ${a.tripId ? `onclick="showItinerary('${a.tripId}', true)" style="cursor:pointer;"` : ''}>
-                ${friendAvatarHTML(a.friend)}
-                <div style="flex:1;min-width:0;">
-                  <div class="friend-activity-text"><b>${a.friend.name}</b> ${a.action} <b>${a.tripName}</b></div>
-                  <div class="friend-activity-time">${a.time}</div>
-                </div>
-                ${a.tripId ? `<span class="friend-activity-arrow">${lucide('chevron-right',16)}</span>` : ''}
-              </div>
-            `).join('')}
+    <div class="home-section">
+      <div class="home-section-title">We think you should try</div>
+      ${suggestedCarouselHTML()}
+    </div>
+
+    <div class="home-section">
+      <div class="home-section-title">Activity leaderboard</div>
+      <div class="stat-card">
+        <div class="flb-rows" id="flbRows">${leaderboardHTML(3)}</div>
+        <button class="flb-toggle" onclick="toggleLeaderboardAll(this)">
+          <span class="flb-toggle-label">Show all</span>${lucide('chevron-down', 14)}
+        </button>
+      </div>
+    </div>
+
+    <div class="home-section" style="margin-bottom:0;">
+      <div class="home-section-title">Activities</div>
+      <div class="friend-activity-list">
+        ${FRIEND_ACTIVITY.map(a => `
+          <div class="friend-activity-item" ${a.tripId ? `onclick="showItinerary('${a.tripId}', true)" style="cursor:pointer;"` : ''}>
+            ${friendAvatarHTML(a.friend)}
+            <div style="flex:1;min-width:0;">
+              <div class="friend-activity-text"><b>${a.friend.name}</b> ${a.action} <b>${a.tripName}</b></div>
+              <div class="friend-activity-time">${a.time}</div>
+            </div>
+            ${a.tripId ? `<span class="friend-activity-arrow">${lucide('chevron-right',16)}</span>` : ''}
           </div>
-        </div>
+        `).join('')}
       </div>
     </div>
   `;
@@ -7272,7 +7319,7 @@ function initFriendsMap() {
   if (friendsMap) { friendsMap.remove(); friendsMap = null; }
 
   friendsMap = L.map(container, {
-    scrollWheelZoom: true,
+    scrollWheelZoom: false,
     zoomControl: true,
     worldCopyJump: true,
     minZoom: 2,
