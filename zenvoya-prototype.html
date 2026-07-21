@@ -2158,10 +2158,12 @@ body {
 .trip-card:hover, .carousel-card:hover { transform: translateY(-3px); }
 
 .trip-card-thumb {
-  height: 160px;
+  height: 184px;
   border-radius: var(--radius-md);
   transition: box-shadow 0.2s;
 }
+.rank-card-thumb { display: flex; align-items: center; justify-content: center; font-size: 34px; }
+.rank-card-title { font-size: 14px; font-weight: 600; color: var(--color-gray-900); line-height: 1.35; margin-top: 2px; }
 .trip-card:hover .trip-card-thumb,
 .carousel-card:hover .trip-card-thumb { box-shadow: var(--shadow-medium); }
 
@@ -2232,6 +2234,17 @@ body {
 
 /* Friends activity feed */
 .friend-activity-list { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.update-divider {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 14px 12px 6px;
+  border-top: 1px solid var(--color-gray-100);
+  margin-top: 6px;
+}
+.update-divider:first-child { border-top: none; margin-top: 0; padding-top: 4px; }
 
 .friend-activity-item {
   display: flex;
@@ -4869,20 +4882,74 @@ function saveTripToMyTrips(tripId) {
   reRenderItinerary(tripId);
 }
 
+const UPDATE_ACTIONS = [
+  { verb: 'added a stop to', tab: 'itinerary', day: true },
+  { verb: 'reordered', tab: 'itinerary', day: true },
+  { verb: 'commented on', tab: 'itinerary', day: true },
+  { verb: 'edited', tab: 'itinerary', day: true },
+  { verb: 'booked flights for', tab: 'flights' },
+  { verb: 'saved a flight option for', tab: 'flights' },
+  { verb: 'booked a stay for', tab: 'stay' },
+  { verb: 'added a hotel option to', tab: 'stay' },
+  { verb: 'added an activity to', tab: 'activity' },
+  { verb: 'added an expense to', tab: 'finances' },
+  { verb: 'settled up on', tab: 'finances' },
+];
+const UPDATE_BUCKETS = [
+  { label: 'Today', n: 3, time: ['just now', '2h ago', '5h ago'] },
+  { label: 'Yesterday', n: 3, time: ['9:20 AM', '1:05 PM', '6:40 PM'] },
+  { label: 'Earlier this week', n: 4, time: ['Mon', 'Mon', 'Sun', 'Sun'] },
+  { label: 'Last week', n: 6, time: ['', '', '', '', '', ''] },
+];
+const TAB_LABEL = { itinerary: 'the itinerary', flights: 'Flights', stay: 'Stay', activity: 'Activities', finances: 'Finances' };
+
+function generateTripUpdates(trip) {
+  const m = trip.members.length ? trip.members : [ME];
+  const dayIdxs = trip.days.map((d, i) => i).filter(i => trip.days[i].blocks && trip.days[i].blocks.length);
+  const out = [];
+  let k = 0;
+  UPDATE_BUCKETS.forEach(bucket => {
+    for (let j = 0; j < bucket.n; j++, k++) {
+      const h = hashStr(trip.id + '~upd' + k);
+      const friend = m[h % m.length];
+      const act = UPDATE_ACTIONS[h % UPDATE_ACTIONS.length];
+      const dayIdx = act.day && dayIdxs.length ? dayIdxs[h % dayIdxs.length] : null;
+      const target = act.tab === 'itinerary' && dayIdx != null ? `Day ${dayIdx + 1}` : TAB_LABEL[act.tab];
+      out.push({ friend, verb: act.verb, target, tab: act.tab, dayIdx, bucket: bucket.label, time: bucket.time[j] || 'last week' });
+    }
+  });
+  return out;
+}
+
+// Jump to the section an update refers to.
+function gotoUpdate(tab, dayIdx) {
+  const container = document.querySelector('#itinPanel.active .itin-details') || document.querySelector('#mobileItinContent .itin-details');
+  if (!container) return;
+  const btn = container.querySelector(`.itin-tab[data-tab="${tab}"]`);
+  if (btn) switchItinTab(btn, tab);
+  if (tab === 'itinerary' && dayIdx != null) setTimeout(() => filterToDay(dayIdx), 40);
+}
+
 function tripUpdatesHTML(trip) {
-  const updates = FRIEND_ACTIVITY.filter(a => a.tripId === trip.id);
-  if (!updates.length) return `<div class="empty-state">No updates yet on this trip.</div>`;
-  return `<div class="friend-activity-list">
-    ${updates.map(a => `
-      <div class="friend-activity-item">
-        ${friendAvatarHTML(a.friend)}
+  const updates = generateTripUpdates(trip);
+  let html = '<div class="friend-activity-list">';
+  let lastBucket = null;
+  updates.forEach(u => {
+    if (u.bucket !== lastBucket) {
+      html += `<div class="update-divider">${u.bucket}</div>`;
+      lastBucket = u.bucket;
+    }
+    html += `
+      <div class="friend-activity-item" onclick="gotoUpdate('${u.tab}', ${u.dayIdx == null ? 'null' : u.dayIdx})" style="cursor:pointer;">
+        ${friendAvatarHTML(u.friend)}
         <div style="flex:1;min-width:0;">
-          <div class="friend-activity-text"><b>${a.friend.name}</b> ${a.action} <b>${a.tripName}</b></div>
-          <div class="friend-activity-time">${a.time}</div>
+          <div class="friend-activity-text"><b>${u.friend.name.replace(' (You)', '')}</b> ${u.verb} <b>${u.target}</b></div>
+          <div class="friend-activity-time">${u.time}</div>
         </div>
-      </div>
-    `).join('')}
-  </div>`;
+        <span class="friend-activity-arrow">${lucide('chevron-right', 16)}</span>
+      </div>`;
+  });
+  return html + '</div>';
 }
 
 /* ===================== ACTIVITY REORDER / REMOVE ===================== */
@@ -5375,6 +5442,18 @@ function tripWhoFor(trip) {
   ];
 }
 
+function rankCardHTML(trip, o) {
+  const bg = locBgForActivity(trip, o.a.title);
+  const tag = ACTIVITY_TAG_MAP[o.a.icon] || 'Explore';
+  return `<div class="carousel-card rank-card" onclick="openActivityModal('${trip.id}',${o.di},${o.bi},${o.ai})">
+    <div class="trip-card-thumb rank-card-thumb" style="background:${bg};">${hasPhotoBg(bg) ? '' : o.a.icon}</div>
+    <div class="trip-card-body">
+      <span class="activity-rec-tag">${tag}</span>
+      <div class="rank-card-title">${o.a.title}</div>
+    </div>
+  </div>`;
+}
+
 function aboutTripHTML(trip) {
   const photos = (CITY_PHOTOS[trip.name] || []).slice(0, 3);
   const acts = collectTripActivities(trip);
@@ -5392,27 +5471,9 @@ function aboutTripHTML(trip) {
     { q: 'Best time', a: `You're visiting in ${MONTH_FULL[monthIdx]} — ${season.name.toLowerCase()}, when you get ${season.note}.` },
   ];
 
-  const rankRow = (o) => {
-    const bg = locBgForActivity(trip, o.a.title);
-    return `<div class="activity-rec" onclick="openActivityModal('${trip.id}',${o.di},${o.bi},${o.ai})">
-      <div class="activity-rec-img" style="background:${bg};">${hasPhotoBg(bg) ? '' : o.a.icon}</div>
-      <div class="activity-rec-body">
-        <span class="activity-rec-tag">${ACTIVITY_TAG_MAP[o.a.icon] || 'Explore'}</span>
-        <div class="activity-rec-title">${o.a.title}</div>
-        <div class="activity-rec-desc">${o.a.desc}</div>
-      </div>
-    </div>`;
-  };
-
   return `
     <div class="about-trip">
       <div class="about-lede">${trip.desc}</div>
-      <div class="about-meta-row">
-        <span class="about-chip">${lucide('map-pin', 13)} ${trip.country}</span>
-        <span class="about-chip">${lucide('calendar', 13)} ${trip.dates}</span>
-        <span class="about-chip">${lucide('clock', 13)} ${trip.days.length} days</span>
-        ${vibes.map(v => `<span class="about-chip">${v}</span>`).join('')}
-      </div>
 
       ${photos.length ? `
       <div class="about-section-title">A glimpse of ${trip.name}</div>
@@ -5439,12 +5500,16 @@ function aboutTripHTML(trip) {
       <div class="about-brief">
         ${brief.map(b => `<div class="about-brief-row"><div class="about-brief-q">${b.q}</div><div class="about-brief-a">${b.a}</div></div>`).join('')}
       </div>
+      ${vibes.length ? `<div class="about-meta-row" style="margin-top:12px;">
+        <span class="about-chip">${lucide('clock', 13)} ${trip.days.length} days</span>
+        ${vibes.map(v => `<span class="about-chip">${v}</span>`).join('')}
+      </div>` : ''}
 
       ${tiers.length ? `
       <div class="about-section-title">See &amp; do, ranked</div>
       ${tiers.map(t => `
         <div class="about-rank-tier">${t.label}</div>
-        <div class="activity-rec-list">${t.items.map(rankRow).join('')}</div>
+        <div class="carousel">${t.items.map(o => rankCardHTML(trip, o)).join('')}</div>
       `).join('')}` : ''}
 
       <div class="about-section-title">Best time to visit</div>
