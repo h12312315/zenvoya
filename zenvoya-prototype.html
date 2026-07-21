@@ -704,8 +704,8 @@ body {
 .itin-map-bottom > * { pointer-events: auto; }
 
 .itin-thumb-float {
-  width: 92px;
-  height: 68px;
+  width: 120px;
+  height: 90px;
   flex-shrink: 0;
   border-radius: var(--radius-md);
   border: 3px solid var(--color-white);
@@ -920,12 +920,12 @@ body {
 .day-pill-group::-webkit-scrollbar { display: none; }
 
 .day-pill {
-  padding: 6px 12px;
+  padding: 8px 14px;
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-full);
   background: var(--color-white);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-gray-600);
   font-family: var(--font-body);
@@ -1139,15 +1139,73 @@ body {
 
 .add-place-btn:hover { background: var(--color-gray-200); }
 
+.itin-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--color-gray-200);
+  margin-bottom: 20px;
+}
+
 .itin-tabs {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid var(--color-gray-200);
-  margin-bottom: 20px;
+  flex: 1;
+  min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
 }
 .itin-tabs::-webkit-scrollbar { display: none; }
+
+.ask-zenvoya-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-gray-300);
+  background: var(--color-white);
+  color: var(--color-gray-900);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.ask-zenvoya-btn:hover { background: var(--color-gray-50); }
+
+.budget-select { background: var(--color-white); }
+
+.invite-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 14px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  margin-bottom: 16px;
+}
+.invite-banner .avatar-stack { flex-shrink: 0; }
+.invite-banner-text { flex: 1; min-width: 0; font-size: 13px; color: var(--color-gray-600); line-height: 1.4; }
+.invite-banner-text b { font-weight: 600; color: var(--color-gray-900); }
+.invite-banner-btn {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-primary);
+  background: var(--color-white);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.invite-banner-btn:hover { background: var(--color-primary-ultra-light); }
 
 .itin-tab {
   padding: 10px 16px;
@@ -1561,7 +1619,42 @@ body {
 }
 
 /* Budget modal */
-.budget-modal-body { padding: 18px 20px 20px; overflow-y: auto; }
+.budget-modal-box { width: 560px; max-width: calc(100vw - 32px); max-height: calc(100vh - 64px); display: flex; flex-direction: column; }
+.bview-toggle { margin-left: auto; margin-right: 10px; }
+.budget-modal-body { padding: 20px; overflow-y: auto; }
+
+.budget-big { font-size: 34px; font-weight: 800; color: var(--color-gray-900); line-height: 1.05; }
+.budget-big span { font-size: 16px; font-weight: 600; color: var(--color-gray-400); }
+.budget-big-sub { font-size: 13px; color: var(--color-gray-500); margin-top: 4px; }
+
+.bmeter { margin: 20px 0 22px; }
+.bmeter-track { position: relative; height: 8px; border-radius: var(--radius-full); background: var(--color-gray-200); }
+.bmeter-fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: var(--radius-full); background: var(--color-primary); }
+.bmeter-range {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  width: 100%;
+  height: 22px;
+  margin: -15px 0 0;
+  background: transparent;
+  cursor: grab;
+}
+.bmeter-range:active { cursor: grabbing; }
+.bmeter-range::-webkit-slider-runnable-track { background: transparent; height: 22px; }
+.bmeter-range::-moz-range-track { background: transparent; height: 22px; }
+.bmeter-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--color-white); border: 4px solid var(--color-primary); box-shadow: var(--shadow-small); cursor: grab; }
+.bmeter-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--color-white); border: 4px solid var(--color-primary); box-shadow: var(--shadow-small); cursor: grab; }
+.bmeter-scale { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: var(--color-gray-500); margin-top: 8px; }
+.bmeter-flex { display: inline-flex; align-items: center; gap: 3px; color: var(--color-primary); }
+
+.bchart-box {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-top: 4px;
+}
+.bchart-title { font-size: 14px; font-weight: 700; color: var(--color-gray-900); margin-bottom: 14px; }
 .budget-current {
   display: flex;
   align-items: center;
@@ -1621,9 +1714,42 @@ body {
 .budget-bar-name { font-size: 13px; font-weight: 600; color: var(--color-gray-800); }
 .budget-bar-total { font-size: 14px; font-weight: 700; color: var(--color-gray-900); }
 .budget-bar-total span { font-size: 11px; font-weight: 500; color: var(--color-gray-400); }
-.budget-bar { display: flex; height: 14px; border-radius: var(--radius-full); overflow: hidden; background: var(--color-gray-100); }
-.budget-bar-seg { height: 100%; }
-.budget-bar-seg:first-child { border-radius: var(--radius-full) 0 0 var(--radius-full); }
+.budget-bar { display: flex; height: 24px; border-radius: var(--radius-sm); overflow: hidden; background: var(--color-gray-100); }
+.budget-bar-seg {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* Date modal */
+.date-modal-body { padding: 18px 20px 20px; overflow-y: auto; }
+.date-modal-label { font-size: 12px; font-weight: 600; color: var(--color-gray-600); margin-bottom: 8px; }
+.date-days-row { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.date-days-count { font-size: 22px; font-weight: 800; color: var(--color-gray-900); min-width: 96px; }
+.date-days-count span { font-size: 13px; font-weight: 500; color: var(--color-gray-400); }
+.date-days-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+.date-days-preset { padding: 7px 14px; border: 1.5px solid var(--color-gray-200); border-radius: var(--radius-full); background: var(--color-white); font-size: 13px; font-weight: 600; color: var(--color-gray-700); cursor: pointer; font-family: var(--font-body); }
+.date-days-preset.active { border-color: var(--color-primary); background: var(--color-primary-ultra-light); color: var(--color-gray-900); }
+
+.cal { border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); padding: 14px; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cal-title { font-size: 14px; font-weight: 700; color: var(--color-gray-900); }
+.cal-nav { width: 30px; height: 30px; border: none; background: var(--color-gray-100); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--color-gray-700); }
+.cal-nav:hover { background: var(--color-gray-200); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal-dow { text-align: center; font-size: 11px; font-weight: 600; color: var(--color-gray-400); padding: 4px 0; }
+.cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; border-radius: 50%; cursor: pointer; color: var(--color-gray-800); }
+.cal-day:hover { background: var(--color-gray-100); }
+.cal-day.empty { visibility: hidden; }
+.cal-day.start, .cal-day.end { background: var(--color-primary); color: #fff; font-weight: 700; }
+.cal-day.inrange { background: var(--color-primary-ultra-light); border-radius: 0; }
+.date-modal-selected { font-size: 13px; font-weight: 600; color: var(--color-gray-700); margin-top: 14px; text-align: center; }
 
 .budget-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
 .budget-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-gray-600); }
@@ -3751,7 +3877,12 @@ body {
 
 <!-- Trip Budget Modal -->
 <div class="modal-overlay" id="budgetModalOverlay" onclick="closeBudgetModalOnOverlay(event)">
-  <div class="modal-box split-modal-box" id="budgetModalBox"></div>
+  <div class="modal-box budget-modal-box" id="budgetModalBox"></div>
+</div>
+
+<!-- Trip Dates Modal -->
+<div class="modal-overlay" id="dateModalOverlay" onclick="closeDateModalOnOverlay(event)">
+  <div class="modal-box split-modal-box" id="dateModalBox"></div>
 </div>
 
 <script>
@@ -3767,6 +3898,7 @@ function lucide(name, size) {
     'x': '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     'arrow-left': '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
     'chevron-right': '<path d="m9 18 6-6-6-6"/>',
+    'chevron-left': '<path d="m15 18-6-6 6-6"/>',
     'chevron-down': '<path d="m6 9 6 6 6-6"/>',
     'search': '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
     'menu': '<path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/>',
@@ -4471,9 +4603,21 @@ function itineraryHTML(tripId, isSaved) {
     ? `<button class="action-btn action-btn-saved" style="flex:none;padding:8px 14px;">${lucide('check',14)} Trip Saved</button>`
     : `<button class="action-btn action-btn-primary" style="flex:none;padding:8px 14px;" onclick="saveTripToMyTrips('${trip.id}')">${lucide('bookmark',14)} Save trip</button>`;
   const budgetSelectHTML = `<button class="date-select budget-select" onclick="openBudgetModal('${trip.id}')">
-    <span class="date-select-label">${lucide('dollar-sign', 14)} <span class="budget-select-label">${budgetTierLabel(tripBudget(trip.id))}</span></span>
+    <span class="date-select-label">${lucide('dollar-sign', 14)} <span class="budget-select-label">${budgetHeaderLabel(trip)}</span></span>
     <span class="date-select-chevron">${lucide('chevron-down', 12)}</span>
   </button>`;
+  const dateSelectHTML = `<button class="date-select" onclick="openDateModal('${trip.id}')">
+    <span class="date-select-label">${lucide('calendar', 14)} ${trip.dates}</span>
+    <span class="date-select-chevron">${lucide('chevron-down', 12)}</span>
+  </button>`;
+  const askBtnHTML = `<button class="ask-zenvoya-btn" onclick="chatWithAgent('${trip.id}', ${isSaved})">${lucide('message-square', 14)} Ask Zenvoya</button>`;
+  const inviteFriends = FRIENDS.filter(f => !trip.members.some(m => m.id === f.id)).slice(0, 3);
+  const inviteBannerHTML = !isSaved ? `
+    <div class="invite-banner">
+      <div class="avatar-stack">${inviteFriends.map(f => friendAvatarHTML(f)).join('')}</div>
+      <span class="invite-banner-text">These friends might also be interested in going. <b>Invite them.</b></span>
+      <button class="invite-banner-btn" onclick="openAddFriendsModal('${trip.id}')">Invite</button>
+    </div>` : '';
   const tabs = isSaved
     ? [['updates', 'Updates'], ['flights', 'Flights'], ['stay', 'Stay'], ['activity', 'Activity'], ['itinerary', 'Itinerary'], ['finances', 'Finances']]
     : [['about', 'About trip'], ['itinerary', 'Itinerary'], ['flights', 'Flights'], ['stay', 'Stay'], ['activity', 'Activity']];
@@ -4496,19 +4640,11 @@ function itineraryHTML(tripId, isSaved) {
         </div>
       </div>
       <div class="itin-details">
-        <button class="itin-chat-cta" onclick="chatWithAgent('${trip.id}', ${isSaved})">${lucide('message-square', 16)} Chat with agent about this trip</button>
         <div class="itin-header-compact">
           <div class="itin-city itin-city-compact">${trip.name} <span class="itin-days-inline">${trip.days.length} days</span></div>
           <div class="itin-header-compact-right">
             ${isSaved ? avatarsHTML : ''}
-            <div class="date-select" onclick="toggleDateDropdown(event, this)">
-              <span class="date-select-label">${lucide('calendar', 14)} ${trip.dates}</span>
-              <span class="date-select-chevron">${lucide('chevron-down', 12)}</span>
-              <div class="date-select-dropdown" onclick="event.stopPropagation()">
-                <div class="date-select-dropdown-row">${trip.dates}</div>
-                <div class="date-select-dropdown-hint">${trip.days.length} days · Tap to edit trip dates</div>
-              </div>
-            </div>
+            ${dateSelectHTML}
             ${budgetSelectHTML}
             ${saveBtnHTML}
             <button class="action-btn" style="flex:none;padding:8px;" title="Share">${lucide('share',14)}</button>
@@ -4521,7 +4657,7 @@ function itineraryHTML(tripId, isSaved) {
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
               <div class="itin-city">${trip.name}</div>
               <div style="display:flex;gap:8px;">
-                <button class="action-btn" style="flex:none;padding:8px 14px;">${lucide('calendar',14)} ${trip.days.length} day <span style="color:var(--color-gray-400);margin-left:2px;">${lucide('chevron-down',12)}</span></button>
+                ${dateSelectHTML}
                 ${budgetSelectHTML}
                 ${saveBtnHTML}
                 <button class="action-btn" style="flex:none;padding:8px 14px;">${lucide('share',14)} Share</button>
@@ -4531,8 +4667,14 @@ function itineraryHTML(tripId, isSaved) {
             ${isSaved ? `<div style="display:flex;gap:12px;margin-top:8px;align-items:center;">${avatarsHTML}</div>` : ''}
           </div>
         </div>
-        <div class="itin-tabs">
-          ${tabs.map(([id, label]) => `<button class="itin-tab ${id === defaultTab ? 'active' : ''}" data-tab="${id}" onclick="switchItinTab(this,'${id}')">${label}</button>`).join('')}
+
+        ${inviteBannerHTML}
+
+        <div class="itin-tabs-row">
+          <div class="itin-tabs">
+            ${tabs.map(([id, label]) => `<button class="itin-tab ${id === defaultTab ? 'active' : ''}" data-tab="${id}" onclick="switchItinTab(this,'${id}')">${label}</button>`).join('')}
+          </div>
+          ${askBtnHTML}
         </div>
         ${!isSaved ? `<div class="itin-tab-panel" data-panel="about" ${show('about')}>${aboutTripHTML(trip)}</div>` : ''}
         ${isSaved ? `<div class="itin-tab-panel" data-panel="updates" ${show('updates')}>${tripUpdatesHTML(trip)}</div>` : ''}
@@ -5167,11 +5309,11 @@ const BUDGET_BASE = {
 };
 const BUDGET_TIERS = ['budget', 'average', 'premium'];
 const BUDGET_CATS = [['stay', 'Stay'], ['food', 'Food'], ['transit', 'Transit'], ['sights', 'Sights']];
-const BUDGET_CAT_COLOR = { stay: 'var(--color-gray-900)', food: 'var(--color-gray-500)', transit: 'var(--color-gray-300)', sights: 'var(--color-accent-green)' };
+const BUDGET_CAT_COLOR = { stay: '#7c3aed', food: '#f59e0b', transit: '#a3e635', sights: '#22c55e' };
 const CITY_COST_FACTOR = { Rome: 1, Paris: 1.15, Barcelona: 0.9, Tokyo: 1.05, Lisbon: 0.8, Kyoto: 1.0, Santorini: 1.1, Reykjavik: 1.35 };
 
-const tripBudgetTier = {};
-function tripBudget(id) { return tripBudgetTier[id] || 'average'; }
+const tripBudgetVal = {};   // selected daily $ per trip, or 'flex'
+let budgetView = 'daily';
 function budgetTierLabel(tier) { return BUDGET_BASE[tier].label; }
 function tierAmounts(trip, tier) {
   const f = CITY_COST_FACTOR[trip.name] || 1;
@@ -5179,6 +5321,21 @@ function tierAmounts(trip, tier) {
   let total = 0;
   BUDGET_CATS.forEach(([k]) => { const v = Math.round(BUDGET_BASE[tier][k] * f); cats[k] = v; total += v; });
   return { cats, total };
+}
+function budgetDaily(trip) {
+  const v = tripBudgetVal[trip.id];
+  if (v === undefined) return tierAmounts(trip, 'average').total;
+  return v === 'flex' ? tierAmounts(trip, 'premium').total : v;
+}
+function budgetIsFlex(trip) { return tripBudgetVal[trip.id] === 'flex'; }
+function budgetHeaderLabel(trip) {
+  return budgetIsFlex(trip) ? 'Flexible' : '$' + (budgetDaily(trip) * trip.days.length).toLocaleString();
+}
+function activeBudgetTier(trip) {
+  const daily = budgetDaily(trip);
+  let best = 'average', bd = Infinity;
+  BUDGET_TIERS.forEach(t => { const d = Math.abs(tierAmounts(trip, t).total - daily); if (d < bd) { bd = d; best = t; } });
+  return best;
 }
 
 /* ===================== ABOUT-TRIP CONTENT HELPERS ===================== */
@@ -5298,7 +5455,7 @@ function aboutTripHTML(trip) {
 
       <div class="about-section-title">What it costs</div>
       <div class="about-cost">
-        ${BUDGET_TIERS.map(t => `<div class="about-cost-tier ${t === tripBudget(trip.id) ? 'active' : ''}">
+        ${BUDGET_TIERS.map(t => `<div class="about-cost-tier ${t === activeBudgetTier(trip) ? 'active' : ''}">
           <div class="about-cost-amt">$${tierAmounts(trip, t).total}</div>
           <div class="about-cost-label">${budgetTierLabel(t)} · /day</div>
         </div>`).join('')}
@@ -5339,59 +5496,189 @@ function openBudgetModal(tripId) {
   document.getElementById('budgetModalOverlay').classList.add('active');
 }
 
+function budgetBounds(trip) {
+  const min = tierAmounts(trip, 'budget').total;
+  const premium = tierAmounts(trip, 'premium').total;
+  return { min, premium, max: Math.round(premium * 1.3), flexAt: Math.round(premium * 1.12) };
+}
+
 function renderBudgetModal() {
   const trip = TRIPS[budgetTripId];
   if (!trip) return;
-  const tier = tripBudget(trip.id);
+  const days = trip.days.length;
+  const mult = budgetView === 'total' ? days : 1;
+  const unit = budgetView === 'total' ? ' total' : '/day';
+  const b = budgetBounds(trip);
+  const daily = budgetDaily(trip);
+  const flex = budgetIsFlex(trip);
   const maxTotal = tierAmounts(trip, 'premium').total;
-  const thumbLeft = { budget: 16, average: 50, premium: 84 }[tier];
-  const fillW = { budget: 33, average: 66, premium: 100 }[tier];
   document.getElementById('budgetModalBox').innerHTML = `
-    <div class="modal-header"><h3>Trip budget</h3><button class="modal-close" onclick="closeBudgetModal()">${lucide('x', 16)}</button></div>
-    <div class="budget-modal-body">
-      <div class="budget-current">
-        <div>
-          <div class="budget-current-tier">${budgetTierLabel(tier)}</div>
-          <div class="budget-current-sub">Daily spend per person in ${trip.name}</div>
-        </div>
-        <div class="budget-current-amt">$${tierAmounts(trip, tier).total}<span>/day</span></div>
+    <div class="modal-header">
+      <h3>Trip budget</h3>
+      <div class="seg-toggle bview-toggle">
+        <button class="seg-btn ${budgetView === 'daily' ? 'active' : ''}" onclick="setBudgetView('daily')">Daily</button>
+        <button class="seg-btn ${budgetView === 'total' ? 'active' : ''}" onclick="setBudgetView('total')">Total</button>
       </div>
-      <div class="budget-meter">
-        <div class="budget-meter-track"><div class="budget-meter-fill" style="width:${fillW}%;"></div><div class="budget-meter-thumb" style="left:${thumbLeft}%;"></div></div>
-        <div class="budget-meter-scale"><span>Budget</span><span>Average</span><span>Premium</span></div>
+      <button class="modal-close" onclick="closeBudgetModal()">${lucide('x', 16)}</button>
+    </div>
+    <div class="budget-modal-body">
+      <div class="budget-big" id="budgetBig"></div>
+      <div class="budget-big-sub" id="budgetBigSub"></div>
+      <div class="bmeter">
+        <div class="bmeter-track"><div class="bmeter-fill" id="bmeterFill"></div></div>
+        <input type="range" class="bmeter-range" id="bmeterRange" min="${b.min}" max="${b.max}" step="5" value="${flex ? b.max : daily}" oninput="onBudgetSlide(this.value)">
+        <div class="bmeter-scale"><span>$${b.min}${budgetView === 'total' ? '' : '/day'}</span><span class="bmeter-flex">Flexible ${lucide('arrow-right', 12)}</span></div>
       </div>
       <div class="budget-presets">
-        ${BUDGET_TIERS.map(t => `<button class="budget-preset ${t === tier ? 'active' : ''}" onclick="setTripBudget('${t}')">
+        ${BUDGET_TIERS.map(t => { const tot = tierAmounts(trip, t).total; return `<button class="budget-preset" data-tier="${t}" onclick="presetBudget('${t}')">
           <span class="budget-preset-label">${budgetTierLabel(t)}</span>
-          <span class="budget-preset-amt">$${tierAmounts(trip, t).total}/day</span>
-        </button>`).join('')}
+          <span class="budget-preset-amt">$${(tot * mult).toLocaleString()}${unit}</span>
+        </button>`; }).join('')}
       </div>
-      <div class="budget-chart-title">Your daily ${trip.name} budget, three ways</div>
-      <div class="budget-chart">
-        ${BUDGET_TIERS.map(t => {
-          const { cats, total } = tierAmounts(trip, t);
-          return `<div class="budget-bar-row ${t === tier ? 'active' : ''}">
-            <div class="budget-bar-head"><span class="budget-bar-name">${budgetTierLabel(t)}</span><span class="budget-bar-total">$${total}<span>/day</span></span></div>
-            <div class="budget-bar">${BUDGET_CATS.map(([k]) => `<div class="budget-bar-seg" style="width:${(cats[k] / maxTotal) * 100}%;background:${BUDGET_CAT_COLOR[k]};" title="${k}: $${cats[k]}"></div>`).join('')}</div>
-          </div>`;
-        }).join('')}
+      <div class="bchart-box">
+        <div class="bchart-title">Common location budget</div>
+        <div class="budget-chart">
+          ${BUDGET_TIERS.map(t => {
+            const { cats, total } = tierAmounts(trip, t);
+            return `<div class="budget-bar-row">
+              <div class="budget-bar-head"><span class="budget-bar-name">${budgetTierLabel(t)}</span><span class="budget-bar-total">$${(total * mult).toLocaleString()}<span>${unit}</span></span></div>
+              <div class="budget-bar">${BUDGET_CATS.map(([k]) => `<div class="budget-bar-seg" style="width:${(cats[k] / maxTotal) * 100}%;background:${BUDGET_CAT_COLOR[k]};">$${(cats[k] * mult).toLocaleString()}</div>`).join('')}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="budget-legend">
+          ${BUDGET_CATS.map(([k, label]) => `<span class="budget-legend-item"><span class="budget-legend-dot" style="background:${BUDGET_CAT_COLOR[k]};"></span>${label}</span>`).join('')}
+        </div>
+        <div class="budget-chart-note">${budgetView === 'total' ? 'Whole trip' : 'Per day'}, per person, before flights</div>
       </div>
-      <div class="budget-legend">
-        ${BUDGET_CATS.map(([k, label]) => `<span class="budget-legend-item"><span class="budget-legend-dot" style="background:${BUDGET_CAT_COLOR[k]};"></span>${label}</span>`).join('')}
+    </div>
+  `;
+  updateBudgetLiveUI();
+}
+
+function updateBudgetLiveUI() {
+  const trip = TRIPS[budgetTripId];
+  if (!trip) return;
+  const b = budgetBounds(trip);
+  const flex = budgetIsFlex(trip);
+  const daily = budgetDaily(trip);
+  const val = flex ? b.max : daily;
+  const pct = Math.max(0, Math.min(100, ((val - b.min) / (b.max - b.min)) * 100));
+  const fill = document.getElementById('bmeterFill');
+  if (fill) fill.style.width = pct + '%';
+  const mult = budgetView === 'total' ? trip.days.length : 1;
+  const unit = budgetView === 'total' ? ' total' : '/day';
+  const big = document.getElementById('budgetBig');
+  if (big) big.innerHTML = flex ? 'Flexible' : `~$${(daily * mult).toLocaleString()}<span>${unit}</span>`;
+  const sub = document.getElementById('budgetBigSub');
+  if (sub) sub.textContent = flex ? 'No cap — show me the best of it' : `Up to about this, per person in ${trip.name}`;
+  const at = activeBudgetTier(trip);
+  document.querySelectorAll('.budget-preset').forEach(p => p.classList.toggle('active', !flex && p.dataset.tier === at));
+  document.querySelectorAll('.budget-select-label').forEach(el => { el.textContent = budgetHeaderLabel(trip); });
+}
+
+function onBudgetSlide(val) {
+  const trip = TRIPS[budgetTripId];
+  const b = budgetBounds(trip);
+  tripBudgetVal[trip.id] = (+val >= b.flexAt) ? 'flex' : +val;
+  updateBudgetLiveUI();
+}
+
+function presetBudget(tier) {
+  const trip = TRIPS[budgetTripId];
+  tripBudgetVal[trip.id] = tierAmounts(trip, tier).total;
+  const range = document.getElementById('bmeterRange');
+  if (range) range.value = tierAmounts(trip, tier).total;
+  updateBudgetLiveUI();
+}
+
+function setBudgetView(v) { budgetView = v; renderBudgetModal(); }
+
+function closeBudgetModal() { document.getElementById('budgetModalOverlay').classList.remove('active'); }
+function closeBudgetModalOnOverlay(e) { if (e.target.id === 'budgetModalOverlay') closeBudgetModal(); }
+
+/* ===================== DATE MODAL ===================== */
+let dateModalTripId = null, dateStart = null, dateDays = 4, dateMonthView = null;
+
+function parseTripStart(trip) {
+  const first = (trip.dates.split('–')[0] || '').trim();
+  const parts = first.split(' ');
+  const mi = MONTH_ABBR.indexOf((parts[0] || '').slice(0, 3));
+  return new Date(2026, mi < 0 ? CURRENT_MONTH_IDX : mi, parseInt(parts[1], 10) || 1);
+}
+function sameDay(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+function dateEnd() { const e = new Date(dateStart); e.setDate(e.getDate() + dateDays - 1); return e; }
+function fmtDate(d) { return MONTH_ABBR[d.getMonth()] + ' ' + d.getDate(); }
+
+function openDateModal(tripId) {
+  const trip = TRIPS[tripId];
+  dateModalTripId = tripId;
+  dateDays = trip.days.length;
+  dateStart = parseTripStart(trip);
+  dateMonthView = new Date(dateStart.getFullYear(), dateStart.getMonth(), 1);
+  renderDateModal();
+  document.getElementById('dateModalOverlay').classList.add('active');
+}
+
+function setDateDays(n) { dateDays = Math.max(1, n); renderDateModal(); }
+function calShiftMonth(delta) { dateMonthView = new Date(dateMonthView.getFullYear(), dateMonthView.getMonth() + delta, 1); renderDateModal(); }
+function calPickDay(y, m, d) { dateStart = new Date(y, m, d); renderDateModal(); }
+
+function applyDates() {
+  const trip = TRIPS[dateModalTripId];
+  trip.dates = fmtDate(dateStart) + ' – ' + fmtDate(dateEnd());
+  closeDateModal();
+  reRenderItinerary(trip.id);
+}
+
+function renderDateModal() {
+  const y = dateMonthView.getFullYear(), m = dateMonthView.getMonth();
+  const startDow = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const s = dateStart, e = dateEnd();
+  const cells = [];
+  for (let i = 0; i < startDow; i++) cells.push('<div class="cal-day empty"></div>');
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cur = new Date(y, m, d);
+    let cls = '';
+    if (sameDay(cur, s)) cls = 'start';
+    else if (sameDay(cur, e)) cls = 'end';
+    else if (cur > s && cur < e) cls = 'inrange';
+    cells.push(`<div class="cal-day ${cls}" onclick="calPickDay(${y},${m},${d})">${d}</div>`);
+  }
+  const presets = [3, 4, 5, 7, 10];
+  document.getElementById('dateModalBox').innerHTML = `
+    <div class="modal-header"><h3>Trip dates</h3><button class="modal-close" onclick="closeDateModal()">${lucide('x', 16)}</button></div>
+    <div class="date-modal-body">
+      <div class="date-modal-label">How many days?</div>
+      <div class="date-days-row">
+        <div class="date-days-count">${dateDays} <span>${dateDays === 1 ? 'day' : 'days'}</span></div>
+        <button class="book-stepper-btn" onclick="setDateDays(${dateDays - 1})" ${dateDays <= 1 ? 'disabled' : ''}>${lucide('minus', 14)}</button>
+        <button class="book-stepper-btn" onclick="setDateDays(${dateDays + 1})">${lucide('plus', 14)}</button>
       </div>
-      <div class="budget-chart-note">Daily spend per person, before flights</div>
+      <div class="date-days-presets">
+        ${presets.map(p => `<button class="date-days-preset ${p === dateDays ? 'active' : ''}" onclick="setDateDays(${p})">${p} days</button>`).join('')}
+      </div>
+      <div class="date-modal-label">Pick your start date</div>
+      <div class="cal">
+        <div class="cal-head">
+          <button class="cal-nav" onclick="calShiftMonth(-1)">${lucide('chevron-left', 16)}</button>
+          <div class="cal-title">${MONTH_FULL[m]} ${y}</div>
+          <button class="cal-nav" onclick="calShiftMonth(1)">${lucide('chevron-right', 16)}</button>
+        </div>
+        <div class="cal-grid">
+          ${['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => `<div class="cal-dow">${d}</div>`).join('')}
+          ${cells.join('')}
+        </div>
+      </div>
+      <div class="date-modal-selected">${fmtDate(s)} – ${fmtDate(e)} · ${dateDays} ${dateDays === 1 ? 'day' : 'days'}</div>
+      <button class="split-save-btn" style="margin-top:14px;" onclick="applyDates()">Apply dates</button>
     </div>
   `;
 }
 
-function setTripBudget(tier) {
-  tripBudgetTier[budgetTripId] = tier;
-  renderBudgetModal();
-  document.querySelectorAll('.budget-select-label').forEach(el => { el.textContent = budgetTierLabel(tier); });
-}
-
-function closeBudgetModal() { document.getElementById('budgetModalOverlay').classList.remove('active'); }
-function closeBudgetModalOnOverlay(e) { if (e.target.id === 'budgetModalOverlay') closeBudgetModal(); }
+function closeDateModal() { document.getElementById('dateModalOverlay').classList.remove('active'); }
+function closeDateModalOnOverlay(e) { if (e.target.id === 'dateModalOverlay') closeDateModal(); }
 
 /* ===================== FINANCES — SPLITWISE MODEL ===================== */
 let expenseSeq = 1;
