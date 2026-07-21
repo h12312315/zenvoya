@@ -612,17 +612,21 @@ body {
 /* ===================== ITINERARY PANEL ===================== */
 .itinerary-panel {
   display: none;
-  width: 0;
+  width: 50%;
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100dvh;
   border-left: 1px solid var(--color-gray-200);
   overflow-y: auto;
-  flex-shrink: 0;
   background: var(--color-white);
+  z-index: 1000;
+  box-shadow: -12px 0 48px rgba(0, 0, 0, 0.22), 0 24px 48px rgba(0, 0, 0, 0.18);
   animation: slideIn 0.4s ease;
 }
 
 .itinerary-panel.active {
   display: block;
-  width: 50%;
 }
 
 @keyframes slideIn {
@@ -1097,7 +1101,10 @@ body {
   gap: 0;
   border-bottom: 1px solid var(--color-gray-200);
   margin-bottom: 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.itin-tabs::-webkit-scrollbar { display: none; }
 
 .itin-tab {
   padding: 10px 16px;
@@ -1109,6 +1116,8 @@ body {
   border-bottom: 2px solid transparent;
   cursor: pointer;
   font-family: var(--font-body);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .itin-tab.active { font-weight: 600; color: var(--color-primary); border-bottom-color: var(--color-primary); }
@@ -1266,6 +1275,350 @@ body {
   white-space: nowrap;
 }
 .explore-btn:hover { background: var(--color-primary-hover); }
+
+/* ===================== ABOUT TRIP (editorial) ===================== */
+.about-trip { padding-top: 4px; }
+
+.about-lede {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--color-gray-700);
+  margin-bottom: 8px;
+}
+
+.about-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 22px;
+}
+.about-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-100);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-gray-700);
+}
+.about-chip svg { color: var(--color-gray-500); }
+
+.about-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin: 26px 0 12px;
+}
+
+.about-gallery {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-auto-rows: 110px;
+  gap: 8px;
+}
+.about-gallery-img {
+  border-radius: var(--radius-md);
+  background: var(--color-gray-100) center/cover no-repeat;
+}
+.about-gallery-img:first-child { grid-row: span 2; }
+
+.about-highlights { display: flex; flex-direction: column; gap: 14px; }
+.about-highlight {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.about-highlight-img {
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-gray-100) center/cover no-repeat;
+}
+.about-highlight-body { min-width: 0; }
+.about-highlight-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+.about-highlight-title { font-size: 15px; font-weight: 700; color: var(--color-gray-900); margin-bottom: 4px; }
+.about-highlight-desc { font-size: 13px; line-height: 1.55; color: var(--color-gray-600); }
+
+.about-glance {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+.about-glance-stat {
+  background: var(--color-gray-50);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  text-align: center;
+}
+.about-glance-value { font-size: 22px; font-weight: 800; color: var(--color-gray-900); line-height: 1.1; }
+.about-glance-label { font-size: 11px; color: var(--color-gray-500); margin-top: 4px; }
+
+.about-cta {
+  margin: 26px 0 8px;
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-gray-900), var(--color-gray-700));
+  color: var(--color-white);
+  text-align: center;
+}
+.about-cta-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.about-cta-sub { font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 14px; line-height: 1.5; }
+.about-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  color: var(--color-gray-900);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+.about-cta-btn:hover { background: var(--color-gray-100); }
+
+/* Editorial recommended lists (Flights / Stay unsaved) */
+.editorial-intro {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-gray-600);
+  margin-bottom: 14px;
+}
+.editorial-cta {
+  width: 100%;
+  margin-top: 6px;
+  padding: 13px;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  color: var(--color-gray-900);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.editorial-cta:hover { background: var(--color-gray-50); border-color: var(--color-gray-400); }
+
+/* Activity tab cards */
+.activity-rec-list { display: flex; flex-direction: column; gap: 12px; }
+.activity-rec {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.15s;
+}
+.activity-rec:hover { transform: translateY(-2px); box-shadow: var(--shadow-medium); border-color: var(--color-primary); }
+.activity-rec-img {
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-gray-100) center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+}
+.activity-rec-body { flex: 1; min-width: 0; }
+.activity-rec-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+.activity-rec-title { font-size: 15px; font-weight: 600; color: var(--color-gray-900); margin-bottom: 3px; }
+.activity-rec-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-gray-600);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Finances CTAs */
+.finance-actions { display: flex; gap: 10px; margin: 4px 0 20px; }
+.finance-action-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-gray-200);
+  background: var(--color-gray-100);
+  color: var(--color-gray-800);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: background 0.15s;
+}
+.finance-action-btn:hover { background: var(--color-gray-200); }
+.finance-action-btn.primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+}
+.finance-action-btn.primary:hover { background: var(--color-primary-hover); }
+
+.finance-balance-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+.finance-balance-row:last-child { border-bottom: none; }
+.finance-balance-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--color-gray-800); }
+.finance-balance-amount { font-size: 14px; font-weight: 700; }
+.finance-balance-amount.positive { color: var(--color-success); }
+.finance-balance-amount.negative { color: var(--color-error); }
+.finance-balance-amount.settled { color: var(--color-gray-400); font-weight: 600; }
+
+.finance-row.settle .finance-row-icon { background: var(--color-success); color: var(--color-white); }
+
+/* Splitwise-style finance modal */
+.split-modal-box { width: 440px; max-width: calc(100vw - 32px); max-height: calc(100vh - 64px); display: flex; flex-direction: column; }
+.split-modal-body { padding: 18px 20px; overflow-y: auto; }
+
+.split-field { margin-bottom: 16px; }
+.split-field-label { font-size: 12px; font-weight: 600; color: var(--color-gray-600); margin-bottom: 7px; }
+
+.split-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-family: var(--font-body);
+  color: var(--color-gray-900);
+  background: var(--color-white);
+}
+.split-input:focus { outline: none; border-color: var(--color-primary); }
+
+.split-amount-wrap { position: relative; }
+.split-amount-wrap .split-currency {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-gray-500);
+}
+.split-amount-wrap .split-input { padding-left: 30px; font-size: 20px; font-weight: 700; height: 56px; }
+
+.split-payer-options, .split-people { display: flex; flex-wrap: wrap; gap: 8px; }
+.split-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px 7px 8px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-gray-200);
+  background: var(--color-white);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-700);
+  transition: border-color 0.15s, background 0.15s;
+}
+.split-pill .split-pill-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+.split-pill.active { border-color: var(--color-primary); background: var(--color-primary-ultra-light); color: var(--color-gray-900); font-weight: 600; }
+
+.split-note { font-size: 12px; color: var(--color-gray-500); margin-top: 8px; line-height: 1.5; }
+
+.split-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  margin-bottom: 10px;
+}
+.split-suggestion-avatars { display: flex; align-items: center; }
+.split-suggestion-arrow { color: var(--color-gray-400); display: flex; align-items: center; }
+.split-suggestion-text { flex: 1; min-width: 0; font-size: 13px; color: var(--color-gray-700); line-height: 1.4; }
+.split-suggestion-text b { font-weight: 700; color: var(--color-gray-900); }
+.split-record-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-success);
+  color: var(--color-white);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.split-record-btn:hover { filter: brightness(0.95); }
+
+.split-all-settled { text-align: center; padding: 24px 12px; color: var(--color-gray-500); font-size: 14px; }
+.split-all-settled svg { color: var(--color-success); margin-bottom: 8px; }
+
+.split-modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--color-gray-200);
+  display: flex;
+  gap: 10px;
+}
+.split-save-btn {
+  flex: 1;
+  padding: 13px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+.split-save-btn:hover { background: var(--color-primary-hover); }
+.split-save-btn:disabled { background: var(--color-gray-300); cursor: default; }
 
 /* ===================== MOBILE MENU OVERLAY ===================== */
 .mobile-menu-overlay {
@@ -2948,6 +3301,11 @@ body {
   <div class="modal-box book-modal-box" id="bookModalBox"></div>
 </div>
 
+<!-- Splitwise-style Finance Modal (add expense / settle up) -->
+<div class="modal-overlay" id="splitModalOverlay" onclick="closeSplitModalOnOverlay(event)">
+  <div class="modal-box split-modal-box" id="splitModalBox"></div>
+</div>
+
 <script>
 function lucide(name, size) {
   size = size || 18;
@@ -3630,9 +3988,10 @@ function itineraryHTML(tripId) {
     ? `<button class="action-btn action-btn-saved" style="flex:none;padding:8px 14px;">${lucide('check',14)} Trip Saved</button>`
     : `<button class="action-btn action-btn-primary" style="flex:none;padding:8px 14px;" onclick="saveTripToMyTrips('${trip.id}')">${lucide('bookmark',14)} Save trip</button>`;
   const tabs = isSaved
-    ? [['updates', 'Updates'], ['itinerary', 'Itinerary'], ['flights', 'Flights'], ['stay', 'Stay'], ['finances', 'Finances']]
-    : [['itinerary', 'Itinerary'], ['flights', 'Flights'], ['stay', 'Stay'], ['finances', 'Finances']];
-  const defaultTab = isSaved ? 'updates' : 'itinerary';
+    ? [['updates', 'Updates'], ['flights', 'Flights'], ['stay', 'Stay'], ['activity', 'Activity'], ['itinerary', 'Itinerary'], ['finances', 'Finances']]
+    : [['about', 'About trip'], ['itinerary', 'Itinerary'], ['flights', 'Flights'], ['stay', 'Stay'], ['activity', 'Activity']];
+  const defaultTab = isSaved ? 'updates' : 'about';
+  const show = id => id === defaultTab ? '' : 'style="display:none;"';
   return `
     <div class="itin-content">
       <div class="itin-toolbar">
@@ -3679,17 +4038,19 @@ function itineraryHTML(tripId) {
         <div class="itin-tabs">
           ${tabs.map(([id, label]) => `<button class="itin-tab ${id === defaultTab ? 'active' : ''}" data-tab="${id}" onclick="switchItinTab(this,'${id}')">${label}</button>`).join('')}
         </div>
-        ${isSaved ? `<div class="itin-tab-panel" data-panel="updates" ${defaultTab === 'updates' ? '' : 'style="display:none;"'}>${tripUpdatesHTML(trip)}</div>` : ''}
-        <div class="itin-tab-panel" data-panel="itinerary" ${defaultTab === 'itinerary' ? '' : 'style="display:none;"'}>
+        ${!isSaved ? `<div class="itin-tab-panel" data-panel="about" ${show('about')}>${aboutTripHTML(trip)}</div>` : ''}
+        ${isSaved ? `<div class="itin-tab-panel" data-panel="updates" ${show('updates')}>${tripUpdatesHTML(trip)}</div>` : ''}
+        <div class="itin-tab-panel" data-panel="flights" ${show('flights')}>${isSaved ? flightsTabHTML(trip) : editorialFlightsHTML(trip)}</div>
+        <div class="itin-tab-panel" data-panel="stay" ${show('stay')}>${isSaved ? stayTabHTML(trip) : editorialStaysHTML(trip)}</div>
+        <div class="itin-tab-panel" data-panel="activity" ${show('activity')}>${activitiesTabHTML(trip)}</div>
+        <div class="itin-tab-panel" data-panel="itinerary" ${show('itinerary')}>
           <div class="day-pill-group">
             <button class="day-pill active" data-day="all" onclick="filterToDay(null)">All</button>
             ${trip.days.map((d, i) => `<button class="day-pill" data-day="${i}" onclick="filterToDay(${i})">Day ${i + 1}</button>`).join('')}
           </div>
           ${trip.days.map((day, i) => dayItemHTML(trip, day, i)).join('')}
         </div>
-        <div class="itin-tab-panel" data-panel="flights" style="display:none;">${flightsTabHTML(trip)}</div>
-        <div class="itin-tab-panel" data-panel="stay" style="display:none;">${stayTabHTML(trip)}</div>
-        <div class="itin-tab-panel" data-panel="finances" style="display:none;">${financesTabHTML(trip)}</div>
+        ${isSaved ? `<div class="itin-tab-panel" data-panel="finances" ${show('finances')}>${financesTabHTML(trip)}</div>` : ''}
       </div>
     </div>`;
 }
@@ -4192,6 +4553,381 @@ function bookingCardHTML(opts) {
     </div>`;
 }
 
+/* ===================== TRIP DETAIL — EDITORIAL TABS ===================== */
+function tripFlights(trip) { if (!trip._flights) trip._flights = generateFlights('New York', trip.name); return trip._flights; }
+function tripStays(trip) { if (!trip._stays) trip._stays = generateStays(trip.name); return trip._stays; }
+
+function openBookWith(tab, dest) {
+  bookTab = tab;
+  openBookView();
+  const d = document.getElementById('bookDest');
+  if (d) { d.value = dest; syncBookSearchBtn(); }
+}
+
+function openTripFlightModal(tripId, idx) {
+  const r = tripFlights(TRIPS[tripId])[idx];
+  if (!r) return;
+  document.getElementById('bookModalBox').innerHTML = flightModalHTML(r);
+  document.getElementById('bookModalOverlay').classList.add('active');
+}
+
+function openTripStayModal(tripId, idx) {
+  const s = tripStays(TRIPS[tripId])[idx];
+  if (!s) return;
+  document.getElementById('bookModalBox').innerHTML = stayModalHTML(s);
+  document.getElementById('bookModalOverlay').classList.add('active');
+  initStayModalMap(s);
+}
+
+function editorialFlightsHTML(trip) {
+  const flights = tripFlights(trip).slice(0, 2);
+  return `
+    <div class="editorial-intro">Round-trip fares we'd book for ${trip.name}, from New York. Tap one to see the full itinerary.</div>
+    <div class="result-list">
+      ${flights.map((r, i) => `
+        <div class="result-card flight-card" onclick="openTripFlightModal('${trip.id}',${i})">
+          <div class="flight-card-legs">${flightLegHTML(r.out)}${flightLegHTML(r.back)}</div>
+          <div class="result-price">$${r.price.toLocaleString()}<span>round trip</span></div>
+        </div>`).join('')}
+    </div>
+    <button class="editorial-cta" onclick="openBookWith('flights','${trip.name}')">Explore more options ${lucide('arrow-right', 16)}</button>
+  `;
+}
+
+function editorialStaysHTML(trip) {
+  const stays = tripStays(trip).slice(0, 3);
+  return `
+    <div class="editorial-intro">A few stays travellers love in ${trip.name}. Tap any to see photos, location and amenities.</div>
+    <div class="result-list">
+      ${stays.map((s, i) => `
+        <div class="result-card stay-card" onclick="openTripStayModal('${trip.id}',${i})">
+          <div class="stay-card-photo" style="background-image:url('images/locations/${s.photos[0]}.jpg');"></div>
+          <div class="stay-card-body">
+            <div class="stay-card-info">
+              <div class="stay-card-name">${s.name}</div>
+              <div class="stay-score-row">
+                <div class="stay-score">${s.score}</div>
+                <div>
+                  <div class="stay-score-label">${s.scoreLabel}</div>
+                  <div class="stay-score-reviews">${s.reviews.toLocaleString()} reviews</div>
+                </div>
+              </div>
+              ${s.refundable ? '<div class="stay-card-refund">Refundable</div>' : ''}
+              <div class="stay-card-dist">${s.dist} mi from center</div>
+            </div>
+            <div class="result-price">$${s.price.toLocaleString()}<span>${s.nights} nights</span></div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <button class="editorial-cta" onclick="openBookWith('stays','${trip.name}')">Explore more options ${lucide('arrow-right', 16)}</button>
+  `;
+}
+
+function collectTripActivities(trip) {
+  const out = [];
+  trip.days.forEach((day, di) => (day.blocks || []).forEach((b, bi) => (b.activities || []).forEach((a, ai) => {
+    if (a.icon === '✈') return;                         // skip flights
+    if (out.some(o => o.a.title === a.title)) return;   // dedupe repeated stops
+    out.push({ a, di, bi, ai });
+  })));
+  return out;
+}
+
+function activitiesTabHTML(trip) {
+  const items = collectTripActivities(trip);
+  if (!items.length) return `<div class="empty-state">No activities yet for this trip.</div>`;
+  return `
+    <div class="editorial-intro">Handpicked things to do in ${trip.name} — tap any for details.</div>
+    <div class="activity-rec-list">
+      ${items.map(({ a, di, bi, ai }) => {
+        const bg = locBgForActivity(trip, a.title);
+        const tag = ACTIVITY_TAG_MAP[a.icon] || 'Explore';
+        return `<div class="activity-rec" onclick="openActivityModal('${trip.id}',${di},${bi},${ai})">
+          <div class="activity-rec-img" style="background:${bg};">${hasPhotoBg(bg) ? '' : a.icon}</div>
+          <div class="activity-rec-body">
+            <span class="activity-rec-tag">${tag}</span>
+            <div class="activity-rec-title">${a.title}</div>
+            <div class="activity-rec-desc">${a.desc}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function aboutTripHTML(trip) {
+  const photos = (CITY_PHOTOS[trip.name] || []).slice(0, 3);
+  const acts = collectTripActivities(trip);
+  const highlights = acts.slice(0, 3);
+  const vibes = [...new Set(acts.map(o => ACTIVITY_TAG_MAP[o.a.icon]).filter(Boolean))].slice(0, 4);
+  const kickers = ['Must see', 'Local favourite', "Don't miss"];
+  return `
+    <div class="about-trip">
+      <div class="about-lede">${trip.desc}</div>
+      <div class="about-meta-row">
+        <span class="about-chip">${lucide('map-pin', 13)} ${trip.country}</span>
+        <span class="about-chip">${lucide('calendar', 13)} ${trip.dates}</span>
+        <span class="about-chip">${lucide('clock', 13)} ${trip.days.length} days</span>
+        ${vibes.map(v => `<span class="about-chip">${v}</span>`).join('')}
+      </div>
+
+      ${photos.length ? `
+      <div class="about-section-title">A glimpse of ${trip.name}</div>
+      <div class="about-gallery">
+        ${photos.map(p => `<div class="about-gallery-img" style="background-image:url('images/locations/${p}.jpg');"></div>`).join('')}
+      </div>` : ''}
+
+      ${highlights.length ? `
+      <div class="about-section-title">Why you'll love it</div>
+      <div class="about-highlights">
+        ${highlights.map((o, i) => {
+          const bg = locBgForActivity(trip, o.a.title);
+          return `<div class="about-highlight">
+            <div class="about-highlight-img" style="background:${bg};">${hasPhotoBg(bg) ? '' : o.a.icon}</div>
+            <div class="about-highlight-body">
+              <div class="about-highlight-kicker">${kickers[i] || 'Highlight'}</div>
+              <div class="about-highlight-title">${o.a.title}</div>
+              <div class="about-highlight-desc">${o.a.desc}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>` : ''}
+
+      <div class="about-section-title">Trip at a glance</div>
+      <div class="about-glance">
+        <div class="about-glance-stat"><div class="about-glance-value">${trip.days.length}</div><div class="about-glance-label">Days</div></div>
+        <div class="about-glance-stat"><div class="about-glance-value">${acts.length}</div><div class="about-glance-label">Experiences</div></div>
+        <div class="about-glance-stat"><div class="about-glance-value">${trip.members.length}</div><div class="about-glance-label">Travellers</div></div>
+      </div>
+
+      <div class="about-cta">
+        <div class="about-cta-title">Ready to make it real?</div>
+        <div class="about-cta-sub">Save this trip to start booking flights, stays and activities with your crew.</div>
+        <button class="about-cta-btn" onclick="saveTripToMyTrips('${trip.id}')">${lucide('bookmark', 16)} Save this trip</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ===================== FINANCES — SPLITWISE MODEL ===================== */
+let expenseSeq = 1;
+
+function ensureExpenses(trip) {
+  if (trip.expenses) return trip.expenses;
+  const m = trip.members.length ? trip.members : [ME];
+  trip.expenses = tripExpenses(trip).map((e, i) => ({
+    id: 'seed-' + i, type: 'expense', icon: e.icon, title: e.title,
+    payer: e.payer, amount: e.amount, participants: m.slice(), date: e.date,
+  }));
+  return trip.expenses;
+}
+
+// Net per member: positive => the group owes them; negative => they owe the group.
+function computeBalances(trip) {
+  const m = trip.members.length ? trip.members : [ME];
+  const bal = new Map(m.map(p => [p, 0]));
+  const add = (p, v) => { if (bal.has(p)) bal.set(p, bal.get(p) + v); };
+  ensureExpenses(trip).forEach(e => {
+    if (e.type === 'settle') {
+      add(e.from, e.amount);   // paying down a debt raises your balance toward zero
+      add(e.to, -e.amount);
+    } else {
+      const parts = (e.participants && e.participants.length) ? e.participants : m;
+      add(e.payer, e.amount);
+      const share = e.amount / parts.length;
+      parts.forEach(p => add(p, -share));
+    }
+  });
+  return bal;
+}
+
+// Greedy "simplify debts": match biggest debtor to biggest creditor.
+function settlementSuggestions(trip) {
+  const bal = computeBalances(trip);
+  const creditors = [], debtors = [];
+  bal.forEach((v, p) => { if (v > 0.5) creditors.push({ p, v }); else if (v < -0.5) debtors.push({ p, v: -v }); });
+  creditors.sort((a, b) => b.v - a.v);
+  debtors.sort((a, b) => b.v - a.v);
+  const res = [];
+  let i = 0, j = 0;
+  while (i < debtors.length && j < creditors.length) {
+    const amt = Math.min(debtors[i].v, creditors[j].v);
+    res.push({ from: debtors[i].p, to: creditors[j].p, amount: Math.round(amt) });
+    debtors[i].v -= amt; creditors[j].v -= amt;
+    if (debtors[i].v < 0.5) i++;
+    if (creditors[j].v < 0.5) j++;
+  }
+  return res;
+}
+
+function refreshFinancesPanel(tripId) {
+  document.querySelectorAll('.itin-tab-panel[data-panel="finances"]').forEach(el => {
+    el.innerHTML = financesTabHTML(TRIPS[tripId]);
+  });
+}
+
+function balanceRowHTML(p, v) {
+  const settled = Math.abs(v) < 0.5;
+  const cls = settled ? 'settled' : (v > 0 ? 'positive' : 'negative');
+  const label = settled ? 'settled up' : (v > 0 ? 'gets back' : 'owes');
+  return `<div class="finance-balance-row">
+    ${stackAvatarHTML(p)}
+    <span class="finance-balance-name">${p.name.replace(' (You)', '')} <span style="color:var(--color-gray-400);font-weight:400;">${label}</span></span>
+    <span class="finance-balance-amount ${cls}">${settled ? '—' : '$' + Math.round(Math.abs(v)).toLocaleString()}</span>
+  </div>`;
+}
+
+function expenseRowHTML(e) {
+  if (e.type === 'settle') {
+    return `<div class="finance-row settle">
+      <div class="finance-row-icon">${lucide('check', 16)}</div>
+      <div class="finance-row-body">
+        <div class="finance-row-title">${e.from.name.replace(' (You)', '')} paid ${e.to.name.replace(' (You)', '')}</div>
+        <div class="finance-row-meta">${e.date ? e.date + ' · ' : ''}Settlement</div>
+      </div>
+      <div class="avatar-stack" style="margin-right:2px;">${stackAvatarHTML(e.from)}</div>
+      <div class="finance-row-amount">$${Math.round(e.amount).toLocaleString()}</div>
+    </div>`;
+  }
+  return financeRowHTML({ icon: e.icon, title: e.title, payer: e.payer, amount: e.amount, date: e.date });
+}
+
+/* ---- Add expense modal ---- */
+let splitTripId = null;
+let expensePayer = null;
+let expenseParticipants = new Set();
+let expenseDescVal = '';
+let expenseAmountVal = '';
+
+function memberList(trip) { return trip.members.length ? trip.members : [ME]; }
+function pillAvatarHTML(p) {
+  return `<div class="split-pill-avatar" style="background:${p.color};${p.textColor ? 'color:' + p.textColor + ';' : ''}">${p.initial}</div>`;
+}
+
+function openExpenseModal(tripId) {
+  splitTripId = tripId;
+  const m = memberList(TRIPS[tripId]);
+  expensePayer = m.includes(ME) ? ME : m[0];
+  expenseParticipants = new Set(m);
+  expenseDescVal = '';
+  expenseAmountVal = '';
+  renderExpenseModal();
+  document.getElementById('splitModalOverlay').classList.add('active');
+}
+
+function renderExpenseModal() {
+  const trip = TRIPS[splitTripId];
+  const m = memberList(trip);
+  document.getElementById('splitModalBox').className = 'modal-box split-modal-box';
+  document.getElementById('splitModalBox').innerHTML = `
+    <div class="modal-header"><h3>Add an expense</h3><button class="modal-close" onclick="closeSplitModal()">${lucide('x', 16)}</button></div>
+    <div class="split-modal-body">
+      <div class="split-field">
+        <div class="split-field-label">Description</div>
+        <input class="split-input" id="expenseDesc" placeholder="e.g. Group dinner" value="${expenseDescVal.replace(/"/g, '&quot;')}" oninput="syncExpense()" />
+      </div>
+      <div class="split-field">
+        <div class="split-field-label">Amount</div>
+        <div class="split-amount-wrap"><span class="split-currency">$</span><input class="split-input" id="expenseAmount" inputmode="decimal" placeholder="0.00" value="${expenseAmountVal}" oninput="syncExpense()" /></div>
+      </div>
+      <div class="split-field">
+        <div class="split-field-label">Paid by</div>
+        <div class="split-payer-options">
+          ${m.map((p, i) => `<div class="split-pill ${p === expensePayer ? 'active' : ''}" onclick="setExpensePayer(${i})">${pillAvatarHTML(p)}${p.name.replace(' (You)', '')}</div>`).join('')}
+        </div>
+      </div>
+      <div class="split-field">
+        <div class="split-field-label">Split equally between</div>
+        <div class="split-people">
+          ${m.map((p, i) => `<div class="split-pill ${expenseParticipants.has(p) ? 'active' : ''}" onclick="toggleExpenseParticipant(${i})">${pillAvatarHTML(p)}${p.name.replace(' (You)', '')}</div>`).join('')}
+        </div>
+        <div class="split-note" id="expenseSplitNote"></div>
+      </div>
+    </div>
+    <div class="split-modal-footer"><button class="split-save-btn" id="expenseSaveBtn" disabled onclick="saveExpense()">Save expense</button></div>
+  `;
+  syncExpense();
+}
+
+function syncExpense() {
+  const d = document.getElementById('expenseDesc');
+  const a = document.getElementById('expenseAmount');
+  if (d) expenseDescVal = d.value;
+  if (a) expenseAmountVal = a.value;
+  const amt = parseFloat(expenseAmountVal);
+  const n = expenseParticipants.size || 1;
+  const note = document.getElementById('expenseSplitNote');
+  if (note) note.textContent = amt > 0
+    ? `$${(amt / n).toFixed(2)} per person · ${n} ${n === 1 ? 'person' : 'people'}`
+    : `Split equally among ${n} ${n === 1 ? 'person' : 'people'}`;
+  const btn = document.getElementById('expenseSaveBtn');
+  if (btn) btn.disabled = !(expenseDescVal.trim() && amt > 0 && expenseParticipants.size > 0);
+}
+
+function setExpensePayer(i) { expensePayer = memberList(TRIPS[splitTripId])[i]; renderExpenseModal(); }
+function toggleExpenseParticipant(i) {
+  const p = memberList(TRIPS[splitTripId])[i];
+  if (expenseParticipants.has(p)) expenseParticipants.delete(p); else expenseParticipants.add(p);
+  renderExpenseModal();
+}
+
+function saveExpense() {
+  const trip = TRIPS[splitTripId];
+  const amt = parseFloat(expenseAmountVal);
+  if (!(expenseDescVal.trim() && amt > 0 && expenseParticipants.size)) return;
+  ensureExpenses(trip).unshift({
+    id: 'x' + (expenseSeq++), type: 'expense', icon: 'dollar-sign',
+    title: expenseDescVal.trim(), payer: expensePayer, amount: amt,
+    participants: [...expenseParticipants], date: 'Just now',
+  });
+  closeSplitModal();
+  refreshFinancesPanel(trip.id);
+}
+
+/* ---- Settle up modal ---- */
+function openSettleModal(tripId) {
+  splitTripId = tripId;
+  renderSettleModal();
+  document.getElementById('splitModalOverlay').classList.add('active');
+}
+
+function renderSettleModal() {
+  const trip = TRIPS[splitTripId];
+  const suggestions = settlementSuggestions(trip);
+  document.getElementById('splitModalBox').className = 'modal-box split-modal-box';
+  document.getElementById('splitModalBox').innerHTML = `
+    <div class="modal-header"><h3>Settle up</h3><button class="modal-close" onclick="closeSplitModal()">${lucide('x', 16)}</button></div>
+    <div class="split-modal-body">
+      ${suggestions.length ? `
+        <div class="split-note" style="margin-bottom:14px;">Suggested payments to square up the group with the fewest transfers.</div>
+        ${suggestions.map((s, i) => `
+          <div class="split-suggestion">
+            <div class="split-suggestion-avatars">${stackAvatarHTML(s.from)}${stackAvatarHTML(s.to)}</div>
+            <div class="split-suggestion-text"><b>${s.from.name.replace(' (You)', '')}</b> pays <b>${s.to.name.replace(' (You)', '')}</b></div>
+            <div style="font-weight:700;white-space:nowrap;">$${s.amount.toLocaleString()}</div>
+            <button class="split-record-btn" onclick="recordSettlement(${i})">Record</button>
+          </div>`).join('')}
+      ` : `
+        <div class="split-all-settled">${lucide('check', 28)}<div>Everyone's settled up 🎉</div></div>
+      `}
+    </div>
+  `;
+}
+
+function recordSettlement(i) {
+  const trip = TRIPS[splitTripId];
+  const s = settlementSuggestions(trip)[i];
+  if (!s) return;
+  ensureExpenses(trip).unshift({
+    id: 's' + (expenseSeq++), type: 'settle', from: s.from, to: s.to, amount: s.amount, date: 'Just now',
+  });
+  renderSettleModal();
+  refreshFinancesPanel(trip.id);
+}
+
+function closeSplitModal() { document.getElementById('splitModalOverlay').classList.remove('active'); }
+function closeSplitModalOnOverlay(e) { if (e.target.id === 'splitModalOverlay') closeSplitModal(); }
+
 function flightsTabHTML(trip) {
   const booked = trip.members.slice(0, Math.min(2, trip.members.length));
   const notBooked = trip.members.slice(booked.length);
@@ -4622,11 +5358,7 @@ function openFlightModal(idx) {
   document.getElementById('bookModalOverlay').classList.add('active');
 }
 
-function openStayResultModal(idx) {
-  const s = bookingFlow && bookingFlow.stays && bookingFlow.stays[idx];
-  if (!s) return;
-  document.getElementById('bookModalBox').innerHTML = stayModalHTML(s);
-  document.getElementById('bookModalOverlay').classList.add('active');
+function initStayModalMap(s) {
   setTimeout(() => {
     const el = document.getElementById('stayModalMap');
     if (!el) return;
@@ -4638,6 +5370,14 @@ function openStayResultModal(idx) {
     }).addTo(stayModalMap);
     L.marker([s.lat, s.lng]).addTo(stayModalMap).bindTooltip(s.name);
   }, 0);
+}
+
+function openStayResultModal(idx) {
+  const s = bookingFlow && bookingFlow.stays && bookingFlow.stays[idx];
+  if (!s) return;
+  document.getElementById('bookModalBox').innerHTML = stayModalHTML(s);
+  document.getElementById('bookModalOverlay').classList.add('active');
+  initStayModalMap(s);
 }
 
 function closeBookModal() {
@@ -4676,13 +5416,15 @@ function financeRowHTML(e) {
 }
 
 function financesTabHTML(trip) {
-  const expenses = tripExpenses(trip);
-  const memberCount = trip.members.length || 1;
-  const total = expenses.reduce((sum, e) => sum + e.amount, 0);
-  const perPerson = total / memberCount;
-  const paidByMe = expenses.filter(e => e.payer === ME).reduce((sum, e) => sum + e.amount, 0);
-  const balance = paidByMe - perPerson;
-  const owed = balance >= 0;
+  const m = memberList(trip);
+  const expenses = ensureExpenses(trip);
+  const spend = expenses.filter(e => e.type !== 'settle');
+  const total = spend.reduce((sum, e) => sum + e.amount, 0);
+  const perPerson = total / m.length;
+  const bal = computeBalances(trip);
+  const myBal = bal.get(ME) || 0;
+  const owed = myBal >= 0;
+  const settledUp = Math.abs(myBal) < 0.5;
   return `
     <div class="finance-summary">
       <div class="finance-stat">
@@ -4694,12 +5436,18 @@ function financesTabHTML(trip) {
         <div class="finance-stat-value">$${Math.round(perPerson).toLocaleString()}</div>
       </div>
       <div class="finance-stat">
-        <div class="finance-stat-label">${owed ? "You're owed" : 'You owe'}</div>
-        <div class="finance-stat-value ${owed ? 'positive' : 'negative'}">$${Math.round(Math.abs(balance)).toLocaleString()}</div>
+        <div class="finance-stat-label">${settledUp ? 'Your balance' : (owed ? "You're owed" : 'You owe')}</div>
+        <div class="finance-stat-value ${settledUp ? '' : (owed ? 'positive' : 'negative')}">${settledUp ? '$0' : '$' + Math.round(Math.abs(myBal)).toLocaleString()}</div>
       </div>
     </div>
+    <div class="finance-actions">
+      <button class="finance-action-btn primary" onclick="openExpenseModal('${trip.id}')">${lucide('plus', 16)} Add new expense</button>
+      <button class="finance-action-btn" onclick="openSettleModal('${trip.id}')">${lucide('check', 16)} Settle up</button>
+    </div>
+    <div class="booking-section-title">Balances</div>
+    ${m.map(p => balanceRowHTML(p, bal.get(p) || 0)).join('')}
     <div class="booking-section-title">All expenses</div>
-    ${expenses.map(financeRowHTML).join('')}
+    ${expenses.map(expenseRowHTML).join('')}
   `;
 }
 
@@ -4838,6 +5586,7 @@ function showItinerary(tripId) {
     document.getElementById('homeView').classList.remove('active');
     document.getElementById('tripsView').classList.remove('active');
     document.getElementById('friendsView').classList.remove('active');
+    document.getElementById('bookView').classList.remove('active');
     const mobileItinView = document.getElementById('mobileItinView');
     mobileItinView.classList.add('active');
     mobileItinView.querySelector('.header-title').textContent = trip.name;
