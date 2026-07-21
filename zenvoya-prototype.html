@@ -678,24 +678,43 @@ body {
 
 .itinerary-panel.enlarged .itin-content { display: flex; flex-direction: row; height: 100vh; }
 .itinerary-panel.enlarged .itin-toolbar { position: absolute; top: 16px; right: calc(50% + 16px); height: auto; padding-right: 0; z-index: 900; }
-.itinerary-panel.enlarged .itin-map { width: 50%; height: 100vh; flex-shrink: 0; }
+.itinerary-panel.enlarged .itin-map-wrap { width: 50%; height: 100vh; flex-shrink: 0; }
+.itinerary-panel.enlarged .itin-map { height: 100%; }
 .itinerary-panel.enlarged .itin-details { flex: 1; height: 100vh; overflow-y: auto; max-width: none; margin: 0; width: auto; }
 
 /* Compact trip header (default, non-enlarged) */
-.itin-thumb-float {
+/* Trip thumbnail + day filter, floating at the bottom of the map */
+.itin-map-wrap { position: relative; }
+
+.itin-map-bottom {
   position: absolute;
-  top: 380px;
-  left: 20px;
-  width: 100px;
-  height: 80px;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  z-index: 1000;
+  pointer-events: none;
+}
+.itin-map-bottom > * { pointer-events: auto; }
+
+.itin-thumb-float {
+  width: 92px;
+  height: 68px;
+  flex-shrink: 0;
   border-radius: var(--radius-md);
   border: 3px solid var(--color-white);
   box-shadow: var(--shadow-medium);
-  z-index: 500;
 }
 
 .itin-header-compact {
-  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
   padding-top: 6px;
 }
 
@@ -704,17 +723,9 @@ body {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  justify-content: flex-end;
 }
 
 .itin-city-compact { margin-bottom: 0; }
-
-.itin-title-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
 
 .itin-days-inline { font-size: inherit; font-weight: inherit; color: inherit; margin-left: 6px; }
 
@@ -725,7 +736,7 @@ body {
   gap: 6px;
   padding: 8px 12px;
   border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
@@ -764,10 +775,7 @@ body {
 
 .itin-header-enlarged { display: none; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
 
-.itinerary-panel.enlarged .itin-thumb-float,
-.itinerary-panel.enlarged .itin-header-compact,
-.itinerary-panel.enlarged .itin-city-compact,
-.itinerary-panel.enlarged .itin-title-row { display: none; }
+.itinerary-panel.enlarged .itin-header-compact { display: none; }
 
 .itinerary-panel.enlarged .itin-header-enlarged { display: flex; }
 
@@ -806,7 +814,7 @@ body {
   background: var(--color-primary);
   color: var(--color-white);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -830,7 +838,7 @@ body {
   flex: 1;
   padding: 8px;
   border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   background: var(--color-white);
   cursor: pointer;
   font-size: 13px;
@@ -877,10 +885,14 @@ body {
 
 .day-pill-group {
   display: flex;
-  flex-wrap: wrap;
+  flex: 1;
   gap: 6px;
-  margin-bottom: 16px;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
 }
+.day-pill-group::-webkit-scrollbar { display: none; }
 
 .day-pill {
   padding: 6px 12px;
@@ -892,6 +904,8 @@ body {
   font-weight: 500;
   color: var(--color-gray-600);
   font-family: var(--font-body);
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
@@ -914,17 +928,21 @@ body {
 
 .day-number { font-size: 20px; font-weight: 700; color: var(--color-gray-900); }
 
-.day-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.day-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
 
 .day-tag {
-  padding: 7px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
   border-radius: var(--radius-full);
   background: var(--color-gray-100);
   color: var(--color-gray-700);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
 }
+.day-tag svg { color: var(--color-gray-500); }
 
 .day-icon {
   width: 24px;
@@ -1237,7 +1255,7 @@ body {
 .remind-btn {
   padding: 8px 14px;
   border: 1px solid var(--color-gray-300);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   background: var(--color-white);
   cursor: pointer;
   font-size: 13px;
@@ -1265,7 +1283,7 @@ body {
 .explore-btn {
   padding: 8px 16px;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   background: var(--color-primary);
   color: var(--color-white);
   cursor: pointer;
@@ -3353,6 +3371,14 @@ function lucide(name, size) {
     'circle-parking': '<circle cx="12" cy="12" r="10"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',
     'utensils': '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
     'ticket': '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>',
+    'landmark': '<line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>',
+    'palette': '<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2z"/>',
+    'sun': '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+    'sparkles': '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z"/>',
+    'mountain': '<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>',
+    'music': '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+    'leaf': '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>',
+    'compass': '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
   };
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+icons[name]+'</svg>';
 }
@@ -4000,10 +4026,19 @@ function itineraryHTML(tripId, isSaved) {
         <button class="itin-toolbar-btn" onclick="toggleEnlarge()" title="Enlarge">${lucide('maximize', 16)}</button>
         <button class="itin-toolbar-btn" onclick="closeItinPanel()" title="Close">${lucide('x', 16)}</button>
       </div>
-      <div class="itin-map" id="itinMap-${trip.id}"></div>
-      <div class="itin-thumb-float" style="background:${tripBg(trip)};"></div>
+      <div class="itin-map-wrap">
+        <div class="itin-map" id="itinMap-${trip.id}"></div>
+        <div class="itin-map-bottom">
+          <div class="itin-thumb-float" style="background:${tripBg(trip)};"></div>
+          <div class="day-pill-group">
+            <button class="day-pill active" data-day="all" onclick="filterToDay(null)">All</button>
+            ${trip.days.map((d, i) => `<button class="day-pill" data-day="${i}" onclick="filterToDay(${i})">Day ${i + 1}</button>`).join('')}
+          </div>
+        </div>
+      </div>
       <div class="itin-details">
         <div class="itin-header-compact">
+          <div class="itin-city itin-city-compact">${trip.name} <span class="itin-days-inline">${trip.days.length} days</span></div>
           <div class="itin-header-compact-right">
             ${isSaved ? avatarsHTML : ''}
             <div class="date-select" onclick="toggleDateDropdown(event, this)">
@@ -4017,9 +4052,6 @@ function itineraryHTML(tripId, isSaved) {
             ${saveBtnHTML}
             <button class="action-btn" style="flex:none;padding:8px;" title="Share">${lucide('share',14)}</button>
           </div>
-        </div>
-        <div class="itin-title-row">
-          <div class="itin-city itin-city-compact">${trip.name} <span class="itin-days-inline">${trip.days.length} days</span></div>
         </div>
 
         <div class="itin-header-enlarged">
@@ -4046,10 +4078,6 @@ function itineraryHTML(tripId, isSaved) {
         <div class="itin-tab-panel" data-panel="stay" ${show('stay')}>${isSaved ? stayTabHTML(trip) : editorialStaysHTML(trip)}</div>
         <div class="itin-tab-panel" data-panel="activity" ${show('activity')}>${activitiesTabHTML(trip)}</div>
         <div class="itin-tab-panel" data-panel="itinerary" ${show('itinerary')}>
-          <div class="day-pill-group">
-            <button class="day-pill active" data-day="all" onclick="filterToDay(null)">All</button>
-            ${trip.days.map((d, i) => `<button class="day-pill" data-day="${i}" onclick="filterToDay(${i})">Day ${i + 1}</button>`).join('')}
-          </div>
           ${trip.days.map((day, i) => dayItemHTML(trip, day, i)).join('')}
         </div>
         ${isSaved ? `<div class="itin-tab-panel" data-panel="finances" ${show('finances')}>${financesTabHTML(trip)}</div>` : ''}
@@ -4111,6 +4139,16 @@ const ACTIVITY_TAG_MAP = {
   '🏘': 'Explore', '📍': 'Explore',
 };
 
+// Leading icon for each day-title category pill (matches the About-trip chips).
+const TAG_ICON = {
+  Flight: 'plane', Departure: 'plane-takeoff', Return: 'plane-landing',
+  Shopping: 'shopping-cart', Culture: 'landmark', History: 'landmark',
+  Art: 'palette', Sunset: 'sun', Nightlife: 'sparkles', Beach: 'waves',
+  Adventure: 'mountain', Food: 'utensils', Landmark: 'map-pin',
+  Entertainment: 'ticket', Music: 'music', Nature: 'leaf', Relax: 'waves',
+  Explore: 'compass',
+};
+
 function deriveDayTags(day, index, totalDays) {
   if (day.isFlight) return [index === 0 ? 'Departure' : 'Return'];
   const tags = [];
@@ -4151,7 +4189,7 @@ function dayItemHTML(trip, day, index) {
         <span class="day-icon">${lucide('chevron-down', 14)}</span>
         <span class="day-number">Day ${index + 1}</span>
         <div class="day-tags">
-          ${tags.map(t => `<span class="day-tag">${t}</span>`).join('')}
+          ${tags.map(t => `<span class="day-tag">${lucide(TAG_ICON[t] || 'map-pin', 13)} ${t}</span>`).join('')}
         </div>
       </div>
       ${expandable ? `<div class="day-body"><div class="day-body-inner">
