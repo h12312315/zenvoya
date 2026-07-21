@@ -1429,6 +1429,203 @@ body {
 }
 .about-cta-btn:hover { background: var(--color-gray-100); }
 
+/* Shorts carousel (About trip) */
+.shorts-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scroll-snap-type: x proximity;
+}
+.short-card { flex: 0 0 132px; scroll-snap-align: start; cursor: pointer; }
+.short-thumb {
+  position: relative;
+  height: 234px;
+  border-radius: var(--radius-md);
+  background: var(--color-gray-200) center/cover no-repeat;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+.short-card:hover .short-thumb { transform: translateY(-3px); }
+.short-source {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+}
+.short-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  color: var(--color-gray-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.short-overlay {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 24px 10px 10px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  color: #fff;
+}
+.short-title { font-size: 12px; font-weight: 700; line-height: 1.3; }
+.short-views { display: flex; align-items: center; gap: 4px; font-size: 10px; opacity: 0.85; margin-top: 3px; }
+
+/* About: in-brief Q/A */
+.about-brief { display: flex; flex-direction: column; }
+.about-brief-row { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--color-gray-100); }
+.about-brief-row:last-child { border-bottom: none; }
+.about-brief-q { flex: 0 0 108px; font-size: 13px; font-weight: 700; color: var(--color-gray-900); }
+.about-brief-a { flex: 1; font-size: 13px; line-height: 1.55; color: var(--color-gray-600); }
+
+/* About: see & do ranked */
+.about-rank-tier {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin: 14px 0 8px;
+}
+
+/* About: best time to visit */
+.about-seasons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.about-season {
+  padding: 12px 6px;
+  border-radius: var(--radius-md);
+  background: var(--color-gray-50);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-gray-500);
+  border: 1px solid transparent;
+}
+.about-season.active { background: var(--color-primary-ultra-light); border-color: var(--color-primary); color: var(--color-gray-900); }
+.about-season-note { font-size: 13px; line-height: 1.55; color: var(--color-gray-600); margin-top: 10px; }
+
+/* About: what it costs */
+.about-cost { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+.about-cost-tier {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-gray-50);
+  text-align: center;
+  border: 1px solid transparent;
+}
+.about-cost-tier.active { border-color: var(--color-primary); background: var(--color-primary-ultra-light); }
+.about-cost-amt { font-size: 20px; font-weight: 800; color: var(--color-gray-900); }
+.about-cost-label { font-size: 11px; color: var(--color-gray-500); margin-top: 2px; }
+
+/* About: who it's for */
+.about-whofor { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.about-whofor-card { padding: 14px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); }
+.about-whofor-icon { color: var(--color-primary); margin-bottom: 8px; }
+.about-whofor-who { font-size: 14px; font-weight: 700; color: var(--color-gray-900); margin-bottom: 4px; }
+.about-whofor-txt { font-size: 12px; line-height: 1.5; color: var(--color-gray-600); }
+
+/* Saved trips tabs + sections */
+.saved-tabs { margin-bottom: 20px; }
+.saved-section { margin-bottom: 28px; }
+.saved-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: 12px;
+}
+.saved-section-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-gray-500);
+  background: var(--color-gray-100);
+  border-radius: var(--radius-full);
+  padding: 2px 9px;
+}
+
+/* Budget modal */
+.budget-modal-body { padding: 18px 20px 20px; overflow-y: auto; }
+.budget-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.budget-current-tier { font-size: 18px; font-weight: 800; color: var(--color-gray-900); }
+.budget-current-sub { font-size: 12px; color: var(--color-gray-500); margin-top: 2px; }
+.budget-current-amt { font-size: 26px; font-weight: 800; color: var(--color-gray-900); white-space: nowrap; }
+.budget-current-amt span { font-size: 13px; font-weight: 500; color: var(--color-gray-400); }
+
+.budget-meter { margin-bottom: 18px; }
+.budget-meter-track {
+  position: relative;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(to right, var(--color-gray-200), var(--color-gray-400), var(--color-gray-900));
+}
+.budget-meter-fill { display: none; }
+.budget-meter-thumb {
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-white);
+  border: 3px solid var(--color-primary);
+  box-shadow: var(--shadow-small);
+  transform: translate(-50%, -50%);
+  transition: left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.budget-meter-scale { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: var(--color-gray-500); margin-top: 10px; }
+
+.budget-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 22px; }
+.budget-preset {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+  border: 1.5px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  cursor: pointer;
+  font-family: var(--font-body);
+  text-align: center;
+}
+.budget-preset.active { border-color: var(--color-primary); background: var(--color-primary-ultra-light); }
+.budget-preset-label { font-size: 13px; font-weight: 700; color: var(--color-gray-900); }
+.budget-preset-amt { font-size: 12px; color: var(--color-gray-500); }
+
+.budget-chart-title { font-size: 14px; font-weight: 700; color: var(--color-gray-900); margin-bottom: 12px; }
+.budget-chart { display: flex; flex-direction: column; gap: 12px; }
+.budget-bar-row { opacity: 0.55; transition: opacity 0.15s; }
+.budget-bar-row.active { opacity: 1; }
+.budget-bar-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 5px; }
+.budget-bar-name { font-size: 13px; font-weight: 600; color: var(--color-gray-800); }
+.budget-bar-total { font-size: 14px; font-weight: 700; color: var(--color-gray-900); }
+.budget-bar-total span { font-size: 11px; font-weight: 500; color: var(--color-gray-400); }
+.budget-bar { display: flex; height: 14px; border-radius: var(--radius-full); overflow: hidden; background: var(--color-gray-100); }
+.budget-bar-seg { height: 100%; }
+.budget-bar-seg:first-child { border-radius: var(--radius-full) 0 0 var(--radius-full); }
+
+.budget-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+.budget-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-gray-600); }
+.budget-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+.budget-chart-note { font-size: 11px; color: var(--color-gray-400); margin-top: 12px; }
+
 /* Editorial recommended lists (Flights / Stay unsaved) */
 .editorial-intro {
   font-size: 14px;
@@ -3001,7 +3198,7 @@ body {
 .stat-card-subsection-title { font-size: 12px; font-weight: 600; color: var(--color-gray-700); margin: 20px 0 10px; }
 
 /* Bar chart */
-.bar-chart { display: flex; align-items: flex-end; gap: 6px; flex: 1; min-height: 120px; }
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 150px; }
 
 .bar-chart-col {
   position: relative;
@@ -3526,6 +3723,11 @@ body {
   <div class="modal-box split-modal-box" id="splitModalBox"></div>
 </div>
 
+<!-- Trip Budget Modal -->
+<div class="modal-overlay" id="budgetModalOverlay" onclick="closeBudgetModalOnOverlay(event)">
+  <div class="modal-box split-modal-box" id="budgetModalBox"></div>
+</div>
+
 <script>
 function lucide(name, size) {
   size = size || 18;
@@ -3581,6 +3783,7 @@ function lucide(name, size) {
     'music': '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
     'leaf': '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>',
     'compass': '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+    'play': '<polygon points="6 3 20 12 6 21 6 3"/>',
   };
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+icons[name]+'</svg>';
 }
@@ -4099,7 +4302,13 @@ const TRIPS = {
   },
 };
 
-const SAVED_TRIP_IDS = ['paris', 'tokyo', 'santorini'];
+const SAVED_TRIP_IDS = ['paris', 'tokyo', 'barcelona', 'santorini', 'rome'];
+
+// Saved-trip planning status (Coming up / Booked / Working on). New saves → working-on.
+const TRIP_STATUS = { paris: 'booked', tokyo: 'coming-up', barcelona: 'coming-up', santorini: 'working-on', rome: 'working-on' };
+const SAVED_STATUSES = [['coming-up', 'Coming up'], ['booked', 'Booked'], ['working-on', 'Working on']];
+function tripStatus(id) { return TRIP_STATUS[id] || 'working-on'; }
+function savedTripsByStatus(status) { return SAVED_TRIP_IDS.filter(id => tripStatus(id) === status); }
 
 const COLLAGE_TRIP_IDS = ['paris', 'barcelona', 'tokyo', 'kyoto', 'santorini', 'rome'];
 const COLLAGE_ROTATIONS = [-8, 5, -6, 4, -3, 7];
@@ -4235,6 +4444,10 @@ function itineraryHTML(tripId, isSaved) {
   const saveBtnHTML = isSaved
     ? `<button class="action-btn action-btn-saved" style="flex:none;padding:8px 14px;">${lucide('check',14)} Trip Saved</button>`
     : `<button class="action-btn action-btn-primary" style="flex:none;padding:8px 14px;" onclick="saveTripToMyTrips('${trip.id}')">${lucide('bookmark',14)} Save trip</button>`;
+  const budgetSelectHTML = `<button class="date-select budget-select" onclick="openBudgetModal('${trip.id}')">
+    <span class="date-select-label">${lucide('dollar-sign', 14)} <span class="budget-select-label">${budgetTierLabel(tripBudget(trip.id))}</span></span>
+    <span class="date-select-chevron">${lucide('chevron-down', 12)}</span>
+  </button>`;
   const tabs = isSaved
     ? [['updates', 'Updates'], ['flights', 'Flights'], ['stay', 'Stay'], ['activity', 'Activity'], ['itinerary', 'Itinerary'], ['finances', 'Finances']]
     : [['about', 'About trip'], ['itinerary', 'Itinerary'], ['flights', 'Flights'], ['stay', 'Stay'], ['activity', 'Activity']];
@@ -4270,6 +4483,7 @@ function itineraryHTML(tripId, isSaved) {
                 <div class="date-select-dropdown-hint">${trip.days.length} days · Tap to edit trip dates</div>
               </div>
             </div>
+            ${budgetSelectHTML}
             ${saveBtnHTML}
             <button class="action-btn" style="flex:none;padding:8px;" title="Share">${lucide('share',14)}</button>
           </div>
@@ -4282,6 +4496,7 @@ function itineraryHTML(tripId, isSaved) {
               <div class="itin-city">${trip.name}</div>
               <div style="display:flex;gap:8px;">
                 <button class="action-btn" style="flex:none;padding:8px 14px;">${lucide('calendar',14)} ${trip.days.length} day <span style="color:var(--color-gray-400);margin-left:2px;">${lucide('chevron-down',12)}</span></button>
+                ${budgetSelectHTML}
                 ${saveBtnHTML}
                 <button class="action-btn" style="flex:none;padding:8px 14px;">${lucide('share',14)} Share</button>
               </div>
@@ -4481,6 +4696,7 @@ function reRenderItinerary(tripId, keepDayExpanded) {
 
 function saveTripToMyTrips(tripId) {
   if (!SAVED_TRIP_IDS.includes(tripId)) SAVED_TRIP_IDS.push(tripId);
+  if (!TRIP_STATUS[tripId]) TRIP_STATUS[tripId] = 'working-on';
   openItinSaved = true;
   reRenderItinerary(tripId);
 }
@@ -4917,12 +5133,94 @@ function activitiesTabHTML(trip) {
   `;
 }
 
+/* ===================== BUDGET (per-city cost model) ===================== */
+const BUDGET_BASE = {
+  budget:  { label: 'Budget',  stay: 50,  food: 25, transit: 12, sights: 8 },
+  average: { label: 'Average', stay: 110, food: 45, transit: 28, sights: 12 },
+  premium: { label: 'Premium', stay: 210, food: 75, transit: 22, sights: 13 },
+};
+const BUDGET_TIERS = ['budget', 'average', 'premium'];
+const BUDGET_CATS = [['stay', 'Stay'], ['food', 'Food'], ['transit', 'Transit'], ['sights', 'Sights']];
+const BUDGET_CAT_COLOR = { stay: 'var(--color-gray-900)', food: 'var(--color-gray-500)', transit: 'var(--color-gray-300)', sights: 'var(--color-accent-green)' };
+const CITY_COST_FACTOR = { Rome: 1, Paris: 1.15, Barcelona: 0.9, Tokyo: 1.05, Lisbon: 0.8, Kyoto: 1.0, Santorini: 1.1, Reykjavik: 1.35 };
+
+const tripBudgetTier = {};
+function tripBudget(id) { return tripBudgetTier[id] || 'average'; }
+function budgetTierLabel(tier) { return BUDGET_BASE[tier].label; }
+function tierAmounts(trip, tier) {
+  const f = CITY_COST_FACTOR[trip.name] || 1;
+  const cats = {};
+  let total = 0;
+  BUDGET_CATS.forEach(([k]) => { const v = Math.round(BUDGET_BASE[tier][k] * f); cats[k] = v; total += v; });
+  return { cats, total };
+}
+
+/* ===================== ABOUT-TRIP CONTENT HELPERS ===================== */
+const SHORT_SOURCES = ['TikTok', 'YouTube', 'Reels'];
+const SHORT_TEMPLATES = ['48 hours in {c}', '{c} hidden gems', 'Best eats in {c}', '{c} on a budget', 'A perfect day in {c}'];
+function tripShorts(trip) {
+  const photos = CITY_PHOTOS[trip.name] || ['vineyard'];
+  return SHORT_TEMPLATES.map((t, i) => {
+    const h = hashStr(trip.name + '~short' + i);
+    return {
+      title: t.replace('{c}', trip.name),
+      source: SHORT_SOURCES[i % SHORT_SOURCES.length],
+      photo: photos[i % photos.length],
+      views: (100 + (h % 900)) + 'K',
+    };
+  });
+}
+
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const SEASONS = [
+  { name: 'Winter', months: [11, 0, 1], note: 'crisp, quiet days and the lowest prices' },
+  { name: 'Spring', months: [2, 3, 4], note: 'mild weather, blossom and building crowds' },
+  { name: 'Summer', months: [5, 6, 7], note: 'warm, lively and peak season' },
+  { name: 'Autumn', months: [8, 9, 10], note: 'golden light, thinner crowds and great value' },
+];
+function tripSeason(trip) {
+  const idx = MONTH_ABBR.indexOf((trip.dates.split(' ')[0] || '').slice(0, 3));
+  const m = idx < 0 ? CURRENT_MONTH_IDX : idx;
+  return { monthIdx: m, season: SEASONS.find(s => s.months.includes(m)) || SEASONS[0] };
+}
+
+function tripWhoFor(trip) {
+  return [
+    { icon: 'star', who: 'Couples', txt: `Sunset views and long, leisurely dinners across ${trip.name}.` },
+    { icon: 'users', who: 'Families', txt: 'Relaxed days with plenty to see, do and snack on.' },
+    { icon: 'user', who: 'Solo', txt: 'Walkable, friendly and easy to explore at your own pace.' },
+  ];
+}
+
 function aboutTripHTML(trip) {
   const photos = (CITY_PHOTOS[trip.name] || []).slice(0, 3);
   const acts = collectTripActivities(trip);
-  const highlights = acts.slice(0, 3);
   const vibes = [...new Set(acts.map(o => ACTIVITY_TAG_MAP[o.a.icon]).filter(Boolean))].slice(0, 4);
-  const kickers = ['Must see', 'Local favourite', "Don't miss"];
+  const shorts = tripShorts(trip);
+  const tiers = [
+    { label: 'Must-see', items: acts.slice(0, 3) },
+    { label: 'Worth it with more time', items: acts.slice(3, 5) },
+    { label: 'Hidden gems', items: acts.slice(5, 8) },
+  ].filter(t => t.items.length);
+  const { monthIdx, season } = tripSeason(trip);
+  const brief = [
+    { q: 'What to do', a: `${acts.length} handpicked stops over ${trip.days.length} days — ${vibes.slice(0, 3).join(', ').toLowerCase() || 'a mix of sights, food and culture'} and more.` },
+    { q: 'Getting around', a: `${trip.name} is compact and walkable, with quick metro or taxi hops linking the highlights.` },
+    { q: 'Best time', a: `You're visiting in ${MONTH_FULL[monthIdx]} — ${season.name.toLowerCase()}, when you get ${season.note}.` },
+  ];
+
+  const rankRow = (o) => {
+    const bg = locBgForActivity(trip, o.a.title);
+    return `<div class="activity-rec" onclick="openActivityModal('${trip.id}',${o.di},${o.bi},${o.ai})">
+      <div class="activity-rec-img" style="background:${bg};">${hasPhotoBg(bg) ? '' : o.a.icon}</div>
+      <div class="activity-rec-body">
+        <span class="activity-rec-tag">${ACTIVITY_TAG_MAP[o.a.icon] || 'Explore'}</span>
+        <div class="activity-rec-title">${o.a.title}</div>
+        <div class="activity-rec-desc">${o.a.desc}</div>
+      </div>
+    </div>`;
+  };
+
   return `
     <div class="about-trip">
       <div class="about-lede">${trip.desc}</div>
@@ -4939,21 +5237,56 @@ function aboutTripHTML(trip) {
         ${photos.map(p => `<div class="about-gallery-img" style="background-image:url('images/locations/${p}.jpg');"></div>`).join('')}
       </div>` : ''}
 
-      ${highlights.length ? `
-      <div class="about-section-title">Why you'll love it</div>
-      <div class="about-highlights">
-        ${highlights.map((o, i) => {
-          const bg = locBgForActivity(trip, o.a.title);
-          return `<div class="about-highlight">
-            <div class="about-highlight-img" style="background:${bg};">${hasPhotoBg(bg) ? '' : o.a.icon}</div>
-            <div class="about-highlight-body">
-              <div class="about-highlight-kicker">${kickers[i] || 'Highlight'}</div>
-              <div class="about-highlight-title">${o.a.title}</div>
-              <div class="about-highlight-desc">${o.a.desc}</div>
+      <div class="about-section-title">Shorts from ${trip.name}</div>
+      <div class="shorts-row">
+        ${shorts.map(s => `
+          <div class="short-card" onclick="alert('Playing: ${s.title.replace(/'/g, '')}')">
+            <div class="short-thumb" style="background-image:url('images/locations/${s.photo}.jpg');">
+              <span class="short-source">${s.source}</span>
+              <span class="short-play">${lucide('play', 18)}</span>
+              <div class="short-overlay">
+                <div class="short-title">${s.title}</div>
+                <div class="short-views">${lucide('play', 11)} ${s.views} views</div>
+              </div>
             </div>
-          </div>`;
-        }).join('')}
-      </div>` : ''}
+          </div>`).join('')}
+      </div>
+
+      <div class="about-section-title">${trip.name} in brief</div>
+      <div class="about-brief">
+        ${brief.map(b => `<div class="about-brief-row"><div class="about-brief-q">${b.q}</div><div class="about-brief-a">${b.a}</div></div>`).join('')}
+      </div>
+
+      ${tiers.length ? `
+      <div class="about-section-title">See &amp; do, ranked</div>
+      ${tiers.map(t => `
+        <div class="about-rank-tier">${t.label}</div>
+        <div class="activity-rec-list">${t.items.map(rankRow).join('')}</div>
+      `).join('')}` : ''}
+
+      <div class="about-section-title">Best time to visit</div>
+      <div class="about-seasons">
+        ${SEASONS.map(s => `<div class="about-season ${s.months.includes(monthIdx) ? 'active' : ''}">${s.name}</div>`).join('')}
+      </div>
+      <div class="about-season-note">You're going in <b>${MONTH_FULL[monthIdx]}</b> — expect ${season.note}.</div>
+
+      <div class="about-section-title">What it costs</div>
+      <div class="about-cost">
+        ${BUDGET_TIERS.map(t => `<div class="about-cost-tier ${t === tripBudget(trip.id) ? 'active' : ''}">
+          <div class="about-cost-amt">$${tierAmounts(trip, t).total}</div>
+          <div class="about-cost-label">${budgetTierLabel(t)} · /day</div>
+        </div>`).join('')}
+      </div>
+      <button class="editorial-cta" onclick="openBudgetModal('${trip.id}')">See budget breakdown ${lucide('arrow-right', 16)}</button>
+
+      <div class="about-section-title">Who it's for</div>
+      <div class="about-whofor">
+        ${tripWhoFor(trip).map(w => `<div class="about-whofor-card">
+          <div class="about-whofor-icon">${lucide(w.icon, 16)}</div>
+          <div class="about-whofor-who">${w.who}</div>
+          <div class="about-whofor-txt">${w.txt}</div>
+        </div>`).join('')}
+      </div>
 
       <div class="about-section-title">Trip at a glance</div>
       <div class="about-glance">
@@ -4970,6 +5303,69 @@ function aboutTripHTML(trip) {
     </div>
   `;
 }
+
+/* ===================== BUDGET MODAL ===================== */
+let budgetTripId = null;
+
+function openBudgetModal(tripId) {
+  budgetTripId = tripId;
+  renderBudgetModal();
+  document.getElementById('budgetModalOverlay').classList.add('active');
+}
+
+function renderBudgetModal() {
+  const trip = TRIPS[budgetTripId];
+  if (!trip) return;
+  const tier = tripBudget(trip.id);
+  const maxTotal = tierAmounts(trip, 'premium').total;
+  const thumbLeft = { budget: 16, average: 50, premium: 84 }[tier];
+  const fillW = { budget: 33, average: 66, premium: 100 }[tier];
+  document.getElementById('budgetModalBox').innerHTML = `
+    <div class="modal-header"><h3>Trip budget</h3><button class="modal-close" onclick="closeBudgetModal()">${lucide('x', 16)}</button></div>
+    <div class="budget-modal-body">
+      <div class="budget-current">
+        <div>
+          <div class="budget-current-tier">${budgetTierLabel(tier)}</div>
+          <div class="budget-current-sub">Daily spend per person in ${trip.name}</div>
+        </div>
+        <div class="budget-current-amt">$${tierAmounts(trip, tier).total}<span>/day</span></div>
+      </div>
+      <div class="budget-meter">
+        <div class="budget-meter-track"><div class="budget-meter-fill" style="width:${fillW}%;"></div><div class="budget-meter-thumb" style="left:${thumbLeft}%;"></div></div>
+        <div class="budget-meter-scale"><span>Budget</span><span>Average</span><span>Premium</span></div>
+      </div>
+      <div class="budget-presets">
+        ${BUDGET_TIERS.map(t => `<button class="budget-preset ${t === tier ? 'active' : ''}" onclick="setTripBudget('${t}')">
+          <span class="budget-preset-label">${budgetTierLabel(t)}</span>
+          <span class="budget-preset-amt">$${tierAmounts(trip, t).total}/day</span>
+        </button>`).join('')}
+      </div>
+      <div class="budget-chart-title">Your daily ${trip.name} budget, three ways</div>
+      <div class="budget-chart">
+        ${BUDGET_TIERS.map(t => {
+          const { cats, total } = tierAmounts(trip, t);
+          return `<div class="budget-bar-row ${t === tier ? 'active' : ''}">
+            <div class="budget-bar-head"><span class="budget-bar-name">${budgetTierLabel(t)}</span><span class="budget-bar-total">$${total}<span>/day</span></span></div>
+            <div class="budget-bar">${BUDGET_CATS.map(([k]) => `<div class="budget-bar-seg" style="width:${(cats[k] / maxTotal) * 100}%;background:${BUDGET_CAT_COLOR[k]};" title="${k}: $${cats[k]}"></div>`).join('')}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="budget-legend">
+        ${BUDGET_CATS.map(([k, label]) => `<span class="budget-legend-item"><span class="budget-legend-dot" style="background:${BUDGET_CAT_COLOR[k]};"></span>${label}</span>`).join('')}
+      </div>
+      <div class="budget-chart-note">Daily spend per person, before flights</div>
+    </div>
+  `;
+}
+
+function setTripBudget(tier) {
+  tripBudgetTier[budgetTripId] = tier;
+  renderBudgetModal();
+  document.querySelectorAll('.budget-select-label').forEach(el => { el.textContent = budgetTierLabel(tier); });
+}
+
+function closeBudgetModal() { document.getElementById('budgetModalOverlay').classList.remove('active'); }
+function closeBudgetModalOnOverlay(e) { if (e.target.id === 'budgetModalOverlay') closeBudgetModal(); }
 
 /* ===================== FINANCES — SPLITWISE MODEL ===================== */
 let expenseSeq = 1;
@@ -6563,35 +6959,63 @@ function openHomeView() {
 }
 
 /* ===================== TRIPS VIEW ===================== */
+let savedTripsTab = 'all';
+
+function savedTripCardHTML(id) {
+  const t = TRIPS[id];
+  if (!t) return '';
+  return `<div class="trip-card" onclick="showItinerary('${id}', true)">
+    <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
+    <div class="trip-card-body">
+      <div class="trip-card-titlerow">
+        <span class="trip-card-name">${t.name}</span>
+        <span class="trip-card-date">${t.dates}</span>
+      </div>
+      <div class="trip-card-meta">${t.country}</div>
+      <div class="avatar-stack trip-card-avatars">
+        ${t.members.map(stackAvatarHTML).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function savedTripGrid(ids) {
+  return ids.length
+    ? `<div class="trip-list">${ids.map(savedTripCardHTML).join('')}</div>`
+    : `<div class="empty-state">Nothing here yet.</div>`;
+}
+
+function setSavedTripsTab(tab) {
+  savedTripsTab = tab;
+  document.getElementById('tripsContent').innerHTML = tripsHTML();
+}
+
 function tripsHTML() {
-  const list = SAVED_TRIP_IDS.length
-    ? `<div class="trip-list">
-        ${SAVED_TRIP_IDS.map(id => {
-          const t = TRIPS[id];
-          return `<div class="trip-card" onclick="showItinerary('${id}', true)">
-            <div class="trip-card-thumb" style="background:${tripBg(t)};"></div>
-            <div class="trip-card-body">
-              <div class="trip-card-titlerow">
-                <span class="trip-card-name">${t.name}</span>
-                <span class="trip-card-date">${t.dates}</span>
-              </div>
-              <div class="trip-card-meta">${t.country}</div>
-              <div class="avatar-stack trip-card-avatars">
-                ${t.members.map(stackAvatarHTML).join('')}
-              </div>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>`
-    : `<div class="empty-state">No saved trips yet.</div>`;
+  const tabs = [['all', 'All'], ['booked', 'Booked'], ['working-on', 'Working on']];
+  let body;
+  if (savedTripsTab === 'all') {
+    body = !SAVED_TRIP_IDS.length
+      ? `<div class="empty-state">No saved trips yet.</div>`
+      : SAVED_STATUSES.map(([st, label]) => {
+          const ids = savedTripsByStatus(st);
+          return ids.length ? `<div class="saved-section">
+            <div class="saved-section-title">${label} <span class="saved-section-count">${ids.length}</span></div>
+            ${savedTripGrid(ids)}
+          </div>` : '';
+        }).join('');
+  } else {
+    body = savedTripGrid(savedTripsByStatus(savedTripsTab));
+  }
 
   return `
-    <div class="home-section-title">Your trips</div>
-    ${list}
+    <div class="seg-toggle saved-tabs">
+      ${tabs.map(([id, label]) => `<button class="seg-btn ${id === savedTripsTab ? 'active' : ''}" onclick="setSavedTripsTab('${id}')">${label}</button>`).join('')}
+    </div>
+    ${body}
     <div class="discover-section">
       <div class="discover-section-title">Looking for your next trip?</div>
       <div class="discover-section-desc">Tell us what you're in the mood for and we'll put together fresh destination ideas tailored to you.</div>
-      <button class="discover-btn" onclick="openHomeView()">Discover</button>
+      <button class="discover-btn" onclick="openHomeView()">Explore</button>
     </div>
   `;
 }
