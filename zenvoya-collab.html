@@ -129,13 +129,40 @@ button { font-family: var(--font-body); }
 
 /* ===================== CHAT COLUMN ===================== */
 .chat-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.workspace { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ws-body { flex: 1; min-height: 0; display: flex; }
 .chat-header {
-  display: flex; align-items: center; gap: 12px;
-  padding: 18px 24px 10px;
-  max-width: 760px; width: 100%; margin: 0 auto;
+  display: flex; align-items: center; gap: 10px;
+  height: var(--header-height);
+  padding: 0 20px;
+  border-bottom: 1px solid var(--color-gray-200);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 30;
 }
-.chat-header-main { flex: 1; min-width: 0; }
-.chat-title { font-size: 18px; font-weight: 700; color: var(--color-gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-title { flex: 1; min-width: 0; font-size: 18px; font-weight: 700; color: var(--color-gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header-menu-wrap { position: relative; }
+.trips-btn { padding: 7px 12px 7px 10px; }
+.trips-btn .count { font-variant-numeric: tabular-nums; }
+.trips-menu { right: 0; left: auto; width: 380px; max-width: calc(100vw - 32px); padding: 10px; }
+.trips-menu .seg-toggle { display: flex; margin-bottom: 8px; }
+.trips-menu .seg-btn { flex: 1; }
+.trips-list { max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.trip-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--radius-md); cursor: pointer; }
+.trip-row:hover { background: var(--color-gray-50); }
+.trip-row.current { background: var(--color-gray-100); }
+.trip-row-thumb { width: 44px; height: 44px; border-radius: 10px; background: var(--color-gray-200) center/cover no-repeat; flex-shrink: 0; }
+.trip-row-body { flex: 1; min-width: 0; }
+.trip-row-title { font-size: 13px; font-weight: 600; color: var(--color-gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trip-row-meta { font-size: 12px; color: var(--color-gray-500); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trip-row-tags { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.trip-row-tags .avatar-stack .stack-avatar { width: 18px; height: 18px; font-size: 8px; border-width: 1.5px; margin-left: -6px; }
+.trip-row-tags .avatar-stack .stack-avatar:first-child { margin-left: 0; }
+.trip-row .btn { padding: 6px 10px; font-size: 12px; }
+.trips-empty { font-size: 13px; color: var(--color-gray-500); padding: 14px 8px; line-height: 1.5; }
+.more-menu { right: 0; left: auto; min-width: 200px; }
+.menu-item:disabled { opacity: 0.4; cursor: default; }
+.menu-item.danger .menu-item-title, .menu-item.danger .menu-item-icon { color: var(--color-error); }
 .chat-sub { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-gray-500); margin-top: 4px; }
 .chat-sub .avatar-stack .stack-avatar, .chat-sub .avatar-stack .zoya-mini { width: 20px; height: 20px; font-size: 9px; }
 
@@ -400,7 +427,7 @@ button { font-family: var(--font-body); }
   display: none;
   flex: 0 0 min(46%, 640px);
   min-width: 440px;
-  padding: 16px 16px 16px 4px;
+  padding: 12px 16px 16px 4px;
 }
 .trip-panel.open { display: flex; animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
@@ -420,6 +447,7 @@ button { font-family: var(--font-body); }
   box-shadow: var(--shadow-large);
   overflow: hidden;
   position: relative;
+  isolation: isolate; /* keep map controls' z-indexes from covering header menus */
   background: var(--color-white);
 }
 .tp-plan { flex: 1; min-width: 0; overflow-y: auto; overflow-x: hidden; position: relative; }
@@ -751,7 +779,8 @@ button { font-family: var(--font-body); }
   .tp-card.shared.show-group .tp-group { display: flex; }
   .tp-card.shared.show-group .tp-plan { display: none; }
   .tp-card.shared:not(.show-group) .plan-btn, .tp-card.shared.show-group .group-btn { background: var(--color-white); color: var(--color-gray-900); box-shadow: var(--shadow-xsmall); }
-  .chat-header { padding-left: 16px; padding-right: 16px; }
+  .chat-header { padding-left: 12px; padding-right: 12px; }
+  .trips-btn .label { display: none; }
   .chat-messages { padding: 16px; }
   .composer-area { padding: 8px 16px 16px; }
   .facts { grid-template-columns: 1fr 1fr; }
@@ -790,17 +819,23 @@ button { font-family: var(--font-body); }
     </div>
   </aside>
 
+  <div class="workspace">
+  <!-- Full-width header for the selected chat -->
+  <header class="chat-header">
+    <button class="icon-btn" id="showListBtn" onclick="toggleChatList()" title="Show chat list" data-icon="panel-left" style="display:none;"></button>
+    <h1 class="chat-title" id="chatTitle"></h1>
+    <div class="header-menu-wrap">
+      <button class="btn trips-btn" id="tripsBtn" onclick="toggleTripsMenu(event)" aria-haspopup="menu"></button>
+      <div class="tab-menu trips-menu" id="tripsMenu" role="menu"></div>
+    </div>
+    <div class="header-menu-wrap">
+      <button class="icon-btn" onclick="toggleMoreMenu(event)" title="More" aria-label="More" aria-haspopup="menu" data-icon="more-horizontal"></button>
+      <div class="tab-menu more-menu" id="moreMenu" role="menu"></div>
+    </div>
+  </header>
+  <div class="ws-body">
   <!-- Chat column -->
   <main class="chat-col">
-    <header class="chat-header">
-      <button class="icon-btn" id="showListBtn" onclick="toggleChatList()" title="Show chat list" data-icon="panel-left" style="display:none;"></button>
-      <div class="chat-header-main">
-        <div class="chat-title" id="chatTitle"></div>
-        <div class="chat-sub" id="chatSub"></div>
-      </div>
-      <button class="icon-btn" onclick="openShareModal()" title="Share trip plan" data-icon="share-up"></button>
-      <button class="icon-btn" onclick="deleteActiveChat()" title="Delete chat" data-icon="trash-2"></button>
-    </header>
     <div class="chat-messages" id="chatMessages"></div>
     <div class="composer-area" id="composerArea"></div>
   </main>
@@ -831,6 +866,8 @@ button { font-family: var(--font-body); }
       </div>
     </div>
   </section>
+  </div>
+  </div>
 </div>
 
 <!-- Share modal -->
@@ -850,6 +887,8 @@ function lucide(name, size) {
     'bookmark': '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
     'plus': '<path d="M5 12h14"/><path d="M12 5v14"/>',
     'panel-left': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>',
+    'more-horizontal': '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+    'luggage': '<path d="M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2"/><path d="M8 18V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v14"/><path d="M10 20h4"/><circle cx="16" cy="20" r="2"/><circle cx="8" cy="20" r="2"/>',
     'panel-left-close': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/>',
     'x': '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     'share-up': '<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/>',
@@ -1056,11 +1095,14 @@ const PLANS = {};
 let activePlanId = null;
 function plan() { return PLANS[activePlanId]; }
 
-function buildPlan(id) {
-  const t = TEMPLATES[id];
-  const opt = DEST_OPTIONS.find(o => o.id === id);
-  const p = {
-    id, ...t, title: t.name + ' getaway', start: opt.start,
+// A plan is one drafted trip; several can come from the same destination template.
+let planSeq = 1;
+function buildPlan(tpl, chatId) {
+  const t = TEMPLATES[tpl];
+  const opt = DEST_OPTIONS.find(o => o.id === tpl);
+  const id = `${tpl}-${planSeq++}`;
+  const p = PLANS[id] = {
+    id, tpl, chatId, ...t, title: t.name + ' getaway', start: opt.start,
     tier: 'average', members: [ME], shared: false, saved: false,
     tab: 'itinerary', open: new Set([1]), adding: null, expenses: [],
     days: [
@@ -1071,7 +1113,12 @@ function buildPlan(id) {
   };
   return p;
 }
-function ensurePlan(id) { if (!PLANS[id]) PLANS[id] = buildPlan(id); return PLANS[id]; }
+// Trips referenced in a chat: drafted there or brought in from elsewhere.
+function addTripToChat(chat, planId) {
+  chat.tripIds = chat.tripIds || [];
+  if (!chat.tripIds.includes(planId)) chat.tripIds.push(planId);
+  if (chat.id === activeChatId) renderHeader();
+}
 function planRange(p) { return fmtRange(p.start, p.days.length); }
 
 const TIER = { budget: 0.72, average: 1, premium: 1.65 };
@@ -1120,6 +1167,35 @@ function seedChats() {
     { role: 'me', text: 'Ski weekend near New York?' },
     { role: 'zoya', text: 'Stowe and Killington are both about five hours by car. Hunter Mountain is closest at around two and a half.' },
   ]});
+  // An earlier solo draft, and a group trip already underway — both show up under "All trips".
+  const lis = buildPlan('lisbon', 'c-budget');
+  lis.title = 'Lisbon on a budget';
+  lis.start = new Date(2027, 2, 18);
+  lis.tier = 'budget';
+  CHATS['c-budget'].messages.push({ role: 'zoya', text: 'Here\'s a budget Lisbon trip to start from — flights midweek and stays in Alfama.', attach: { type: 'trip', plan: lis.id } });
+  CHATS['c-budget'].tripIds = [lis.id];
+  CHATS['c-budget'].planId = lis.id;
+
+  const bcn = buildPlan('barcelona', 'c-barca');
+  const [mia, kai] = [friendById('mia'), friendById('kai')];
+  Object.assign(bcn, { title: 'Barcelona with Mia & Kai', start: new Date(2027, 1, 11), shared: true, groupOpen: true, members: [ME, mia, kai] });
+  bcn.days[2].acts.push({ ...bcn.suggest[2], by: kai });
+  bcn.expenses = [
+    { title: 'Casa Born deposit', amount: 310, payer: mia, icon: 'bed' },
+    { title: 'Sagrada Família tickets', amount: 102, payer: kai, icon: 'ticket' },
+  ];
+  addChat({ id: 'c-barca', kind: 'personal', title: bcn.title, planId: bcn.id, groupId: 'g-' + bcn.id, tripIds: [bcn.id], messages: [
+    { role: 'zoya', text: GREETING },
+    { role: 'me', text: 'Long weekend in Barcelona in February with Mia and Kai' },
+    { role: 'zoya', text: 'Love it. I drafted a plan and set up a group chat with Mia and Kai inside it.', attach: { type: 'trip', plan: bcn.id } },
+  ]});
+  addChat({ id: 'g-' + bcn.id, kind: 'group', title: bcn.title, members: bcn.members, audience: 'zoya', personalId: 'c-barca', messages: [
+    { role: 'system', icon: 'users', html: '<b>You</b> started the group with Mia and Kai' },
+    { role: 'me', text: 'Barcelona in Feb! Plan is in here, edit away', attach: { type: 'trip', plan: bcn.id } },
+    { role: 'friend', person: kai, text: 'Added a Boqueria lunch on Day 3 🥘' },
+    { role: 'friend', person: mia, text: 'Paid the Casa Born deposit, it\'s in Finances' },
+  ]});
+
   addChat({ id: 'c-main', kind: 'personal', title: 'New York > Europe', messages: [
     { role: 'zoya', text: GREETING },
     { role: 'me', text: '4-day trip from New York in December, somewhere in Europe' },
@@ -1283,10 +1359,85 @@ function later(ms, fn) { return setTimeout(fn, ms); }
 function renderHeader() {
   const c = active();
   document.getElementById('chatTitle').textContent = c.title;
-  const g = c.groupId && CHATS[c.groupId];
-  document.getElementById('chatSub').innerHTML = g
-    ? `${lucide('lock', 12)} Private with Zoya · <button class="sys-link" onclick="openGroupChat('${c.planId}')">Group chat</button>`
-    : `${lucide('lock', 12)} Private — only you and Zoya can see this`;
+  const n = (c.tripIds || []).length;
+  document.getElementById('tripsBtn').innerHTML = `${lucide('luggage', 16)} <span class="label">${n ? `<span class="count">${n}</span> ${n === 1 ? 'trip' : 'trips'}` : 'Trips'}</span> ${lucide('chevron-down', 14)}`;
+  document.getElementById('tripsBtn').title = n ? `${n} ${n === 1 ? 'trip' : 'trips'} in this chat` : 'Your trips';
+}
+
+/* ---- Trips menu: trips referenced in this chat, or every trip you've planned ---- */
+let tripsTab = 'chat';
+function toggleTripsMenu(e) {
+  e.stopPropagation();
+  const m = document.getElementById('tripsMenu');
+  const wasOpen = m.classList.contains('open');
+  closeMenus();
+  if (wasOpen) return;
+  tripsTab = (active().tripIds || []).length ? 'chat' : 'all';
+  renderTripsMenu();
+  m.classList.add('open');
+}
+function setTripsTab(t, e) { e.stopPropagation(); tripsTab = t; renderTripsMenu(); }
+function tripRowHTML(p, inChat) {
+  const panelOpen = document.getElementById('tripPanel').classList.contains('open');
+  const current = panelOpen && p.id === activePlanId;
+  const from = CHATS[p.chatId];
+  const meta = tripsTab === 'all' && from && !inChat ? `From “${esc(from.title)}”` : `${planRange(p)} · ${p.days.length} days`;
+  return `<div class="trip-row${current ? ' current' : ''}" role="menuitem" tabindex="0" onclick="openTripFromMenu('${p.id}')" onkeydown="if(event.key==='Enter')openTripFromMenu('${p.id}')">
+    <div class="trip-row-thumb" style="background-image:url('${p.img}')"></div>
+    <div class="trip-row-body">
+      <div class="trip-row-title">${esc(p.title)}</div>
+      <div class="trip-row-meta">${meta}</div>
+      <div class="trip-row-tags">${p.shared
+        ? `<span class="tag dark">${lucide('users', 11)} Group</span><span class="avatar-stack">${p.members.map(stackAvatarHTML).join('')}</span>`
+        : `<span class="tag">${lucide('lock', 11)} Solo draft</span>`}</div>
+    </div>
+    ${tripsTab === 'all' && !inChat ? `<button class="btn" onclick="event.stopPropagation(); bringTripIn('${p.id}')">${lucide('plus', 12)} Bring in</button>` : ''}
+  </div>`;
+}
+function renderTripsMenu() {
+  const c = active();
+  const mine = (c.tripIds || []).map(id => PLANS[id]).filter(Boolean);
+  const all = Object.values(PLANS);
+  const list = tripsTab === 'chat' ? mine : all;
+  document.getElementById('tripsMenu').innerHTML = `
+    <div class="seg-toggle" role="tablist">
+      <button class="seg-btn${tripsTab === 'chat' ? ' active' : ''}" role="tab" onclick="setTripsTab('chat', event)">In this chat (${mine.length})</button>
+      <button class="seg-btn${tripsTab === 'all' ? ' active' : ''}" role="tab" onclick="setTripsTab('all', event)">All trips (${all.length})</button>
+    </div>
+    <div class="trips-list">${list.length
+      ? list.map(p => tripRowHTML(p, mine.includes(p))).join('')
+      : `<div class="trips-empty">${tripsTab === 'chat' ? 'No trips in this chat yet. Ask Zoya for ideas, or bring one in from All trips.' : 'You haven\'t planned any trips yet.'}</div>`}</div>`;
+}
+function openTripFromMenu(planId) {
+  closeMenus();
+  openPanel(planId);
+}
+// Reference an existing trip in this chat so Zoya can work on it here.
+function bringTripIn(planId) {
+  const c = active();
+  const p = PLANS[planId];
+  addTripToChat(c, planId);
+  closeMenus();
+  openPanel(planId);
+  push(c.id, { role: 'zoya', text: `Brought <b>${esc(p.title)}</b> into this chat. Ask me anything about it.`, attach: { type: 'trip', plan: planId } });
+}
+
+/* ---- More menu ---- */
+function toggleMoreMenu(e) {
+  e.stopPropagation();
+  const m = document.getElementById('moreMenu');
+  const wasOpen = m.classList.contains('open');
+  closeMenus();
+  if (wasOpen) return;
+  const hasPlan = !!plan() && document.getElementById('tripPanel').classList.contains('open');
+  m.innerHTML = `
+    <button class="menu-item" ${hasPlan ? '' : 'disabled'} onclick="closeMenus(); openShareModal()">
+      <span class="menu-item-icon">${lucide('share-up', 15)}</span><span class="menu-item-title">Share trip plan</span>
+    </button>
+    <button class="menu-item danger" onclick="closeMenus(); deleteActiveChat()">
+      <span class="menu-item-icon">${lucide('trash-2', 15)}</span><span class="menu-item-title">Delete chat</span>
+    </button>`;
+  m.classList.add('open');
 }
 
 function renderChatList() {
@@ -1411,11 +1562,13 @@ function deleteActiveChat() {
 function pickDestination(id, chatId, msgIndex) {
   const chat = CHATS[chatId];
   const m = chat.messages[msgIndex];
-  const firstTime = !PLANS[id];
   m.selected = id;
-  const p = ensurePlan(id);
-  if (firstTime) p.chatId = chat.id;
-  if (!chat.groupId) chat.planId = id;
+  const tpl = id;
+  let p = Object.values(PLANS).find(x => x.tpl === tpl && x.chatId === chat.id);
+  const firstTime = !p;
+  if (!p) p = buildPlan(tpl, chat.id);
+  id = p.id;
+  addTripToChat(chat, id);
   if (chat.id === 'c-main' && !chat.groupId) chat.title = `New York > ${p.name}`;
   renderHeader(); renderChatList();
   renderThread(chat.id);
@@ -1441,6 +1594,8 @@ function pickDestination(id, chatId, msgIndex) {
 function openPanel(id, drafting) {
   activePlanId = id;
   const p = PLANS[id];
+  const c = active();
+  if (c && (c.tripIds || []).includes(id)) c.planId = id;
   const panel = document.getElementById('tripPanel');
   const card = document.getElementById('tpCard');
   panel.classList.add('open');
@@ -1914,6 +2069,7 @@ function confirmShare() {
   g.members = p.members;
   root.groupId = g.id;
   root.planId = p.id;
+  addTripToChat(root, p.id);
   root.title = p.title;
   toast(`Shared with ${namesList(added)}`);
 
