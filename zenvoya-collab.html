@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zenvoya — Plan Together</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="zenvoya-tokens.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; }
+body {
+  font-family: var(--font-body);
+  background: var(--color-white);
+  color: var(--color-gray-900);
+  height: 100dvh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: var(--font-body); }
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+#app { display: flex; height: 100dvh; width: 100%; }
+
+/* ===================== ICON RAIL ===================== */
+.rail {
+  width: 76px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--color-gray-200);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 0;
+  gap: 6px;
+}
+.rail-logo {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-weight: 700;
+  font-size: 17px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+}
+.rail-item {
+  width: 60px;
+  padding: 8px 0 6px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-md);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  cursor: pointer;
+}
+.rail-item:hover { background: var(--color-gray-100); }
+.rail-item.active { color: var(--color-primary); font-weight: 600; }
+.rail-item.active .rail-icon { background: var(--color-primary-ultra-light); }
+.rail-icon { width: 40px; height: 30px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; }
+.rail-spacer { flex: 1; }
+.user-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--color-accent-green);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 14px;
+  color: var(--color-gray-800);
+}
+
+/* ===================== CHAT LIST ===================== */
+.chatlist {
+  width: 252px;
+  flex-shrink: 0;
+  padding: 16px 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+}
+.chatlist.collapsed { display: none; }
+.chatlist-inner {
+  flex: 1;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  padding: 14px 10px;
+  display: flex; flex-direction: column;
+  min-height: 0;
+}
+.chatlist-top { display: flex; align-items: center; gap: 8px; padding: 0 2px 12px; }
+.new-chat-btn {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 12px;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  font-size: 14px; font-weight: 600;
+  color: var(--color-gray-900);
+  cursor: pointer;
+}
+.new-chat-btn:hover { background: var(--color-gray-50); }
+.icon-btn {
+  width: 32px; height: 32px;
+  border: none; background: none;
+  border-radius: var(--radius-md);
+  color: var(--color-gray-600);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.icon-btn:hover { background: var(--color-gray-100); color: var(--color-gray-900); }
+.chatlist-label { font-size: 12px; font-weight: 600; color: var(--color-gray-500); padding: 12px 10px 6px; }
+.chatlist-items { overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.chatlist-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 10px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  color: var(--color-gray-700);
+  cursor: pointer;
+  border: none; background: none; text-align: left; width: 100%;
+}
+.chatlist-item:hover { background: var(--color-gray-50); }
+.chatlist-item.active { background: var(--color-gray-100); color: var(--color-gray-900); font-weight: 500; }
+.chatlist-item-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chatlist-item-icon { display: flex; color: var(--color-gray-400); flex-shrink: 0; }
+.unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent-blue); flex-shrink: 0; }
+
+/* ===================== CHAT COLUMN ===================== */
+.chat-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.chat-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 18px 24px 10px;
+  max-width: 760px; width: 100%; margin: 0 auto;
+}
+.chat-header-main { flex: 1; min-width: 0; }
+.chat-title { font-size: 18px; font-weight: 700; color: var(--color-gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-sub { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-gray-500); margin-top: 4px; }
+.chat-sub .avatar-stack .stack-avatar, .chat-sub .avatar-stack .zoya-mini { width: 20px; height: 20px; font-size: 9px; }
+
+/* Chat tabs */
+.chat-tabs-row {
+  display: flex; align-items: flex-end; gap: 4px;
+  padding: 0 24px;
+  max-width: 760px; width: 100%; margin: 0 auto;
+  border-bottom: 1px solid var(--color-gray-200);
+  position: relative;
+}
+.chat-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+.chat-tabs::-webkit-scrollbar { display: none; }
+.chat-tab {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 10px 9px 12px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: none;
+  font-size: 13px; font-weight: 500;
+  color: var(--color-gray-500);
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 220px;
+  position: relative;
+  top: 1px;
+}
+.chat-tab:hover { color: var(--color-gray-800); background: var(--color-gray-50); }
+.chat-tab.active {
+  background: var(--color-white);
+  border-color: var(--color-gray-200);
+  color: var(--color-gray-900);
+  font-weight: 600;
+}
+.chat-tab-label { overflow: hidden; text-overflow: ellipsis; }
+.chat-tab-close {
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-gray-400);
+  opacity: 0;
+}
+.chat-tab:hover .chat-tab-close, .chat-tab.active .chat-tab-close { opacity: 1; }
+.chat-tab-close:hover { background: var(--color-gray-200); color: var(--color-gray-800); }
+.chat-tab-icon { display: flex; align-items: center; flex-shrink: 0; }
+.chat-tab-icon .stack-avatar { width: 16px !important; height: 16px !important; font-size: 8px !important; border-width: 1.5px !important; margin-left: -5px !important; }
+.chat-tab-icon .stack-avatar:first-child { margin-left: 0 !important; }
+.chat-tab-icon .friend-avatar { width: 18px; height: 18px; font-size: 9px; }
+.chat-tab-add { margin: 0 0 4px 2px; }
+.tab-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  min-width: 260px;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-large);
+  padding: 6px;
+  z-index: 50;
+  display: none;
+}
+.tab-menu.open { display: block; animation: popIn 0.15s ease; }
+@keyframes popIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.menu-label { font-size: 11px; font-weight: 600; color: var(--color-gray-400); padding: 8px 10px 4px; }
+.menu-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none; background: none;
+  border-radius: var(--radius-md);
+  text-align: left;
+  cursor: pointer;
+}
+.menu-item:hover { background: var(--color-gray-50); }
+.menu-item-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--color-gray-100); color: var(--color-gray-700); flex-shrink: 0; }
+.menu-item-icon .zoya-avatar, .menu-item-icon .friend-avatar { width: 28px; height: 28px; }
+.menu-item-title { font-size: 13px; font-weight: 600; color: var(--color-gray-900); }
+.menu-item-desc { font-size: 12px; color: var(--color-gray-500); margin-top: 1px; line-height: 1.35; }
+.menu-item.selected .menu-item-check { opacity: 1; }
+.menu-item-check { margin-left: auto; color: var(--color-primary); opacity: 0; display: flex; }
+
+/* Messages */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.chat-messages > * { max-width: 712px; width: 100%; margin-left: auto; margin-right: auto; }
+.message { display: flex; gap: 10px; align-items: flex-start; }
+.message.is-new { animation: messageIn 0.35s ease; }
+@keyframes messageIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.message.me { justify-content: flex-end; }
+.message-avatar { width: 28px; height: 28px; flex-shrink: 0; display: flex; }
+.message-avatar .friend-avatar { width: 28px; height: 28px; font-size: 11px; }
+.message.grouped .message-avatar { visibility: hidden; }
+.zoya-avatar { width: 28px; height: 28px; display: block; }
+.zoya-mini { width: 16px; height: 16px; border-radius: 50%; overflow: hidden; display: inline-flex; flex-shrink: 0; }
+.zoya-mini .zoya-avatar { width: 100%; height: 100%; }
+.message-col { display: flex; flex-direction: column; gap: 4px; min-width: 0; max-width: 82%; }
+.message.me .message-col { align-items: flex-end; }
+.message-col.wide { max-width: 100%; flex: 1; }
+.message-name { font-size: 12px; font-weight: 600; color: var(--color-gray-500); padding-left: 2px; }
+.message-bubble {
+  padding: 9px 14px;
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.message.bot .message-bubble { padding: 4px 0; }
+.message.friend .message-bubble { background: var(--color-gray-50); border: 1px solid var(--color-gray-200); border-radius: 4px var(--radius-lg) var(--radius-lg) var(--radius-lg); }
+.message.me .message-bubble { background: var(--color-gray-100); border-radius: var(--radius-lg) var(--radius-lg) 4px var(--radius-lg); }
+.mention { font-weight: 600; color: var(--color-gray-900); background: var(--color-gray-200); border-radius: 4px; padding: 0 3px; }
+.message-meta { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--color-gray-400); }
+
+.sys-line {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 12px; color: var(--color-gray-500);
+  text-align: center;
+}
+.sys-line.is-new { animation: messageIn 0.35s ease; }
+.sys-line svg { color: var(--color-gray-400); flex-shrink: 0; }
+.sys-line b { color: var(--color-gray-800); font-weight: 600; }
+.sys-link { border: none; background: none; font-size: 12px; font-weight: 600; color: var(--color-gray-900); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.chip {
+  padding: 6px 12px;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  font-size: 13px; font-weight: 500;
+  color: var(--color-gray-800);
+  cursor: pointer;
+}
+.chip:hover { background: var(--color-gray-50); border-color: var(--color-gray-400); }
+.chip:disabled { opacity: 0.45; cursor: default; }
+
+/* Destination options (gray container) */
+.dest-wrap {
+  background: var(--color-gray-100);
+  border-radius: 20px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 12px;
+}
+.dest-wrap.is-new { animation: messageIn 0.35s ease; }
+.dest-card {
+  border: none; background: none;
+  text-align: left; cursor: pointer;
+  border-radius: var(--radius-lg);
+  padding: 0;
+  min-width: 0;
+}
+.dest-photo {
+  height: 148px;
+  border-radius: var(--radius-lg);
+  background: var(--color-gray-200) center/cover no-repeat;
+  border: 2px solid transparent;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+.dest-card:hover .dest-photo { transform: translateY(-2px); box-shadow: var(--shadow-medium); }
+.dest-card.selected .dest-photo { border-color: var(--color-primary); box-shadow: 0 0 0 2px var(--color-white) inset; }
+.dest-price {
+  position: absolute; right: 8px; bottom: 8px;
+  padding: 4px 9px;
+  border-radius: var(--radius-full);
+  background: rgba(255,255,255,0.94);
+  font-size: 12px; font-weight: 600; color: var(--color-gray-900);
+}
+.dest-info { display: flex; align-items: flex-start; gap: 8px; padding: 8px 2px 0; }
+.dest-info-text { flex: 1; min-width: 0; }
+.dest-name { font-size: 15px; font-weight: 600; color: var(--color-gray-900); }
+.dest-country { font-size: 13px; color: var(--color-gray-500); }
+.dest-dates { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 12px; font-weight: 500; color: var(--color-gray-700); }
+.dest-dates svg { color: var(--color-gray-500); }
+.dest-arrow { color: var(--color-gray-300); display: flex; padding-top: 3px; }
+.dest-card.selected .dest-arrow, .dest-card:hover .dest-arrow { color: var(--color-primary); }
+
+/* Drafting + trip card */
+.draft-card, .trip-card {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  background: var(--color-white);
+  overflow: hidden;
+}
+.draft-card { padding: 14px 16px; }
+.draft-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.draft-step { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--color-gray-400); padding: 4px 0; }
+.draft-step.done { color: var(--color-gray-800); }
+.draft-step.current { color: var(--color-gray-800); }
+.draft-step-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--color-gray-300); flex-shrink: 0; }
+.draft-step.done .draft-step-icon { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-white); }
+.draft-step.current .draft-step-icon { border-color: var(--color-gray-900); border-top-color: transparent; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.trip-card { display: flex; align-items: center; gap: 12px; padding: 10px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.2s; }
+.trip-card:hover { border-color: var(--color-gray-400); box-shadow: var(--shadow-small); }
+.trip-card-thumb { width: 64px; height: 64px; border-radius: var(--radius-md); background: var(--color-gray-200) center/cover no-repeat; flex-shrink: 0; }
+.trip-card-body { flex: 1; min-width: 0; }
+.trip-card-name { font-size: 14px; font-weight: 600; }
+.trip-card-meta { font-size: 12px; color: var(--color-gray-500); margin-top: 2px; }
+.trip-card-tags { display: flex; gap: 6px; margin-top: 6px; align-items: center; }
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-100);
+  font-size: 11px; font-weight: 600; color: var(--color-gray-700);
+}
+.tag.dark { background: var(--color-primary); color: var(--color-white); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  font-size: 13px; font-weight: 600;
+  color: var(--color-gray-900);
+  cursor: pointer; white-space: nowrap;
+}
+.btn:hover { background: var(--color-gray-50); }
+.btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-white); }
+.btn.primary:hover { background: var(--color-primary-hover); }
+.btn.ghost { border-color: transparent; background: var(--color-gray-100); }
+.btn.ghost:hover { background: var(--color-gray-200); }
+
+.update-card {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  font-size: 13px;
+  max-width: 420px;
+}
+.update-card-thumb { width: 36px; height: 36px; border-radius: 8px; background: var(--color-gray-200) center/cover no-repeat; flex-shrink: 0; }
+.update-card-body { flex: 1; min-width: 0; }
+.update-card-title { font-weight: 600; color: var(--color-gray-900); }
+.update-card-meta { font-size: 12px; color: var(--color-gray-500); }
+
+.typing { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-gray-500); }
+.typing-dots { display: inline-flex; gap: 3px; padding: 10px 12px; background: var(--color-gray-50); border: 1px solid var(--color-gray-200); border-radius: var(--radius-lg); }
+.typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--color-gray-400); animation: blink 1.2s infinite; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; } }
+
+/* Composer */
+.composer-area { padding: 8px 24px 20px; }
+.composer-area > * { max-width: 712px; margin: 0 auto; }
+.composer {
+  display: flex; align-items: center; gap: 6px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-full);
+  padding: 6px 6px 6px 18px;
+  background: var(--color-white);
+  box-shadow: var(--shadow-xsmall);
+  transition: border-color 0.15s;
+  position: relative;
+}
+.composer:focus-within { border-color: var(--color-primary); }
+.composer.has-audience { padding-left: 6px; }
+.composer-input {
+  flex: 1; min-width: 0;
+  border: none; outline: none;
+  font-size: 14px; font-family: var(--font-body);
+  background: transparent;
+  color: var(--color-gray-900);
+  padding: 10px 0;
+}
+.composer-input::placeholder { color: var(--color-gray-400); }
+.send-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-white);
+  flex-shrink: 0;
+}
+.send-btn:hover { background: var(--color-primary-hover); }
+.audience-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 10px 8px 8px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-100);
+  font-size: 13px; font-weight: 600;
+  color: var(--color-gray-800);
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+.audience-btn:hover { background: var(--color-gray-200); }
+.audience-btn.with-zoya { background: var(--color-primary); color: var(--color-white); }
+.audience-btn .stack-avatar { width: 18px !important; height: 18px !important; font-size: 8px !important; margin-left: -6px !important; border-width: 1.5px !important; }
+.audience-btn .stack-avatar:first-child { margin-left: 0 !important; }
+.audience-btn.with-zoya .stack-avatar { border-color: var(--color-primary) !important; }
+.audience-btn .zoya-mini { width: 18px; height: 18px; margin-left: -6px; box-shadow: 0 0 0 1.5px var(--color-white); }
+.audience-menu { bottom: calc(100% + 8px); top: auto; left: 0; min-width: 300px; }
+.composer-hint { font-size: 12px; color: var(--color-gray-400); margin-top: 8px; padding-left: 18px; display: flex; align-items: center; gap: 6px; }
+
+/* ===================== TRIP PANEL ===================== */
+.trip-panel {
+  display: none;
+  flex: 0 0 min(46%, 640px);
+  min-width: 440px;
+  padding: 16px 16px 16px 4px;
+}
+.trip-panel.open { display: flex; animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+.tp-card {
+  flex: 1;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 20px;
+  box-shadow: var(--shadow-large);
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  background: var(--color-white);
+}
+.tp-map-wrap { position: relative; }
+.tp-map { height: 260px; background: var(--color-gray-100); }
+.tp-map .leaflet-container { font-family: var(--font-body); }
+.tp-map-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; z-index: 900; pointer-events: none; }
+.tp-map-top > * { pointer-events: auto; }
+.tp-float {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px;
+  background: var(--color-white);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-small);
+  font-size: 12px; font-weight: 600; color: var(--color-gray-800);
+}
+.tp-float .zoya-mini { width: 18px; height: 18px; }
+.tp-close { width: 32px; height: 32px; border: none; border-radius: 50%; background: var(--color-white); box-shadow: var(--shadow-small); display: flex; align-items: center; justify-content: center; color: var(--color-gray-700); cursor: pointer; }
+.tp-close:hover { background: var(--color-gray-50); }
+.map-pin-marker { display: flex; flex-direction: column; align-items: center; transform: translateY(-6px); }
+.map-pin-dot { width: 26px; height: 26px; border-radius: 50% 50% 50% 0; background: var(--color-primary); transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-small); border: 2px solid white; }
+.map-pin-dot span { transform: rotate(45deg); font-size: 11px; color: var(--color-white); font-weight: 600; }
+.map-pin-label { margin-top: 4px; font-size: 10px; font-weight: 600; color: var(--color-gray-800); background: rgba(255,255,255,0.92); padding: 2px 6px; border-radius: var(--radius-sm); white-space: nowrap; box-shadow: var(--shadow-xsmall); }
+
+.tp-body { padding: 20px 22px 28px; }
+.tp-head { display: flex; gap: 16px; align-items: flex-start; }
+.tp-thumb { width: 104px; height: 104px; border-radius: var(--radius-lg); background: var(--color-gray-200) center/cover no-repeat; flex-shrink: 0; box-shadow: var(--shadow-xsmall); }
+.tp-head-main { flex: 1; min-width: 0; }
+.tp-head-top { display: flex; align-items: flex-start; gap: 10px; }
+.tp-title-wrap { flex: 1; min-width: 0; }
+.tp-title {
+  font-size: 26px; font-weight: 700; line-height: 1.15;
+  color: var(--color-gray-900);
+  border-radius: 6px;
+  outline: none;
+  padding: 0 4px; margin: 0 -4px;
+  overflow-wrap: anywhere;
+}
+.tp-title:hover { background: var(--color-gray-50); }
+.tp-title:focus { background: var(--color-gray-100); }
+.tp-country { font-size: 15px; color: var(--color-gray-500); margin-top: 2px; }
+.tp-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.tp-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.select-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 10px 7px 12px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  font-size: 13px; font-weight: 500;
+  color: var(--color-gray-800);
+  cursor: pointer;
+  position: relative;
+}
+.select-pill:hover { background: var(--color-gray-50); }
+.select-pill > svg:last-child { color: var(--color-gray-400); }
+.select-pill .avatar-stack .stack-avatar { width: 20px; height: 20px; font-size: 9px; border-width: 1.5px; }
+.pill-wrap { position: relative; display: inline-flex; }
+.pill-menu { top: calc(100% + 6px); left: 0; min-width: 200px; }
+
+.share-banner {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 18px;
+  padding: 12px 12px 12px 14px;
+  border-radius: var(--radius-lg);
+  background: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
+}
+.share-banner-icon { width: 34px; height: 34px; border-radius: 50%; background: var(--color-white); border: 1px solid var(--color-gray-200); display: flex; align-items: center; justify-content: center; color: var(--color-gray-700); flex-shrink: 0; }
+.share-banner-text { flex: 1; min-width: 0; font-size: 13px; color: var(--color-gray-600); line-height: 1.4; }
+.share-banner-text b { color: var(--color-gray-900); font-weight: 600; display: block; }
+.share-banner .avatar-stack .stack-avatar { width: 28px; height: 28px; }
+
+.tp-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--color-gray-200); margin: 20px 0 16px; overflow-x: auto; scrollbar-width: none; }
+.tp-tabs::-webkit-scrollbar { display: none; }
+.tp-tab {
+  padding: 10px 12px;
+  border: none; background: none;
+  font-size: 15px; font-weight: 500;
+  color: var(--color-gray-600);
+  border-bottom: 2px solid transparent;
+  cursor: pointer; white-space: nowrap;
+  margin-bottom: -1px;
+}
+.tp-tab:hover { color: var(--color-gray-900); }
+.tp-tab.active { color: var(--color-primary); font-weight: 600; border-bottom-color: var(--color-primary); }
+
+/* Itinerary day rows (Figma) */
+.day-row {
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-xxsmall);
+  background: var(--color-white);
+}
+.tp-card.drafting .day-row { animation: rowIn 0.45s both; animation-delay: calc(var(--i) * 140ms + 150ms); }
+@keyframes rowIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.day-row-head {
+  display: flex; align-items: center; gap: 16px;
+  width: 100%;
+  padding: 16px 18px;
+  border: none; background: none;
+  text-align: left; cursor: pointer;
+  border-radius: var(--radius-lg);
+}
+.day-row-head:hover { background: var(--color-gray-50); }
+.day-date { font-size: 14px; font-weight: 600; color: var(--color-gray-900); width: 92px; flex-shrink: 0; }
+.day-loc { flex: 1; min-width: 0; font-size: 14px; color: var(--color-gray-700); }
+.day-count { font-size: 12px; color: var(--color-gray-400); }
+.day-icon { display: flex; color: var(--color-gray-900); }
+.day-chev { display: flex; color: var(--color-gray-600); transition: transform 0.25s; }
+.day-row.open .day-chev { transform: rotate(180deg); }
+.day-body { padding: 0 18px 16px; display: none; }
+.day-row.open .day-body { display: block; }
+.act {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-gray-100);
+  position: relative;
+}
+.act:first-child { border-top: none; }
+.act.fresh { animation: freshGlow 2.4s ease; border-radius: var(--radius-md); }
+@keyframes freshGlow { 0%, 40% { background: var(--color-primary-ultra-light); box-shadow: 0 0 0 6px var(--color-primary-ultra-light); } 100% { background: transparent; box-shadow: 0 0 0 6px transparent; } }
+.act-thumb { width: 52px; height: 52px; border-radius: 14px; background: var(--color-gray-200) center/cover no-repeat; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--color-gray-600); }
+.act-body { flex: 1; min-width: 0; }
+.act-time { font-size: 11px; font-weight: 600; color: var(--color-gray-500); }
+.act-title { font-size: 14px; font-weight: 600; color: var(--color-gray-900); }
+.act-desc { font-size: 12px; color: var(--color-gray-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.act-by { display: flex; align-items: center; flex-shrink: 0; }
+.act-by .stack-avatar { width: 22px; height: 22px; font-size: 9px; }
+.act-by .zoya-mini { width: 22px; height: 22px; }
+.act-remove { opacity: 0; }
+.act:hover .act-remove, .act-remove:focus-visible { opacity: 1; }
+.add-act-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 8px;
+  padding: 7px 12px;
+  border: 1px dashed var(--color-gray-300);
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  font-size: 13px; font-weight: 500;
+  color: var(--color-gray-700);
+  cursor: pointer;
+}
+.add-act-btn:hover { border-color: var(--color-gray-500); color: var(--color-gray-900); }
+.add-panel { margin-top: 10px; padding: 12px; background: var(--color-gray-50); border-radius: var(--radius-md); }
+.add-panel-label { font-size: 12px; font-weight: 600; color: var(--color-gray-600); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.add-panel-row { display: flex; gap: 8px; margin-top: 10px; }
+.text-input {
+  flex: 1; min-width: 0;
+  padding: 9px 12px;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-full);
+  font-size: 13px; font-family: var(--font-body);
+  background: var(--color-white);
+  outline: none;
+}
+.text-input:focus { border-color: var(--color-primary); }
+.empty-day { font-size: 13px; color: var(--color-gray-500); padding: 6px 0; }
+
+/* About */
+.about-lede { font-size: 15px; line-height: 1.65; color: var(--color-gray-700); }
+.facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 18px 0 6px; }
+.fact { background: var(--color-gray-50); border-radius: var(--radius-md); padding: 12px; }
+.fact-value { font-size: 16px; font-weight: 700; color: var(--color-gray-900); }
+.fact-label { font-size: 11px; color: var(--color-gray-500); margin-top: 2px; }
+.section-title { font-size: 17px; font-weight: 700; color: var(--color-gray-900); margin: 24px 0 10px; }
+.brief-row { display: flex; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--color-gray-100); }
+.brief-row:last-child { border-bottom: none; }
+.brief-q { flex: 0 0 112px; font-size: 13px; font-weight: 600; color: var(--color-gray-900); }
+.brief-a { flex: 1; font-size: 13px; line-height: 1.55; color: var(--color-gray-600); }
+.gallery { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-auto-rows: 96px; gap: 8px; }
+.gallery-img { border-radius: var(--radius-md); background: var(--color-gray-100) center/cover no-repeat; }
+.gallery-img:first-child { grid-row: span 2; }
+
+/* Flights / Stay */
+.opt-card { display: flex; align-items: center; gap: 14px; padding: 14px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-lg); margin-bottom: 10px; }
+.airline-tile { width: 40px; height: 40px; border-radius: var(--radius-sm); border: 1px solid var(--color-gray-200); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; color: var(--color-gray-700); flex-shrink: 0; }
+.opt-body { flex: 1; min-width: 0; }
+.opt-title { font-size: 15px; font-weight: 600; }
+.opt-meta { font-size: 12px; color: var(--color-gray-500); margin-top: 2px; }
+.opt-price { text-align: right; font-size: 17px; font-weight: 700; flex-shrink: 0; }
+.opt-price span { display: block; font-size: 11px; font-weight: 500; color: var(--color-gray-400); }
+.stay-photo { width: 84px; height: 72px; border-radius: var(--radius-md); background: var(--color-gray-200) center/cover no-repeat; flex-shrink: 0; }
+.note { display: flex; gap: 10px; align-items: center; padding: 12px 14px; background: var(--color-gray-50); border-radius: var(--radius-md); font-size: 13px; color: var(--color-gray-600); margin-top: 6px; }
+.note .zoya-mini { width: 22px; height: 22px; }
+
+/* Finances */
+.finance-summary { display: flex; gap: 10px; margin-bottom: 4px; }
+.finance-stat { flex: 1; background: var(--color-gray-50); border-radius: var(--radius-md); padding: 14px; min-width: 0; }
+.finance-stat-label { font-size: 12px; color: var(--color-gray-500); margin-bottom: 4px; }
+.finance-stat-value { font-size: 20px; font-weight: 700; color: var(--color-gray-900); }
+.finance-stat-value.positive { color: var(--color-success); }
+.finance-stat-value.negative { color: var(--color-error); }
+.seg-toggle { display: inline-flex; background: var(--color-gray-100); border-radius: var(--radius-full); padding: 3px; gap: 2px; }
+.seg-btn { padding: 7px 14px; border: none; background: none; border-radius: var(--radius-full); font-size: 13px; font-weight: 600; color: var(--color-gray-600); cursor: pointer; }
+.seg-btn.active { background: var(--color-white); color: var(--color-gray-900); box-shadow: var(--shadow-xsmall); }
+.est-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.est-total { font-size: 30px; font-weight: 700; letter-spacing: -0.01em; }
+.est-sub { font-size: 13px; color: var(--color-gray-500); }
+.stack-bar { display: flex; height: 12px; border-radius: var(--radius-full); overflow: hidden; margin: 16px 0 12px; gap: 2px; }
+.stack-bar div { height: 100%; transition: flex-grow 0.4s ease; }
+.legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+.legend-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-gray-700); }
+.legend-swatch { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.legend-amt { margin-left: auto; font-weight: 600; color: var(--color-gray-900); }
+.finance-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--color-gray-100); }
+.finance-row:last-child { border-bottom: none; }
+.finance-row-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--color-gray-100); color: var(--color-gray-600); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.finance-row-body { flex: 1; min-width: 0; }
+.finance-row-title { font-size: 13px; font-weight: 600; color: var(--color-gray-900); }
+.finance-row-meta { font-size: 12px; color: var(--color-gray-500); margin-top: 2px; }
+.finance-row-amount { font-size: 14px; font-weight: 700; color: var(--color-gray-900); flex-shrink: 0; }
+.finance-row-amount.positive { color: var(--color-success); }
+.finance-row-amount.negative { color: var(--color-error); }
+.finance-row .friend-avatar { width: 32px; height: 32px; font-size: 12px; }
+
+/* Avatars (Zenvoya DS) */
+.avatar-stack { display: flex; align-items: center; }
+.avatar-stack .stack-avatar, .avatar-stack .zoya-mini {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--color-white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: #fff;
+  margin-left: -8px; flex-shrink: 0;
+}
+.avatar-stack .zoya-mini { border: none; box-shadow: 0 0 0 2px var(--color-white); }
+.avatar-stack > :first-child { margin-left: 0; }
+.friend-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; color: #fff; flex-shrink: 0; }
+.avatar-tt { position: relative; }
+.avatar-tt:hover { z-index: 20; }
+.avatar-tooltip {
+  position: absolute; bottom: 100%; left: 50%;
+  transform: translate(-50%, 4px);
+  background: var(--color-gray-900); color: var(--color-white);
+  font-size: 11px; font-weight: 400;
+  padding: 8px 10px; border-radius: var(--radius-sm);
+  white-space: nowrap; opacity: 0; visibility: hidden;
+  transition: opacity 0.15s, transform 0.15s;
+  pointer-events: none; z-index: 30;
+  text-align: left; line-height: 1.5; margin-bottom: 6px;
+}
+.avatar-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--color-gray-900); }
+.avatar-tt:hover .avatar-tooltip { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+.avatar-tooltip-name { font-weight: 600; }
+.avatar-tooltip-meta { color: var(--color-gray-300); }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1100; display: none; align-items: center; justify-content: center; padding: 16px; }
+.modal-overlay.active { display: flex; }
+.modal-box { background: var(--color-white); border-radius: var(--radius-lg); width: 440px; max-width: 100%; box-shadow: var(--shadow-xlarge); overflow: hidden; animation: popIn 0.2s ease; }
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 20px 14px; border-bottom: 1px solid var(--color-gray-200); }
+.modal-header h3 { font-size: 16px; font-weight: 700; }
+.modal-header p { font-size: 13px; color: var(--color-gray-500); margin-top: 3px; line-height: 1.4; }
+.modal-body { padding: 14px 20px; max-height: min(520px, calc(100dvh - 200px)); overflow-y: auto; }
+.modal-friend-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; cursor: pointer; width: 100%; border: none; background: none; text-align: left; }
+.modal-friend-row .friend-avatar { width: 34px; height: 34px; font-size: 12px; }
+.modal-friend-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--color-gray-800); }
+.modal-friend-name span { display: block; font-size: 12px; font-weight: 400; color: var(--color-gray-500); }
+.modal-check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--color-gray-300); display: flex; align-items: center; justify-content: center; color: transparent; flex-shrink: 0; }
+.modal-check.checked { background: var(--color-primary); border-color: var(--color-primary); color: white; }
+.modal-share-row { display: flex; gap: 8px; margin-top: 6px; }
+.modal-share-input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-full); font-size: 13px; font-family: var(--font-body); color: var(--color-gray-600); background: var(--color-gray-50); }
+.toggle-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--color-gray-50); border-radius: var(--radius-md); margin-top: 14px; cursor: pointer; border: none; width: 100%; text-align: left; }
+.toggle-row-text { flex: 1; font-size: 13px; color: var(--color-gray-600); line-height: 1.4; }
+.toggle-row-text b { display: block; color: var(--color-gray-900); font-weight: 600; }
+.switch { width: 36px; height: 22px; border-radius: 11px; background: var(--color-gray-300); position: relative; flex-shrink: 0; transition: background 0.15s; }
+.switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: white; transition: transform 0.15s; box-shadow: var(--shadow-xsmall); }
+.switch.on { background: var(--color-primary); }
+.switch.on::after { transform: translateX(14px); }
+.modal-footer { padding: 14px 20px; border-top: 1px solid var(--color-gray-200); display: flex; gap: 8px; justify-content: flex-end; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 28px;
+  transform: translate(-50%, 20px);
+  background: var(--color-gray-900); color: var(--color-white);
+  padding: 10px 16px; border-radius: var(--radius-full);
+  font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 1200;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* Responsive */
+@media (max-width: 1280px) {
+  .trip-panel { min-width: 420px; }
+}
+@media (max-width: 900px) {
+  .chatlist { display: none; }
+  .rail { width: 60px; }
+  .rail-item { width: 50px; font-size: 11px; }
+  .trip-panel.open { position: fixed; inset: 0; z-index: 1000; padding: 0; background: var(--color-white); min-width: 0; }
+  .tp-card { border-radius: 0; border: none; box-shadow: none; }
+  .chat-header, .chat-tabs-row { padding-left: 16px; padding-right: 16px; }
+  .chat-messages { padding: 16px; }
+  .composer-area { padding: 8px 16px 16px; }
+  .facts { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .dest-wrap { grid-template-columns: 1fr; }
+  .tp-head { flex-direction: column; }
+  .tp-thumb { width: 72px; height: 72px; }
+  .audience-btn .audience-label { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Icon rail -->
+  <nav class="rail" aria-label="Main">
+    <div class="rail-logo" title="Zenvoya">Z</div>
+    <button class="rail-item active" id="railChat"><span class="rail-icon" data-icon="message-square"></span>Chat</button>
+    <button class="rail-item" onclick="toast('Shop isn\'t part of this prototype')"><span class="rail-icon" data-icon="shopping-cart"></span>Shop</button>
+    <button class="rail-item" onclick="toast('Trips isn\'t part of this prototype')"><span class="rail-icon" data-icon="bookmark"></span>Trips</button>
+    <div class="rail-spacer"></div>
+    <div class="user-avatar avatar-tt" id="railUser">G</div>
+  </nav>
+
+  <!-- Chat list -->
+  <aside class="chatlist" id="chatList">
+    <div class="chatlist-inner">
+      <div class="chatlist-top">
+        <button class="new-chat-btn" onclick="newPersonalChat()"><span data-icon="plus"></span> New chat</button>
+        <button class="icon-btn" onclick="toggleChatList()" title="Hide chat list" data-icon="panel-left"></button>
+      </div>
+      <div class="chatlist-items" id="chatListItems"></div>
+    </div>
+  </aside>
+
+  <!-- Chat column -->
+  <main class="chat-col">
+    <header class="chat-header">
+      <button class="icon-btn" id="showListBtn" onclick="toggleChatList()" title="Show chat list" data-icon="panel-left" style="display:none;"></button>
+      <div class="chat-header-main">
+        <div class="chat-title" id="chatTitle"></div>
+        <div class="chat-sub" id="chatSub"></div>
+      </div>
+      <button class="icon-btn" onclick="openShareModal()" title="Share trip plan" data-icon="share-up"></button>
+      <button class="icon-btn" onclick="deleteActiveChat()" title="Delete chat" data-icon="trash-2"></button>
+    </header>
+    <div class="chat-tabs-row">
+      <div class="chat-tabs" id="chatTabs" role="tablist"></div>
+      <button class="icon-btn chat-tab-add" id="tabAddBtn" onclick="toggleTabMenu(event)" title="Open a chat in a new tab" data-icon="plus"></button>
+      <div class="tab-menu" id="tabMenu"></div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="composer-area" id="composerArea"></div>
+  </main>
+
+  <!-- Trip plan panel -->
+  <section class="trip-panel" id="tripPanel" aria-label="Trip plan">
+    <div class="tp-card" id="tpCard">
+      <div class="tp-map-wrap">
+        <div class="tp-map" id="tpMap"></div>
+        <div class="tp-map-top">
+          <span class="tp-float" id="tpBadge"></span>
+          <button class="tp-close" onclick="closePanel()" title="Close trip plan" data-icon="x"></button>
+        </div>
+      </div>
+      <div class="tp-body" id="tpBody"></div>
+    </div>
+  </section>
+</div>
+
+<!-- Share modal -->
+<div class="modal-overlay" id="shareOverlay" onclick="if (event.target === this) closeShareModal()">
+  <div class="modal-box" id="shareBox" role="dialog" aria-modal="true"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== ICONS (lucide subset, same helper as prototype) ===================== */
+function lucide(name, size) {
+  size = size || 18;
+  const icons = {
+    'message-square': '<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/>',
+    'shopping-cart': '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+    'bookmark': '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
+    'plus': '<path d="M5 12h14"/><path d="M12 5v14"/>',
+    'panel-left': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>',
+    'x': '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    'share-up': '<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/>',
+    'trash-2': '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
+    'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+    'arrow-right': '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+    'arrow-up': '<path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>',
+    'mic': '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>',
+    'calendar': '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+    'user': '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    'users': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    'user-plus': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>',
+    'plane-takeoff': '<path d="M2 22h20"/><path d="M6.36 17.4 4 17l-2-4 1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12 5 6l.9-.45a2 2 0 0 1 2.09.2l4.02 3a2 2 0 0 0 2.1.2l4.19-2.06a2.41 2.41 0 0 1 1.73-.17L21 7a1.4 1.4 0 0 1 .87 1.99l-.38.76c-.23.46-.6.84-1.07 1.08L7.97 17.78a2 2 0 0 1-1.61-.38z"/>',
+    'plane-landing': '<path d="M2 22h20"/><path d="M3.77 10.77 2 9l2-4.5 1.1.55c.55.28.9.84.9 1.45s.35 1.17.9 1.45L8 8.5l3-6 1.05.53a2 2 0 0 1 1.09 1.52l.72 5.4a2 2 0 0 0 1.09 1.52l4.4 2.2c.56.27.95.78 1.08 1.39l.28 1.3-15.94-4.59Z"/>',
+    'plane': '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+    'bed': '<path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>',
+    'utensils': '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
+    'ticket': '<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>',
+    'check': '<path d="M20 6 9 17l-5-5"/>',
+    'lock': '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    'link': '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+    'pencil': '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>',
+    'map-pin': '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+    'dollar-sign': '<path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+    'sparkles': '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z"/>',
+    'star': '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+    'receipt': '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>',
+  };
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+icons[name]+'</svg>';
+}
+
+const ZOYA_SVG = `<svg class="zoya-avatar" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="14" fill="#0a0a0a"/><path d="M7 11c0-.8.4-1.5 1.2-1.9L14 6l5.8 3.1c.8.4 1.2 1.1 1.2 1.9v3c0 3.5-3 6-7 7.5-4-1.5-7-4-7-7.5v-3z" fill="white" opacity="0.9"/><circle cx="11.5" cy="12.5" r="1.2" fill="#0a0a0a"/><circle cx="16.5" cy="12.5" r="1.2" fill="#0a0a0a"/><path d="M11.5 16c1.2 1.2 3.8 1.2 5 0" stroke="#0a0a0a" stroke-width="1" stroke-linecap="round"/><path d="M9 8.5l-1.5-2.5M19 8.5l1.5-2.5" stroke="white" stroke-width="1" stroke-linecap="round"/></svg>`;
+const ZOYA_MINI = `<span class="zoya-mini avatar-tt">${ZOYA_SVG}<div class="avatar-tooltip"><div class="avatar-tooltip-name">Zoya</div><div class="avatar-tooltip-meta">Your travel agent</div></div></span>`;
+
+/* ===================== PEOPLE (mirrors zenvoya-prototype.html) ===================== */
+const FRIENDS = [
+  { id: 'mia', name: 'Mia Chen', initial: 'M', color: '#f97316', level: 5, joinDate: 'Mar 2024' },
+  { id: 'liam', name: 'Liam Torres', initial: 'L', color: '#0ea5e9', level: 3, joinDate: 'Nov 2024' },
+  { id: 'ava', name: 'Ava Patel', initial: 'A', color: '#a855f7', level: 2, joinDate: 'Feb 2025' },
+  { id: 'noah', name: 'Noah Kim', initial: 'N', color: '#22c55e', level: 4, joinDate: 'Jun 2024' },
+  { id: 'zoe', name: 'Zoe Martin', initial: 'Z', color: '#ec4899', level: 4, joinDate: 'Aug 2024' },
+  { id: 'kai', name: 'Kai Nakamura', initial: 'K', color: '#6366f1', level: 5, joinDate: 'Sep 2024' },
+];
+function friendById(id) { return FRIENDS.find(f => f.id === id); }
+const ME = { id: 'me', name: 'George (You)', initial: 'G', color: 'var(--color-accent-green)', textColor: 'var(--color-gray-800)', level: 6, joinDate: 'Jan 2024' };
+const LEVELS = ['', 'Passenger', 'Watcher', 'Tracker', 'Catalyst', 'Anchor', 'Tracer', 'Curator', 'Purist', 'Architect', 'Agent'];
+function levelLabel(level) { return `Lv ${level}. ${LEVELS[level]}`; }
+function firstName(p) { return p === ME ? 'You' : p.name.split(' ')[0]; }
+
+function avatarTooltipHTML(person) {
+  if (!person || !person.name) return '';
+  return `<div class="avatar-tooltip">
+    <div class="avatar-tooltip-name">${person.name}</div>
+    ${person.joinDate ? `<div class="avatar-tooltip-meta">Joined ${person.joinDate}</div>` : ''}
+    ${person.level ? `<div class="avatar-tooltip-meta">${levelLabel(person.level)}</div>` : ''}
+  </div>`;
+}
+function stackAvatarHTML(m) {
+  return `<div class="stack-avatar avatar-tt" style="background:${m.color};${m.textColor ? 'color:' + m.textColor + ';' : ''}">${m.initial}${avatarTooltipHTML(m)}</div>`;
+}
+function friendAvatarHTML(f, extraStyle) {
+  if (!f) return '';
+  return `<div class="friend-avatar avatar-tt" style="background:${f.color};${f.textColor ? 'color:' + f.textColor + ';' : ''}${extraStyle || ''}">${f.initial}${avatarTooltipHTML(f)}</div>`;
+}
+function namesList(people) {
+  const n = people.map(firstName);
+  return n.length <= 1 ? n.join('') : n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1];
+}
+
+/* ===================== PHOTOS (same lookup order as prototype) ===================== */
+const LOCATION_IMAGES = new Set([
+  'alfama-castle','barceloneta-beach','champs-elysees','colosseum','eiffel-tower','el-born-tapas','fado-in-alfama',
+  'le-marais','louvre-museum','montmartre','park-guell','pena-palace-sintra','sagrada-familia','saint-germain',
+  'seine-river-cruise','trastevere','trevi-fountain','vatican-museums','fiumicino-airport','charles-de-gaulle-airport',
+  'barcelona-el-prat-airport','lisbon-airport',
+]);
+function slugifyLocation(str) {
+  return (str || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+function locImgFor(label) {
+  const slug = slugifyLocation(label);
+  return LOCATION_IMAGES.has(slug) ? `images/locations/${slug}.jpg` : null;
+}
+function bgUrl(src) { return `url('${src}') center/cover no-repeat`; }
+function actBg(plan, a) {
+  const img = locImgFor(a.loc || a.title);
+  return img ? bgUrl(img) : bgUrl(plan.img);
+}
+
+/* ===================== DESTINATION OPTIONS + PLAN TEMPLATES ===================== */
+const DEST_OPTIONS = [
+  { id: 'rome', start: new Date(2026, 11, 4) },
+  { id: 'paris', start: new Date(2026, 11, 11) },
+  { id: 'barcelona', start: new Date(2026, 11, 3) },
+  { id: 'lisbon', start: new Date(2026, 11, 10) },
+];
+
+const TEMPLATES = {
+  rome: {
+    name: 'Rome', country: 'Italy', img: 'images/trips/rome.jpg', code: 'FCO', airport: 'Fiumicino Airport',
+    cost: { flight: 640, stay: 190, food: 70, acts: 45 },
+    airlines: [['AZ', 'ITA Airways', 'Nonstop', '8h 25m'], ['DL', 'Delta', 'Nonstop', '8h 40m'], ['BA', 'British Airways', '1 stop', '11h 05m']],
+    stays: [['Trastevere Lofts', 'Trastevere', 9.1, 168], ['Monti Garden Suites', 'Colosseum', 8.8, 205]],
+    days: [
+      [ { title: 'Colosseum & Roman Forum', loc: 'Colosseum', desc: 'Skip-the-line entry at 9am, then walk the Forum ruins.', time: 'Morning', ll: [41.8902, 12.4922] },
+        { title: 'Dinner in Trastevere', loc: 'Trastevere', desc: 'Cacio e pepe on the cobblestones. Table for 8pm.', time: 'Evening', ll: [41.8896, 12.4692] } ],
+      [ { title: 'Vatican Museums & Sistine Chapel', loc: 'Vatican Museums', desc: "Early slot to beat the crowds, then St. Peter's.", time: 'Morning', ll: [41.9065, 12.4536] },
+        { title: 'Trevi Fountain & Pantheon', loc: 'Trevi Fountain', desc: 'Toss a coin, then a short walk to the Pantheon.', time: 'Afternoon', ll: [41.9009, 12.4833] } ],
+    ],
+    suggest: [
+      { title: 'Sunset at Gianicolo Hill', desc: 'The best free view over the domes of Rome.', time: 'Evening', ll: [41.8919, 12.4610] },
+      { title: 'Borghese Gallery', desc: 'Bernini sculptures, timed two-hour slots.', time: 'Afternoon', ll: [41.9142, 12.4922], indoor: true },
+      { title: 'Pasta-making class', desc: 'Three hours, ends with the pasta you made.', time: 'Evening', ll: [41.8986, 12.4731], food: true },
+      { title: "Campo de' Fiori market", desc: 'Morning produce market and street snacks.', time: 'Morning', ll: [41.8956, 12.4722], food: true },
+    ],
+    lede: 'Four unhurried days in Rome in early December: quieter ruins, the Christmas market in Piazza Navona, and long dinners in Trastevere.',
+    facts: [['13°C', 'Avg. high'], ['8h 25m', 'Flight'], ['EUR', 'Currency'], ['+6h', 'Time diff.']],
+    brief: [['Weather', 'Mild, 10–15°C with the odd rainy afternoon. Bring a light jacket.'], ['Getting around', 'The center is walkable; metro line A gets you to the Vatican.'], ['Good for', 'History, food, and first-timers to Italy.'], ['Heads-up', 'Vatican and Colosseum tickets sell out — book a week ahead.']],
+    gallery: ['images/trips/rome.jpg', 'images/locations/colosseum.jpg', 'images/locations/trevi-fountain.jpg', 'images/locations/vatican-museums.jpg', 'images/locations/trastevere.jpg'],
+  },
+  paris: {
+    name: 'Paris', country: 'France', img: 'images/trips/paris.jpg', code: 'CDG', airport: 'Charles de Gaulle Airport',
+    cost: { flight: 590, stay: 230, food: 80, acts: 50 },
+    airlines: [['AF', 'Air France', 'Nonstop', '7h 15m'], ['DL', 'Delta', 'Nonstop', '7h 30m'], ['TP', 'TAP Air Portugal', '1 stop', '10h 50m']],
+    stays: [['Maison du Marais', 'Le Marais', 9.0, 214], ['Hôtel Rive Gauche', 'Saint-Germain', 8.7, 248]],
+    days: [
+      [ { title: 'Louvre Museum', loc: 'Louvre Museum', desc: 'Timed entry at 9:30 — start with the Denon wing.', time: 'Morning', ll: [48.8606, 2.3376] },
+        { title: 'Seine River Cruise', loc: 'Seine River Cruise', desc: 'A one-hour cruise as the city lights come on.', time: 'Evening', ll: [48.8600, 2.2950] } ],
+      [ { title: 'Montmartre & Sacré-Cœur', loc: 'Montmartre', desc: 'Wander the hill before the crowds arrive.', time: 'Morning', ll: [48.8867, 2.3431] },
+        { title: 'Le Marais boutiques', loc: 'Le Marais', desc: 'Concept stores and falafel on Rue des Rosiers.', time: 'Afternoon', ll: [48.8555, 2.3654] } ],
+    ],
+    suggest: [
+      { title: 'Eiffel Tower at night', loc: 'Eiffel Tower', desc: 'It sparkles for five minutes every hour.', time: 'Evening', ll: [48.8584, 2.2945] },
+      { title: "Musée d'Orsay", desc: 'Impressionists in a former train station.', time: 'Afternoon', ll: [48.8600, 2.3266], indoor: true },
+      { title: 'Bistro dinner in Saint-Germain', loc: 'Saint-Germain', desc: 'Steak frites and a carafe of red.', time: 'Evening', ll: [48.8539, 2.3336], food: true },
+      { title: 'Champs-Élysées lights', loc: 'Champs-Élysées', desc: 'The avenue is lit up for the holidays.', time: 'Evening', ll: [48.8698, 2.3078] },
+    ],
+    lede: 'Paris in December: the Champs-Élysées lit up, museums without summer queues, and bistro dinners that run late.',
+    facts: [['8°C', 'Avg. high'], ['7h 15m', 'Flight'], ['EUR', 'Currency'], ['+6h', 'Time diff.']],
+    brief: [['Weather', 'Cold and crisp, 4–9°C. Layers and a proper coat.'], ['Getting around', 'Metro everywhere; buy a Navigo Easy card on arrival.'], ['Good for', 'Art, shopping, and couples.'], ['Heads-up', 'Many museums close on Mondays or Tuesdays.']],
+    gallery: ['images/trips/paris.jpg', 'images/locations/eiffel-tower.jpg', 'images/locations/louvre-museum.jpg', 'images/locations/montmartre.jpg', 'images/locations/le-marais.jpg'],
+  },
+  barcelona: {
+    name: 'Barcelona', country: 'Spain', img: 'images/trips/barcelona.jpg', code: 'BCN', airport: 'Barcelona El Prat Airport',
+    cost: { flight: 540, stay: 160, food: 55, acts: 38 },
+    airlines: [['IB', 'Iberia', 'Nonstop', '8h 05m'], ['UA', 'United', 'Nonstop', '8h 20m'], ['AF', 'Air France', '1 stop', '11h 30m']],
+    stays: [['Casa Born', 'El Born Tapas', 9.2, 152], ['Barceloneta Sea Rooms', 'Barceloneta Beach', 8.6, 139]],
+    days: [
+      [ { title: 'Sagrada Família', loc: 'Sagrada Familia', desc: 'Towers tour at 10am — book the Nativity side.', time: 'Morning', ll: [41.4036, 2.1744] },
+        { title: 'Tapas crawl in El Born', loc: 'El Born Tapas', desc: 'Three bars, small plates and vermouth.', time: 'Evening', ll: [41.3851, 2.1834] } ],
+      [ { title: 'Park Güell', loc: 'Park Guell', desc: "Gaudí's mosaic terrace with a view over the city.", time: 'Morning', ll: [41.4145, 2.1527] },
+        { title: 'Barceloneta beach walk', loc: 'Barceloneta Beach', desc: 'Paella by the water, then a seafront stroll.', time: 'Afternoon', ll: [41.3784, 2.1925] } ],
+    ],
+    suggest: [
+      { title: 'Bunkers del Carmel sunset', desc: 'Locals bring snacks and watch the sun go down.', time: 'Evening', ll: [41.4190, 2.1617] },
+      { title: 'Picasso Museum', desc: 'His early work, in five medieval palaces.', time: 'Afternoon', ll: [41.3852, 2.1810], indoor: true },
+      { title: 'Boqueria market lunch', desc: 'Grab a stool at a counter bar inside.', time: 'Morning', ll: [41.3817, 2.1716], food: true },
+      { title: 'Gothic Quarter walk', desc: 'Narrow lanes, hidden squares and the cathedral.', time: 'Afternoon', ll: [41.3833, 2.1765] },
+    ],
+    lede: 'Barcelona in December is 15°C and mostly sunny: Gaudí without the summer crowds, long lunches, and late tapas nights.',
+    facts: [['15°C', 'Avg. high'], ['8h 05m', 'Flight'], ['EUR', 'Currency'], ['+6h', 'Time diff.']],
+    brief: [['Weather', 'Sunny and mild, 9–15°C. Too cold to swim, perfect to walk.'], ['Getting around', 'Metro plus a lot of walking; a T-casual card covers 10 rides.'], ['Good for', 'Architecture, food, and friend groups.'], ['Heads-up', 'Pickpockets on La Rambla — keep phones zipped away.']],
+    gallery: ['images/trips/barcelona.jpg', 'images/locations/sagrada-familia.jpg', 'images/locations/park-guell.jpg', 'images/locations/el-born-tapas.jpg', 'images/locations/barceloneta-beach.jpg'],
+  },
+  lisbon: {
+    name: 'Lisbon', country: 'Portugal', img: 'images/trips/lisbon.jpg', code: 'LIS', airport: 'Lisbon Airport',
+    cost: { flight: 470, stay: 125, food: 45, acts: 30 },
+    airlines: [['TP', 'TAP Air Portugal', 'Nonstop', '6h 50m'], ['UA', 'United', 'Nonstop', '7h 05m'], ['IB', 'Iberia', '1 stop', '10h 15m']],
+    stays: [['Alfama Patio House', 'Alfama Castle', 9.3, 118], ['Sintra Hill Retreat', 'Pena Palace Sintra', 8.9, 132]],
+    days: [
+      [ { title: 'São Jorge Castle', loc: 'Alfama Castle', desc: 'Castle walls and the best view of the red rooftops.', time: 'Morning', ll: [38.7139, -9.1334] },
+        { title: 'Fado night in Alfama', loc: 'Fado in Alfama', desc: 'Dinner and live fado in a tiny tavern.', time: 'Evening', ll: [38.7115, -9.1300] } ],
+      [ { title: 'Day trip to Sintra', loc: 'Pena Palace Sintra', desc: '40 minutes by train to the hilltop Pena Palace.', time: 'Morning', ll: [38.7876, -9.3906] },
+        { title: 'Pastéis de nata in Belém', desc: 'The original custard tarts, still warm.', time: 'Afternoon', ll: [38.6976, -9.2033], food: true } ],
+    ],
+    suggest: [
+      { title: 'Miradouro sunset', desc: 'Senhora do Monte has the widest view in town.', time: 'Evening', ll: [38.7192, -9.1328] },
+      { title: 'LX Factory', desc: 'Bookshops, design stores and cafés in an old mill.', time: 'Afternoon', ll: [38.7036, -9.1784], indoor: true },
+      { title: 'Time Out Market dinner', desc: "A food hall with the city's best chefs.", time: 'Evening', ll: [38.7069, -9.1458], food: true },
+      { title: 'Tram 28 ride', desc: 'The rattling yellow tram through old Lisbon.', time: 'Morning', ll: [38.7107, -9.1365] },
+    ],
+    lede: 'The best-value option this month: cheap flights, 15°C days on the hills, fado at night and a day trip to Sintra.',
+    facts: [['15°C', 'Avg. high'], ['6h 50m', 'Flight'], ['EUR', 'Currency'], ['+5h', 'Time diff.']],
+    brief: [['Weather', 'Mild with some rain, 10–15°C. Wear shoes with grip — the cobbles get slick.'], ['Getting around', 'Steep hills: trams, tuk-tuks and comfortable shoes.'], ['Good for', 'Budget trips, food, and slow travel.'], ['Heads-up', 'Pena Palace needs a timed ticket; go early.']],
+    gallery: ['images/trips/lisbon.jpg', 'images/locations/alfama-castle.jpg', 'images/locations/pena-palace-sintra.jpg', 'images/locations/fado-in-alfama.jpg', 'images/locations/lisbon-airport.jpg'],
+  },
+};
+
+/* ===================== DATES / MONEY ===================== */
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function fmtDay(d) { return `${WD[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}`; }
+function fmtRange(start, n) {
+  const end = addDays(start, n - 1);
+  return start.getMonth() === end.getMonth()
+    ? `${MON[start.getMonth()]} ${start.getDate()} – ${end.getDate()}`
+    : `${MON[start.getMonth()]} ${start.getDate()} – ${MON[end.getMonth()]} ${end.getDate()}`;
+}
+function money(n) { return '$' + Math.round(n).toLocaleString(); }
+
+/* ===================== PLANS ===================== */
+const PLANS = {};
+let activePlanId = null;
+function plan() { return PLANS[activePlanId]; }
+
+function buildPlan(id) {
+  const t = TEMPLATES[id];
+  const opt = DEST_OPTIONS.find(o => o.id === id);
+  const p = {
+    id, ...t, title: t.name + ' getaway', start: opt.start,
+    tier: 'average', members: [ME], shared: false, saved: false,
+    tab: 'itinerary', open: new Set([1]), adding: null, expenses: [],
+    days: [
+      { kind: 'depart', acts: [{ title: `Flight JFK → ${t.code}`, desc: `Overnight, lands at ${t.airport} the next morning.`, time: 'Evening', by: 'zoya', flight: true }] },
+      ...t.days.map(d => ({ kind: 'city', acts: d.map(a => ({ ...a, by: 'zoya' })) })),
+      { kind: 'return', acts: [{ title: `Flight ${t.code} → JFK`, desc: 'Midday departure, home by the evening.', time: 'Morning', by: 'zoya', flight: true }] },
+    ],
+  };
+  return p;
+}
+function ensurePlan(id) { if (!PLANS[id]) PLANS[id] = buildPlan(id); return PLANS[id]; }
+function planRange(p) { return fmtRange(p.start, p.days.length); }
+
+const TIER = { budget: 0.72, average: 1, premium: 1.65 };
+function estimate(p, tier) {
+  const f = TIER[tier || p.tier];
+  const n = p.days.length, nights = n - 1, share = p.members.length > 1 ? 2 : 1;
+  const parts = {
+    Flights: p.cost.flight * f,
+    Stay: p.cost.stay * f * nights / share,
+    Food: p.cost.food * f * n,
+    Activities: p.cost.acts * f * (n - 1),
+  };
+  parts.total = parts.Flights + parts.Stay + parts.Food + parts.Activities;
+  return parts;
+}
+function optionEstimate(id) { return estimate({ ...TEMPLATES[id], days: [1, 2, 3, 4], members: [ME], tier: 'average' }).total; }
+
+/* ===================== CHATS ===================== */
+const CHATS = {};
+let chatOrder = [];
+let openTabs = [];
+let activeChatId = null;
+let chatSeq = 1;
+
+function addChat(c) {
+  CHATS[c.id] = { unread: 0, messages: [], ...c };
+  chatOrder.unshift(c.id);
+  return CHATS[c.id];
+}
+function active() { return CHATS[activeChatId]; }
+
+const GREETING = "Hi I'm Zoya, your personal travel assistant. What should we explore today?";
+
+function seedChats() {
+  addChat({ id: 'c-budget', kind: 'personal', title: 'Budget tips for Europe', messages: [
+    { role: 'zoya', text: GREETING },
+    { role: 'me', text: 'Any tips for doing Europe cheaply?' },
+    { role: 'zoya', text: 'Fly midweek, stay just outside the old towns, and use city cards for transit and museums. Shoulder season (April–May, Sept–Oct) usually saves 30–40%.' },
+  ]});
+  addChat({ id: 'c-tokyo', kind: 'personal', title: 'Tokyo food crawl', messages: [
+    { role: 'zoya', text: GREETING },
+    { role: 'me', text: 'Where should I eat in Tokyo?' },
+    { role: 'zoya', text: 'Start at Tsukiji Outer Market for breakfast, ramen in Shinjuku for lunch, and finish in one of the tiny bars in Golden Gai.' },
+  ]});
+  addChat({ id: 'c-ski', kind: 'personal', title: 'Ski weekend ideas', messages: [
+    { role: 'zoya', text: GREETING },
+    { role: 'me', text: 'Ski weekend near New York?' },
+    { role: 'zoya', text: 'Stowe and Killington are both about five hours by car. Hunter Mountain is closest at around two and a half.' },
+  ]});
+  addChat({ id: 'c-main', kind: 'personal', title: 'New York > Europe', messages: [
+    { role: 'zoya', text: GREETING },
+    { role: 'me', text: '4-day trip from New York in December, somewhere in Europe' },
+    { role: 'zoya', text: 'Here are some ideas that you might like. Each one has dates that work around early December.' },
+    { type: 'dests', selected: null },
+  ]});
+  openTabs = ['c-main'];
+  activeChatId = 'c-main';
+}
+
+function groupChatFor(p) { return CHATS['g-' + p.id]; }
+
+/* ===================== MESSAGE RENDERING ===================== */
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function richText(s) { return esc(s).replace(/@zoya/gi, '<span class="mention">@Zoya</span>'); }
+
+function senderKey(m) { return m.type ? null : (m.role === 'friend' ? m.person.id : m.role); }
+
+function messageHTML(m, i, chat) {
+  const prev = chat.messages[i - 1];
+  const grouped = prev && senderKey(prev) && senderKey(prev) === senderKey(m) && !m.type;
+  const isNew = m._new ? ' is-new' : '';
+  const isGroup = chat.kind === 'group';
+  if (m.type === 'dests') return destOptionsHTML(m, i, isNew);
+  if (m.role === 'system') {
+    return `<div class="sys-line${isNew}">${lucide(m.icon || 'pencil', 13)}<span>${m.html}</span>${m.view ? `<button class="sys-link" onclick="viewInPlan('${m.view.plan}', ${m.view.day})">View</button>` : ''}</div>`;
+  }
+  if (m.role === 'me') {
+    const meta = isGroup ? `<div class="message-meta">${m.toZoya ? `${ZOYA_MINI} Sent to group + Zoya` : 'Sent to group'}</div>` : '';
+    const attach = m.attach ? attachHTML(m.attach) : '';
+    return `<div class="message me${isNew}"><div class="message-col">${attach}${m.text ? `<div class="message-bubble">${richText(m.text)}</div>` : ''}${meta}</div></div>`;
+  }
+  if (m.role === 'friend') {
+    return `<div class="message friend${grouped ? ' grouped' : ''}${isNew}">
+      <div class="message-avatar">${friendAvatarHTML(m.person)}</div>
+      <div class="message-col">
+        ${grouped ? '' : `<div class="message-name">${m.person.name.split(' ')[0]}</div>`}
+        <div class="message-bubble">${richText(m.text)}</div>
+        ${m.toZoya ? `<div class="message-meta">${ZOYA_MINI} Sent to group + Zoya</div>` : ''}
+      </div>
+    </div>`;
+  }
+  // Zoya
+  const wide = m.attach && (m.attach.type === 'draft' || m.attach.type === 'trip');
+  return `<div class="message bot${grouped ? ' grouped' : ''}${isNew}">
+    <div class="message-avatar">${ZOYA_SVG}</div>
+    <div class="message-col${wide ? ' wide' : ''}">
+      ${isGroup && !grouped ? `<div class="message-name">Zoya</div>` : ''}
+      ${m.text ? `<div class="message-bubble">${m.text}</div>` : ''}
+      ${m.attach ? attachHTML(m.attach) : ''}
+      ${m.chips ? `<div class="chips">${m.chips.map((c, ci) => `<button class="chip" ${m.chipsUsed ? 'disabled' : ''} onclick="chipClick(${i}, ${ci})">${c.label}</button>`).join('')}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function destOptionsHTML(m, i, isNew) {
+  return `<div class="dest-wrap${isNew}">${DEST_OPTIONS.map(o => {
+    const t = TEMPLATES[o.id];
+    const sel = m.selected === o.id;
+    return `<button class="dest-card${sel ? ' selected' : ''}" onclick="pickDestination('${o.id}', ${i})" aria-pressed="${sel}">
+      <div class="dest-photo" style="background-image:url('${t.img}')"><span class="dest-price">≈ ${money(optionEstimate(o.id))} pp</span></div>
+      <div class="dest-info">
+        <div class="dest-info-text">
+          <div class="dest-name">${t.name}</div>
+          <div class="dest-country">${t.country}</div>
+          <div class="dest-dates">${lucide('calendar', 13)} ${fmtRange(o.start, 4)}</div>
+        </div>
+        <span class="dest-arrow">${lucide('arrow-right', 20)}</span>
+      </div>
+    </button>`;
+  }).join('')}</div>`;
+}
+
+const DRAFT_STEPS = ['Picking dates and flights', 'Laying out each day', 'Estimating the budget'];
+function attachHTML(a) {
+  if (a.type === 'draft') {
+    const p = PLANS[a.plan];
+    if (a.step >= DRAFT_STEPS.length) return tripCardHTML(p);
+    return `<div class="draft-card">
+      <div class="draft-title">Drafting your ${p.name} trip plan</div>
+      ${DRAFT_STEPS.map((s, si) => `<div class="draft-step ${si < a.step ? 'done' : si === a.step ? 'current' : ''}"><span class="draft-step-icon">${si < a.step ? lucide('check', 11) : ''}</span>${s}</div>`).join('')}
+    </div>`;
+  }
+  if (a.type === 'trip') return tripCardHTML(PLANS[a.plan]);
+  if (a.type === 'update') {
+    const p = PLANS[a.plan];
+    return `<div class="update-card">
+      <div class="update-card-thumb" style="background:${a.act ? actBg(p, a.act) : bgUrl(p.img)}"></div>
+      <div class="update-card-body"><div class="update-card-title">${a.title}</div><div class="update-card-meta">${a.meta}</div></div>
+      <button class="btn" onclick="viewInPlan('${p.id}', ${a.day == null ? 'null' : a.day}, '${a.tab || 'itinerary'}')">View</button>
+    </div>`;
+  }
+  return '';
+}
+
+function tripCardHTML(p) {
+  return `<div class="trip-card" onclick="openPanel('${p.id}')" role="button" tabindex="0">
+    <div class="trip-card-thumb" style="background-image:url('${p.img}')"></div>
+    <div class="trip-card-body">
+      <div class="trip-card-name">${esc(p.title)}</div>
+      <div class="trip-card-meta">${planRange(p)}, ${p.days.length} days · ${money(estimate(p).total)} per person</div>
+      <div class="trip-card-tags">
+        ${p.shared ? `<span class="tag dark">${lucide('users', 11)} Shared</span><div class="avatar-stack">${p.members.map(stackAvatarHTML).join('')}</div>` : `<span class="tag">${lucide('lock', 11)} Draft, only you</span>`}
+      </div>
+    </div>
+    <span class="btn">Open plan</span>
+  </div>`;
+}
+
+function renderMessages() {
+  const chat = active();
+  const el = document.getElementById('chatMessages');
+  let html = chat.messages.map((m, i) => messageHTML(m, i, chat)).join('');
+  if (!chat.messages.length && chat.kind === 'dm') {
+    html = `<div class="sys-line" style="margin-top:auto;margin-bottom:8px;">${lucide('lock', 13)}<span>Start a private chat with ${chat.person.name.split(' ')[0]}. Nobody else in the group can see it.</span></div>`;
+  }
+  if (chat.typing) {
+    const who = chat.typing;
+    html += `<div class="typing">${who === 'zoya' ? `<div class="message-avatar">${ZOYA_SVG}</div>` : `<div class="message-avatar">${friendAvatarHTML(who, 'width:28px;height:28px;font-size:11px;')}</div>`}<span class="typing-dots"><span></span><span></span><span></span></span>${who === 'zoya' ? 'Zoya is' : firstName(who) + ' is'} typing</div>`;
+  }
+  el.innerHTML = html;
+  chat.messages.forEach(m => { delete m._new; });
+  requestAnimationFrame(() => el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }));
+}
+
+function push(chatId, m) {
+  const chat = CHATS[chatId];
+  if (!chat) return;
+  m._new = true;
+  chat.messages.push(m);
+  if (chatId === activeChatId) renderMessages();
+  else chat.unread++;
+  // most recent first in the list
+  chatOrder = [chatId, ...chatOrder.filter(id => id !== chatId)];
+  renderTabs();
+  renderChatList();
+}
+function setTyping(chatId, who) {
+  const chat = CHATS[chatId];
+  if (!chat) return;
+  chat.typing = who;
+  if (chatId === activeChatId) renderMessages();
+}
+function later(ms, fn) { return setTimeout(fn, ms); }
+
+/* ===================== HEADER, TABS, LIST ===================== */
+function chatIconHTML(c) {
+  if (c.kind === 'group') return `<span class="chat-tab-icon avatar-stack">${c.members.slice(0, 3).map(stackAvatarHTML).join('')}</span>`;
+  if (c.kind === 'dm') return `<span class="chat-tab-icon">${friendAvatarHTML(c.person)}</span>`;
+  return `<span class="chat-tab-icon">${ZOYA_MINI}</span>`;
+}
+
+function renderHeader() {
+  const c = active();
+  document.getElementById('chatTitle').textContent = c.title;
+  let sub = '';
+  if (c.kind === 'group') {
+    sub = `<div class="avatar-stack">${c.members.map(stackAvatarHTML).join('')}${ZOYA_MINI}</div> Group chat with ${namesList(c.members.filter(m => m !== ME))} and Zoya`;
+  } else if (c.kind === 'dm') {
+    sub = `${lucide('lock', 12)} Private — only you and ${c.person.name.split(' ')[0]} can see this`;
+  } else {
+    sub = `${lucide('lock', 12)} Private — only you and Zoya can see this`;
+  }
+  document.getElementById('chatSub').innerHTML = sub;
+}
+
+function renderTabs() {
+  document.getElementById('chatTabs').innerHTML = openTabs.map(id => {
+    const c = CHATS[id];
+    const on = id === activeChatId;
+    return `<div class="chat-tab${on ? ' active' : ''}" role="tab" aria-selected="${on}" tabindex="0" onclick="switchTab('${id}')" onkeydown="if(event.key==='Enter')switchTab('${id}')" title="${esc(c.title)}">
+      ${chatIconHTML(c)}<span class="chat-tab-label">${esc(c.title)}</span>
+      ${c.unread && !on ? '<span class="unread-dot" aria-label="Unread"></span>' : ''}
+      ${openTabs.length > 1 ? `<span class="chat-tab-close" role="button" aria-label="Close tab" onclick="event.stopPropagation(); closeTab('${id}')">${lucide('x', 12)}</span>` : ''}
+    </div>`;
+  }).join('');
+  const tabsEl = document.getElementById('chatTabs');
+  const on = tabsEl.querySelector('.chat-tab.active');
+  if (on) {
+    const r = on.getBoundingClientRect(), box = tabsEl.getBoundingClientRect();
+    if (r.right > box.right) tabsEl.scrollLeft += r.right - box.right + 4;
+    else if (r.left < box.left) tabsEl.scrollLeft -= box.left - r.left + 4;
+  }
+}
+
+function renderChatList() {
+  const groups = chatOrder.filter(id => CHATS[id].kind === 'group');
+  const rest = chatOrder.filter(id => CHATS[id].kind !== 'group');
+  const item = id => {
+    const c = CHATS[id];
+    const icon = c.kind === 'group' ? lucide('users', 14) : c.kind === 'dm' ? lucide('lock', 13) : '';
+    return `<button class="chatlist-item${id === activeChatId ? ' active' : ''}" onclick="openChat('${id}')">
+      ${icon ? `<span class="chatlist-item-icon">${icon}</span>` : ''}
+      <span class="chatlist-item-name">${esc(c.title)}</span>
+      ${c.unread && id !== activeChatId ? '<span class="unread-dot"></span>' : ''}
+    </button>`;
+  };
+  document.getElementById('chatListItems').innerHTML =
+    (groups.length ? `<div class="chatlist-label">Group trips</div>${groups.map(item).join('')}<div class="chatlist-label">Your chats</div>` : '') +
+    rest.map(item).join('');
+}
+
+function renderComposer() {
+  const c = active();
+  let html;
+  if (c.kind === 'group') {
+    const withZoya = c.audience === 'zoya';
+    const others = c.members.filter(m => m !== ME);
+    html = `<div class="composer has-audience">
+      <button class="audience-btn${withZoya ? ' with-zoya' : ''}" onclick="toggleAudienceMenu(event)" aria-haspopup="menu" title="Choose who gets this message">
+        <span class="avatar-stack">${others.slice(0, 3).map(stackAvatarHTML).join('')}${withZoya ? ZOYA_MINI : ''}</span>
+        <span class="audience-label">${withZoya ? 'Group + Zoya' : 'Group'}</span>${lucide('chevron-down', 14)}
+      </button>
+      <input class="composer-input" id="composerInput" placeholder="${withZoya ? 'Ask Zoya and the group…' : 'Message the group…'}" autocomplete="off">
+      <button class="icon-btn" title="Voice input" onclick="toast('Voice input isn\\'t part of this prototype')">${lucide('mic', 18)}</button>
+      <button class="send-btn" onclick="send()" title="Send">${lucide('arrow-up', 20)}</button>
+      <div class="tab-menu audience-menu" id="audienceMenu" role="menu">
+        <button class="menu-item${!withZoya ? ' selected' : ''}" onclick="setAudience('group')">
+          <span class="menu-item-icon">${lucide('users', 15)}</span>
+          <span><div class="menu-item-title">Group</div><div class="menu-item-desc">Only ${namesList(others)} see it. Zoya stays quiet.</div></span>
+          <span class="menu-item-check">${lucide('check', 16)}</span>
+        </button>
+        <button class="menu-item${withZoya ? ' selected' : ''}" onclick="setAudience('zoya')">
+          <span class="menu-item-icon">${ZOYA_SVG}</span>
+          <span><div class="menu-item-title">Group + Zoya</div><div class="menu-item-desc">Zoya replies to everyone and can edit the trip plan.</div></span>
+          <span class="menu-item-check">${lucide('check', 16)}</span>
+        </button>
+      </div>
+    </div>
+    <div class="composer-hint">Tip: type <b>@Zoya</b> to include Zoya for one message.</div>`;
+  } else {
+    const ph = c.kind === 'dm' ? `Message ${c.person.name.split(' ')[0]}…` : 'Ask anything travel';
+    html = `<div class="composer">
+      <input class="composer-input" id="composerInput" placeholder="${ph}" autocomplete="off">
+      <button class="icon-btn" title="Voice input" onclick="toast('Voice input isn\\'t part of this prototype')">${lucide('mic', 18)}</button>
+      <button class="send-btn" onclick="send()" title="Send">${lucide('arrow-up', 20)}</button>
+    </div>`;
+  }
+  document.getElementById('composerArea').innerHTML = html;
+  const input = document.getElementById('composerInput');
+  input.value = c.draft || '';
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+  input.addEventListener('input', () => { c.draft = input.value; });
+}
+
+function renderChat() {
+  renderHeader();
+  renderTabs();
+  renderChatList();
+  renderMessages();
+  renderComposer();
+}
+
+function switchTab(id) {
+  const prev = active();
+  const input = document.getElementById('composerInput');
+  if (prev && input) prev.draft = input.value;
+  activeChatId = id;
+  CHATS[id].unread = 0;
+  closeMenus();
+  renderChat();
+}
+function openChat(id) {
+  if (!openTabs.includes(id)) openTabs.push(id);
+  switchTab(id);
+}
+function closeTab(id) {
+  const idx = openTabs.indexOf(id);
+  openTabs = openTabs.filter(t => t !== id);
+  if (activeChatId === id) switchTab(openTabs[Math.max(0, idx - 1)]);
+  else renderTabs();
+}
+
+function newPersonalChat() {
+  const id = 'c-new-' + (chatSeq++);
+  addChat({ id, kind: 'personal', title: 'New chat', fresh: true, messages: [{ role: 'zoya', text: GREETING }] });
+  openChat(id);
+  document.getElementById('composerInput').focus();
+}
+function openDM(personId) {
+  const person = friendById(personId);
+  const id = 'dm-' + personId;
+  if (!CHATS[id]) addChat({ id, kind: 'dm', title: person.name.split(' ')[0], person, messages: [] });
+  openChat(id);
+  closeMenus();
+  document.getElementById('composerInput').focus();
+}
+
+function toggleTabMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('tabMenu');
+  const wasOpen = menu.classList.contains('open');
+  closeMenus();
+  if (wasOpen) return;
+  const p = plan();
+  const group = p && groupChatFor(p);
+  const people = group ? group.members.filter(m => m !== ME) : [];
+  menu.innerHTML = `
+    <div class="menu-label">Private</div>
+    <button class="menu-item" onclick="closeMenus(); newPersonalChat()">
+      <span class="menu-item-icon">${ZOYA_SVG}</span>
+      <span><div class="menu-item-title">New chat with Zoya</div><div class="menu-item-desc">Only you can see it</div></span>
+    </button>
+    ${people.map(f => `<button class="menu-item" onclick="openDM('${f.id}')">
+      <span class="menu-item-icon">${friendAvatarHTML(f)}</span>
+      <span><div class="menu-item-title">Message ${f.name.split(' ')[0]} privately</div><div class="menu-item-desc">The rest of the group won't see it</div></span>
+    </button>`).join('')}
+    ${group ? `<div class="menu-label">Group</div>
+    <button class="menu-item" onclick="closeMenus(); openChat('${group.id}')">
+      <span class="menu-item-icon">${lucide('users', 15)}</span>
+      <span><div class="menu-item-title">${esc(group.title)}</div><div class="menu-item-desc">${group.members.length} people and Zoya</div></span>
+    </button>` : `<div class="menu-label">Group</div>
+    <button class="menu-item" onclick="closeMenus(); openShareModal()">
+      <span class="menu-item-icon">${lucide('user-plus', 15)}</span>
+      <span><div class="menu-item-title">Start a group chat</div><div class="menu-item-desc">Share a trip plan to plan together</div></span>
+    </button>`}`;
+  const btn = document.getElementById('tabAddBtn');
+  menu.style.left = Math.min(btn.offsetLeft, btn.parentElement.clientWidth - 270) + 'px';
+  menu.classList.add('open');
+}
+function toggleAudienceMenu(e) {
+  e.stopPropagation();
+  const m = document.getElementById('audienceMenu');
+  const wasOpen = m.classList.contains('open');
+  closeMenus();
+  if (!wasOpen) m.classList.add('open');
+}
+function setAudience(a) {
+  active().audience = a;
+  const input = document.getElementById('composerInput');
+  active().draft = input ? input.value : '';
+  renderComposer();
+  document.getElementById('composerInput').focus();
+}
+function closeMenus() { document.querySelectorAll('.tab-menu.open').forEach(m => m.classList.remove('open')); }
+document.addEventListener('click', e => { if (!e.target.closest('.tab-menu')) closeMenus(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenus(); closeShareModal(); } });
+
+function toggleChatList() {
+  const list = document.getElementById('chatList');
+  list.classList.toggle('collapsed');
+  document.getElementById('showListBtn').style.display = list.classList.contains('collapsed') ? '' : 'none';
+}
+function deleteActiveChat() {
+  const c = active();
+  if (c.id === 'c-main') { toast('This chat started your trip plan, so it stays'); return; }
+  if (!confirm(`Delete "${c.title}"?`)) return;
+  delete CHATS[c.id];
+  chatOrder = chatOrder.filter(id => id !== c.id);
+  openTabs = openTabs.filter(id => id !== c.id);
+  if (!openTabs.length) openTabs = ['c-main'];
+  activeChatId = openTabs[openTabs.length - 1];
+  renderChat();
+}
+
+/* ===================== DESTINATION → TRIP PLAN SHELL ===================== */
+function pickDestination(id, msgIndex) {
+  const chat = active();
+  const m = chat.messages[msgIndex];
+  const firstTime = !PLANS[id];
+  m.selected = id;
+  const p = ensurePlan(id);
+  if (chat.id === 'c-main') chat.title = `New York > ${p.name}`;
+  renderHeader(); renderTabs(); renderChatList();
+  renderMessages();
+  if (!firstTime) { openPanel(id); return; }
+
+  push(chat.id, { role: 'me', text: `Let's do ${p.name}, ${planRange(p)}` });
+  later(500, () => {
+    const draft = { role: 'zoya', text: `Great pick. I'm putting together a trip plan for ${p.name} you can edit and share.`, attach: { type: 'draft', plan: id, step: 0 } };
+    push(chat.id, draft);
+    later(500, () => openPanel(id, true));
+    [1, 2, 3].forEach(s => later(500 + s * 650, () => {
+      draft.attach.step = s;
+      if (activeChatId === chat.id) renderMessages();
+    }));
+    later(500 + 4 * 650, () => push(chat.id, {
+      role: 'zoya',
+      text: `Your ${p.name} plan is ready on the right. Change anything — days, activities, budget — and hit <b>Share</b> when you want friends to plan it with you.`,
+      chips: [{ label: 'Share with friends', action: 'share' }, { label: 'Make it cheaper', send: 'Make it cheaper' }, { label: 'Add a food experience', send: 'Add a food experience' }],
+    }));
+  });
+}
+
+function openPanel(id, drafting) {
+  activePlanId = id;
+  const panel = document.getElementById('tripPanel');
+  const card = document.getElementById('tpCard');
+  panel.classList.add('open');
+  card.classList.toggle('drafting', !!drafting);
+  if (drafting) later(1800, () => card.classList.remove('drafting'));
+  if (window.innerWidth < 1500 && window.innerWidth > 900) {
+    const list = document.getElementById('chatList');
+    if (!list.classList.contains('collapsed')) toggleChatList();
+  }
+  card.scrollTop = 0;
+  renderPanel();
+  initMap();
+}
+function closePanel() { document.getElementById('tripPanel').classList.remove('open'); }
+
+function viewInPlan(id, day, tab) {
+  openPanel(id);
+  const p = PLANS[id];
+  p.tab = tab || 'itinerary';
+  if (day != null) p.open.add(day);
+  renderPanel();
+  if (day != null) later(60, () => {
+    const row = document.querySelector(`.day-row[data-day="${day}"]`);
+    if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+
+/* ===================== TRIP PANEL ===================== */
+function renderPanel() {
+  const p = plan();
+  if (!p) return;
+  document.getElementById('tpBadge').innerHTML = p.shared
+    ? `${lucide('users', 13)} Shared with ${p.members.length - 1} · everyone can edit`
+    : `${ZOYA_MINI} Drafted by Zoya`;
+  const est = estimate(p);
+  const others = p.members.filter(m => m !== ME);
+  document.getElementById('tpBody').innerHTML = `
+    <div class="tp-head">
+      <div class="tp-thumb" style="background-image:url('${p.img}')"></div>
+      <div class="tp-head-main">
+        <div class="tp-head-top">
+          <div class="tp-title-wrap">
+            <div class="tp-title" contenteditable="true" spellcheck="false" title="Rename trip" onblur="renameTrip(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${esc(p.title)}</div>
+            <div class="tp-country">${p.name}, ${p.country}</div>
+          </div>
+          <div class="tp-actions">
+            <button class="btn" onclick="toggleSave()">${lucide(p.saved ? 'check' : 'bookmark', 14)} ${p.saved ? 'Saved' : 'Save'}</button>
+            <button class="btn${p.shared ? '' : ' primary'}" onclick="openShareModal()">${lucide('share-up', 14)} Share</button>
+          </div>
+        </div>
+        <div class="tp-controls">
+          <span class="pill-wrap">
+            <button class="select-pill" onclick="toggleDaysMenu(event)" aria-haspopup="menu">${lucide('calendar', 14)} ${planRange(p)} · ${p.days.length} days ${lucide('chevron-down', 13)}</button>
+            <div class="tab-menu pill-menu" id="daysMenu" role="menu">${[3, 4, 5, 6].map(n => `<button class="menu-item${n === p.days.length ? ' selected' : ''}" onclick="event.stopPropagation(); setDays(${n})"><span class="menu-item-title">${n} days</span><span class="menu-item-desc" style="margin-left:6px;">${fmtRange(p.start, n)}</span><span class="menu-item-check">${lucide('check', 15)}</span></button>`).join('')}</div>
+          </span>
+          <button class="select-pill" onclick="openShareModal()" title="Travelers">${p.shared ? `<span class="avatar-stack">${p.members.map(stackAvatarHTML).join('')}</span> ${p.members.length}` : `${lucide('user', 14)} 1`} ${lucide('chevron-down', 13)}</button>
+          <button class="select-pill" onclick="setTab('finances')" title="Budget">${lucide('dollar-sign', 14)} ${money(est.total)} pp ${lucide('chevron-down', 13)}</button>
+        </div>
+      </div>
+    </div>
+    ${p.shared ? `<div class="share-banner">
+        <span class="avatar-stack">${p.members.map(stackAvatarHTML).join('')}</span>
+        <span class="share-banner-text"><b>Planning with ${namesList(others)}</b>Edits show up for everyone and in the group chat.</span>
+        <button class="btn" onclick="openChat('g-${p.id}')">${lucide('message-square', 14)} Group chat</button>
+      </div>` : `<div class="share-banner">
+        <span class="share-banner-icon">${lucide('lock', 15)}</span>
+        <span class="share-banner-text"><b>Only you can see this draft</b>Share it to edit together, split costs and chat as a group.</span>
+        <button class="btn" onclick="openShareModal()">${lucide('user-plus', 14)} Invite</button>
+      </div>`}
+    <div class="tp-tabs" role="tablist">
+      ${[['itinerary', 'Itinerary'], ['about', 'About'], ['flights', 'Flights'], ['stay', 'Stay'], ['finances', 'Finances']].map(([id, label]) =>
+        `<button class="tp-tab${p.tab === id ? ' active' : ''}" role="tab" aria-selected="${p.tab === id}" onclick="setTab('${id}')">${label}</button>`).join('')}
+    </div>
+    <div>${({ itinerary: itineraryHTML, about: aboutHTML, flights: flightsHTML, stay: stayHTML, finances: financesHTML })[p.tab](p)}</div>`;
+  p.days.forEach(d => d.acts.forEach(a => { delete a._fresh; }));
+}
+
+function setTab(t) { plan().tab = t; renderPanel(); }
+function renameTrip(el) {
+  const p = plan();
+  const v = el.textContent.trim();
+  if (!v || v === p.title) { el.textContent = p.title; return; }
+  p.title = v;
+  logEdit(p, `<b>You</b> renamed the trip to <b>${esc(v)}</b>`, null, 'pencil');
+  const g = groupChatFor(p);
+  if (g) { g.title = v; if (activeChatId === g.id) renderHeader(); renderTabs(); renderChatList(); }
+  rerenderChatIfShowing();
+}
+function toggleSave() { const p = plan(); p.saved = !p.saved; renderPanel(); toast(p.saved ? 'Saved to Trips' : 'Removed from Trips'); }
+function toggleDaysMenu(e) {
+  e.stopPropagation();
+  const m = document.getElementById('daysMenu');
+  const wasOpen = m.classList.contains('open');
+  closeMenus();
+  if (!wasOpen) m.classList.add('open');
+}
+
+function dayLabel(p, i) { return fmtDay(addDays(p.start, i)); }
+function dayLoc(p, d) { return d.kind === 'city' ? p.name : 'New York City'; }
+
+function itineraryHTML(p) {
+  return p.days.map((d, i) => {
+    const open = p.open.has(i);
+    const flightIcon = d.kind === 'depart' ? lucide('plane-takeoff', 20) : d.kind === 'return' ? lucide('plane-landing', 20) : '';
+    return `<div class="day-row${open ? ' open' : ''}" data-day="${i}" style="--i:${i}">
+      <button class="day-row-head" onclick="toggleDay(${i})" aria-expanded="${open}">
+        <span class="day-date">${dayLabel(p, i)}</span>
+        <span class="day-loc">${dayLoc(p, d)} ${d.kind === 'city' ? `<span class="day-count">· ${d.acts.length} ${d.acts.length === 1 ? 'stop' : 'stops'}</span>` : ''}</span>
+        ${flightIcon ? `<span class="day-icon">${flightIcon}</span>` : ''}
+        <span class="day-chev">${lucide('chevron-down', 18)}</span>
+      </button>
+      <div class="day-body">
+        ${d.acts.length ? d.acts.map((a, ai) => actHTML(p, a, i, ai)).join('') : `<div class="empty-day">Nothing planned yet. Add a place, or ask Zoya to fill this day.</div>`}
+        ${d.kind === 'city' ? addPanelHTML(p, i) : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function actHTML(p, a, di, ai) {
+  const by = a.by === 'zoya' ? ZOYA_MINI : (a.by ? `<span class="avatar-stack">${stackAvatarHTML(a.by)}</span>` : '');
+  const thumb = a.flight
+    ? `<div class="act-thumb" style="background:var(--color-gray-100)">${lucide('plane', 20)}</div>`
+    : `<div class="act-thumb" style="background:${actBg(p, a)}"></div>`;
+  return `<div class="act${a._fresh ? ' fresh' : ''}">
+    ${thumb}
+    <div class="act-body">
+      <div class="act-time">${a.time}</div>
+      <div class="act-title">${esc(a.title)}</div>
+      <div class="act-desc">${esc(a.desc)}</div>
+    </div>
+    <span class="act-by" title="${a.by === 'zoya' ? 'Suggested by Zoya' : 'Added by ' + (a.by ? a.by.name : '')}">${by}</span>
+    ${a.flight ? '' : `<button class="icon-btn act-remove" title="Remove" onclick="removeAct(${di}, ${ai})">${lucide('x', 15)}</button>`}
+  </div>`;
+}
+
+function addPanelHTML(p, i) {
+  if (p.adding !== i) return `<button class="add-act-btn" onclick="p_startAdding(${i})">${lucide('plus', 14)} Add to this day</button>`;
+  const used = new Set(p.days.flatMap(d => d.acts.map(a => a.title)));
+  const ideas = p.suggest.map((s, si) => [s, si]).filter(([s]) => !used.has(s.title));
+  return `<div class="add-panel">
+    <div class="add-panel-label">${ZOYA_MINI} Zoya's ideas for ${p.name}</div>
+    <div class="chips">${ideas.length ? ideas.map(([s, si]) => `<button class="chip" onclick="addSuggestion(${i}, ${si}, true)">${lucide('plus', 12)} ${esc(s.title)}</button>`).join('') : '<span class="empty-day">You\'ve added all of Zoya\'s ideas.</span>'}</div>
+    <div class="add-panel-row">
+      <input class="text-input" id="addInput" placeholder="Or type a place, e.g. a restaurant" onkeydown="if(event.key==='Enter')addCustom(${i})">
+      <button class="btn primary" onclick="addCustom(${i})">Add</button>
+      <button class="btn" onclick="p_cancelAdding()">Cancel</button>
+    </div>
+  </div>`;
+}
+
+function toggleDay(i) { const p = plan(); p.open.has(i) ? p.open.delete(i) : p.open.add(i); renderPanel(); }
+function p_startAdding(i) { plan().adding = i; renderPanel(); later(30, () => { const el = document.getElementById('addInput'); if (el) el.focus(); }); }
+function p_cancelAdding() { plan().adding = null; renderPanel(); }
+
+/* ---- Edits (shared plans log every edit to the group chat) ---- */
+function addAct(p, di, act, by) {
+  const a = { ...act, by, _fresh: true };
+  p.days[di].acts.push(a);
+  p.open.add(di);
+  return a;
+}
+function addSuggestion(di, si, mine) {
+  const p = plan();
+  const a = addAct(p, di, p.suggest[si], ME);
+  p.adding = null;
+  renderPanel(); updatePins();
+  logEdit(p, `<b>You</b> added <b>${esc(a.title)}</b> to Day ${di + 1}`, di, 'plus');
+}
+function addCustom(di) {
+  const p = plan();
+  const v = (document.getElementById('addInput').value || '').trim();
+  if (!v) return;
+  const a = addAct(p, di, { title: v, desc: 'Added by you — Zoya will find times and tickets.', time: 'Afternoon' }, ME);
+  p.adding = null;
+  renderPanel();
+  logEdit(p, `<b>You</b> added <b>${esc(a.title)}</b> to Day ${di + 1}`, di, 'plus');
+}
+function removeAct(di, ai) {
+  const p = plan();
+  const [a] = p.days[di].acts.splice(ai, 1);
+  renderPanel(); updatePins();
+  logEdit(p, `<b>You</b> removed <b>${esc(a.title)}</b> from Day ${di + 1}`, di, 'trash-2');
+}
+function setDays(n) {
+  const p = plan();
+  closeMenus();
+  if (n === p.days.length) return;
+  const cities = p.days.filter(d => d.kind === 'city');
+  const want = n - 2;
+  while (cities.length < want) cities.push({ kind: 'city', acts: [] });
+  cities.length = want;
+  p.days = [p.days[0], ...cities, p.days[p.days.length - 1]];
+  p.open = new Set([...p.open].filter(i => i < n));
+  renderPanel(); updatePins();
+  logEdit(p, `<b>You</b> changed the trip to <b>${n} days</b> (${planRange(p)})`, null, 'calendar');
+  rerenderChatIfShowing();
+}
+function setTier(t, quiet) {
+  const p = plan();
+  if (p.tier === t) return;
+  p.tier = t;
+  renderPanel();
+  if (!quiet) logEdit(p, `<b>You</b> switched to <b>${t}</b> picks, now ${money(estimate(p).total)} per person`, null, 'dollar-sign', 'finances');
+  rerenderChatIfShowing();
+}
+function logEdit(p, html, day, icon, tab) {
+  const g = groupChatFor(p);
+  if (!g) return;
+  push(g.id, { role: 'system', html, icon, view: day != null ? { plan: p.id, day } : null });
+}
+function rerenderChatIfShowing() { renderMessages(); }
+
+/* ---- Tabs content ---- */
+function aboutHTML(p) {
+  return `
+    <p class="about-lede">${p.lede}</p>
+    <div class="facts">${p.facts.map(([v, l]) => `<div class="fact"><div class="fact-value">${v}</div><div class="fact-label">${l}</div></div>`).join('')}</div>
+    <div class="section-title">In brief</div>
+    <div>${p.brief.map(([q, a]) => `<div class="brief-row"><div class="brief-q">${q}</div><div class="brief-a">${a}</div></div>`).join('')}</div>
+    <div class="section-title">A glimpse of ${p.name}</div>
+    <div class="gallery">${p.gallery.map(src => `<div class="gallery-img" style="background-image:url('${src}')"></div>`).join('')}</div>`;
+}
+
+function flightsHTML(p) {
+  const base = p.cost.flight * TIER[p.tier];
+  const times = [['6:10pm', '8:35am +1'], ['9:45pm', '12:25pm +1'], ['4:30pm', '9:35am +1']];
+  return `${p.airlines.map(([code, name, stops, dur], i) => `
+    <div class="opt-card">
+      <div class="airline-tile">${code}</div>
+      <div class="opt-body">
+        <div class="opt-title">${times[i][0]} → ${times[i][1]}</div>
+        <div class="opt-meta">${name} · JFK → ${p.code} · ${dur} · ${stops}</div>
+      </div>
+      <div class="opt-price">${money(base * [1, 1.08, 0.86][i])}<span>round trip pp</span></div>
+    </div>`).join('')}
+    <div class="note">${ZOYA_MINI}<span>${p.shared ? `Zoya is watching these fares and will post in the group chat if they drop.` : `Not booked yet. Share the plan first so everyone can agree on a flight.`}</span></div>`;
+}
+
+function stayHTML(p) {
+  const nights = p.days.length - 1;
+  const rooms = Math.max(1, Math.ceil(p.members.length / 2));
+  return `${p.stays.map(([name, loc, score, price]) => {
+    const night = price * TIER[p.tier];
+    return `<div class="opt-card">
+      <div class="stay-photo" style="background-image:url('${locImgFor(loc) || p.img}')"></div>
+      <div class="opt-body">
+        <div class="opt-title">${name}</div>
+        <div class="opt-meta">${lucide('star', 11)} ${score} · ${rooms} ${rooms === 1 ? 'room' : 'rooms'}, ${nights} nights · Free cancellation</div>
+      </div>
+      <div class="opt-price">${money(night)}<span>per night</span></div>
+    </div>`;
+  }).join('')}
+  <div class="note">${ZOYA_MINI}<span>Rooms update automatically as people join the trip.</span></div>`;
+}
+
+const EST_COLORS = { Flights: 'var(--color-gray-900)', Stay: 'var(--color-gray-600)', Food: 'var(--color-gray-400)', Activities: 'var(--color-gray-300)' };
+function financesHTML(p) {
+  const est = estimate(p);
+  const cats = ['Flights', 'Stay', 'Food', 'Activities'];
+  const estimateBlock = `
+    <div class="est-head">
+      <div><div class="est-total">${money(est.total)}</div><div class="est-sub">Estimated per person, ${p.days.length} days${p.members.length > 1 ? `, sharing rooms` : ''}</div></div>
+      <div class="seg-toggle" role="group" aria-label="Budget">${['budget', 'average', 'premium'].map(t => `<button class="seg-btn${p.tier === t ? ' active' : ''}" onclick="setTier('${t}')">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}</div>
+    </div>
+    <div class="stack-bar">${cats.map(c => `<div style="flex-grow:${est[c]};background:${EST_COLORS[c]}"></div>`).join('')}</div>
+    <div class="legend">${cats.map(c => `<div class="legend-row"><span class="legend-swatch" style="background:${EST_COLORS[c]}"></span>${c}<span class="legend-amt">${money(est[c])}</span></div>`).join('')}</div>`;
+  if (!p.shared) {
+    return `${estimateBlock}
+      <div class="share-banner" style="margin-top:22px;">
+        <span class="share-banner-icon">${lucide('receipt', 15)}</span>
+        <span class="share-banner-text"><b>Split costs with your group</b>Once you share the plan, expenses and balances live here.</span>
+        <button class="btn" onclick="openShareModal()">${lucide('user-plus', 14)} Share</button>
+      </div>`;
+  }
+  const n = p.members.length;
+  const total = p.expenses.reduce((s, e) => s + e.amount, 0);
+  const bal = new Map(p.members.map(m => [m, 0]));
+  p.expenses.forEach(e => { bal.set(e.payer, bal.get(e.payer) + e.amount); p.members.forEach(m => bal.set(m, bal.get(m) - e.amount / n)); });
+  const mine = bal.get(ME);
+  return `${estimateBlock}
+    <div class="section-title">Group spending</div>
+    <div class="finance-summary">
+      <div class="finance-stat"><div class="finance-stat-label">Spent so far</div><div class="finance-stat-value">${money(total)}</div></div>
+      <div class="finance-stat"><div class="finance-stat-label">Per person</div><div class="finance-stat-value">${money(total / n)}</div></div>
+      <div class="finance-stat"><div class="finance-stat-label">${Math.abs(mine) < 0.5 ? 'Your balance' : mine > 0 ? "You're owed" : 'You owe'}</div><div class="finance-stat-value ${Math.abs(mine) < 0.5 ? '' : mine > 0 ? 'positive' : 'negative'}">${money(Math.abs(mine))}</div></div>
+    </div>
+    <div class="add-panel-row" style="margin:14px 0 4px;">
+      <input class="text-input" id="expDesc" placeholder="What did you pay for?">
+      <input class="text-input" id="expAmt" placeholder="Amount" inputmode="decimal" style="flex:0 0 100px;" onkeydown="if(event.key==='Enter')addExpense()">
+      <button class="btn primary" onclick="addExpense()">${lucide('plus', 14)} Add</button>
+    </div>
+    <div class="section-title">Balances</div>
+    ${p.members.map(m => { const v = bal.get(m); return `<div class="finance-row">${friendAvatarHTML(m)}<div class="finance-row-body"><div class="finance-row-title">${m.name}</div><div class="finance-row-meta">${Math.abs(v) < 0.5 ? 'Settled up' : v > 0 ? 'Gets back' : 'Owes'}</div></div><div class="finance-row-amount ${Math.abs(v) < 0.5 ? '' : v > 0 ? 'positive' : 'negative'}">${money(Math.abs(v))}</div></div>`; }).join('')}
+    <div class="section-title">Expenses</div>
+    ${p.expenses.slice().reverse().map(e => `<div class="finance-row"><div class="finance-row-icon">${lucide(e.icon, 16)}</div><div class="finance-row-body"><div class="finance-row-title">${esc(e.title)}</div><div class="finance-row-meta">Paid by ${firstName(e.payer)} · split ${n} ways</div></div><div class="finance-row-amount">${money(e.amount)}</div></div>`).join('')}`;
+}
+function addExpense() {
+  const p = plan();
+  const desc = document.getElementById('expDesc').value.trim();
+  const amt = parseFloat((document.getElementById('expAmt').value || '').replace(/[^0-9.]/g, ''));
+  if (!desc || !amt) { toast('Add a description and an amount'); return; }
+  p.expenses.push({ title: desc, amount: amt, payer: ME, icon: 'receipt' });
+  renderPanel();
+  logEdit(p, `<b>You</b> added an expense: <b>${esc(desc)}</b>, ${money(amt)}`, null, 'receipt');
+}
+
+/* ===================== MAP ===================== */
+let map = null, mapLayer = null, mapPlanId = null;
+function initMap() {
+  const p = plan();
+  if (typeof L === 'undefined') return;
+  if (!map) {
+    map = L.map('tpMap', { scrollWheelZoom: false, zoomControl: false });
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors', maxZoom: 19 }).addTo(map);
+  }
+  setTimeout(() => { map.invalidateSize(); updatePins(mapPlanId !== p.id); mapPlanId = p.id; }, 30);
+}
+function updatePins(fit) {
+  const p = plan();
+  if (!map || !p) return;
+  if (mapLayer) mapLayer.remove();
+  mapLayer = L.layerGroup().addTo(map);
+  const pts = [];
+  p.days.forEach((d, di) => d.acts.forEach(a => {
+    if (!a.ll) return;
+    pts.push(a.ll);
+    L.marker(a.ll, { icon: L.divIcon({ className: '', html: `<div class="map-pin-marker"><div class="map-pin-dot"><span>${di + 1}</span></div><div class="map-pin-label">${esc(a.title)}</div></div>`, iconSize: [26, 46], iconAnchor: [13, 40] }) })
+      .addTo(mapLayer).on('click', () => viewInPlan(p.id, di));
+  }));
+  if (fit !== false && pts.length) map.fitBounds(pts, { padding: [50, 50], maxZoom: 14 });
+}
+window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
+
+/* ===================== SHARING → GROUP CHAT ===================== */
+let shareSel = new Set(['mia', 'liam', 'ava']);
+let shareStartsGroup = true;
+function openShareModal() {
+  const p = plan();
+  if (!p) { toast('Pick a destination first, then share the plan'); return; }
+  closeMenus();
+  if (p.shared) shareSel = new Set(p.members.filter(m => m !== ME).map(m => m.id));
+  renderShareModal();
+  document.getElementById('shareOverlay').classList.add('active');
+}
+function closeShareModal() { document.getElementById('shareOverlay').classList.remove('active'); }
+function toggleShareFriend(id) { shareSel.has(id) ? shareSel.delete(id) : shareSel.add(id); renderShareModal(); }
+function toggleStartGroup() { shareStartsGroup = !shareStartsGroup; renderShareModal(); }
+function renderShareModal() {
+  const p = plan();
+  const already = new Set(p.members.map(m => m.id));
+  const count = [...shareSel].filter(id => !already.has(id)).length;
+  document.getElementById('shareBox').innerHTML = `
+    <div class="modal-header">
+      <div><h3>Share ${esc(p.title)}</h3><p>Everyone you add can edit the plan, chat with the group and split costs.</p></div>
+      <button class="icon-btn" onclick="closeShareModal()" title="Close">${lucide('x', 16)}</button>
+    </div>
+    <div class="modal-body">
+      ${FRIENDS.map(f => {
+        const isMember = already.has(f.id);
+        const on = isMember || shareSel.has(f.id);
+        return `<button class="modal-friend-row" ${isMember ? 'disabled' : `onclick="toggleShareFriend('${f.id}')"`}>
+          ${friendAvatarHTML(f)}
+          <span class="modal-friend-name">${f.name}<span>${isMember ? 'Already planning' : levelLabel(f.level)}</span></span>
+          <span class="modal-check${on ? ' checked' : ''}">${lucide('check', 12)}</span>
+        </button>`;
+      }).join('')}
+      <div class="modal-share-row" style="margin-top:12px;">
+        <input class="modal-share-input" value="zenvoya.app/t/${p.id}-dec" readonly aria-label="Share link">
+        <button class="btn" onclick="toast('Link copied')">${lucide('link', 14)} Copy link</button>
+      </div>
+      ${p.shared ? '' : `<button class="toggle-row" onclick="toggleStartGroup()">
+        <span class="toggle-row-text"><b>Start a group chat</b>Opens a new tab where the group and Zoya can talk about the trip.</span>
+        <span class="switch${shareStartsGroup ? ' on' : ''}"></span>
+      </button>`}
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeShareModal()">Cancel</button>
+      <button class="btn primary" ${count ? '' : 'disabled style="opacity:.4;cursor:default;"'} onclick="confirmShare()">${lucide('share-up', 14)} ${p.shared ? `Add ${count} ${count === 1 ? 'person' : 'people'}` : `Share with ${count} ${count === 1 ? 'person' : 'people'}`}</button>
+    </div>`;
+}
+
+function confirmShare() {
+  const p = plan();
+  const already = new Set(p.members.map(m => m.id));
+  const added = [...shareSel].filter(id => !already.has(id)).map(friendById);
+  if (!added.length) return;
+  closeShareModal();
+  const wasShared = p.shared;
+  p.members = [...p.members, ...added];
+  p.shared = true;
+  if (!wasShared) {
+    p.expenses = [
+      { title: `${p.stays[0][0]} deposit`, amount: Math.round(p.stays[0][3] * 2), payer: added[0], icon: 'bed' },
+      { title: `${p.days[1].acts[0] ? p.days[1].acts[0].title : 'Tickets'} tickets`, amount: 28 * p.members.length, payer: ME, icon: 'ticket' },
+    ];
+  }
+  const g = groupChatFor(p) || addChat({ id: 'g-' + p.id, kind: 'group', title: p.title, members: p.members, audience: 'group', messages: [] });
+  g.members = p.members;
+  renderPanel();
+  toast(`Shared with ${namesList(added)}`);
+
+  if (!wasShared) {
+    g.messages.push({ role: 'system', icon: 'users', html: `<b>You</b> started the group with ${namesList(added)}` });
+    g.messages.push({ role: 'me', text: `Made us a plan for ${p.name}, ${planRange(p)}. Edit anything!`, attach: { type: 'trip', plan: p.id } });
+    push('c-main', { role: 'zoya', text: `Shared. I opened a group chat with ${namesList(added)} in a new tab — this chat stays private between us.` });
+    if (shareStartsGroup) openChat(g.id); else { if (!openTabs.includes(g.id)) openTabs.push(g.id); renderTabs(); renderChatList(); }
+    runGroupScript(p, g);
+  } else {
+    push(g.id, { role: 'system', icon: 'user-plus', html: `<b>You</b> added ${namesList(added)}` });
+    renderHeader(); renderComposer();
+  }
+}
+
+// Simulated friends reacting once a plan is shared.
+function runGroupScript(p, g) {
+  const [a, b, c] = g.members.filter(m => m !== ME);
+  const lastCity = p.days.length - 2;
+  const rainy = p.suggest.findIndex(s => s.indoor);
+  let t = 1200;
+  const step = (gap, fn) => { t += gap; later(t, fn); };
+  if (a) {
+    step(0, () => setTyping(g.id, a));
+    step(1300, () => { setTyping(g.id, null); push(g.id, { role: 'friend', person: a, text: `${p.name} in December?? I'm in 🙌` }); });
+  }
+  if (b) {
+    step(900, () => setTyping(g.id, b));
+    step(1500, () => { setTyping(g.id, null); push(g.id, { role: 'friend', person: b, text: `Same! I'll add a sunset spot for our last night.` }); });
+    step(1400, () => {
+      const s = p.suggest[0];
+      if (!p.days[lastCity].acts.some(x => x.title === s.title)) {
+        addAct(p, lastCity, s, b);
+        if (activePlanId === p.id) { renderPanel(); updatePins(false); }
+        push(g.id, { role: 'system', icon: 'plus', html: `<b>${firstName(b)}</b> added <b>${esc(s.title)}</b> to Day ${lastCity + 1}`, view: { plan: p.id, day: lastCity } });
+      }
+    });
+  }
+  if (c && rainy > -1) {
+    step(1600, () => setTyping(g.id, c));
+    step(1500, () => { setTyping(g.id, null); push(g.id, { role: 'friend', person: c, toZoya: true, text: `@Zoya what do we do if it rains?` }); });
+    step(700, () => setTyping(g.id, 'zoya'));
+    step(1500, () => {
+      setTyping(g.id, null);
+      const s = p.suggest[rainy];
+      push(g.id, {
+        role: 'zoya',
+        text: `Good question, ${firstName(c)}. December can be wet in ${p.name}. <b>${s.title}</b> is a great indoor backup — ${s.desc.charAt(0).toLowerCase() + s.desc.slice(1)} Want me to add it to Day 2 as a rainy-day option?`,
+        chips: [{ label: 'Add it to Day 2', action: 'add', plan: p.id, day: 1, idx: rainy }, { label: 'Not now', action: 'dismiss' }],
+      });
+    });
+  }
+}
+
+/* ===================== SENDING + ZOYA ===================== */
+const GROUP_REPLIES = ['Love that 👍', 'Works for me', 'Agreed, let\'s do it', 'Ha, yes', 'I can book that if nobody else does'];
+const DM_REPLIES = ['Haha yes', 'Between us, I\'d skip the museum day 😅', 'Let me check my calendar and get back to you', 'Totally'];
+let replySeq = 0;
+
+function send(textArg) {
+  const c = active();
+  const input = document.getElementById('composerInput');
+  const text = (textArg != null ? textArg : input.value).trim();
+  if (!text) return;
+  if (textArg == null) { input.value = ''; c.draft = ''; }
+  if (c.kind === 'group') {
+    const toZoya = c.audience === 'zoya' || /@zoya/i.test(text);
+    push(c.id, { role: 'me', text, toZoya });
+    if (toZoya) zoyaRespond(c, text);
+    else {
+      const others = c.members.filter(m => m !== ME);
+      const who = others[replySeq % others.length];
+      const reply = GROUP_REPLIES[replySeq++ % GROUP_REPLIES.length];
+      later(700, () => setTyping(c.id, who));
+      later(2000, () => { setTyping(c.id, null); push(c.id, { role: 'friend', person: who, text: reply }); });
+    }
+  } else if (c.kind === 'dm') {
+    push(c.id, { role: 'me', text });
+    later(700, () => setTyping(c.id, c.person));
+    later(2000, () => { setTyping(c.id, null); push(c.id, { role: 'friend', person: c.person, text: DM_REPLIES[replySeq++ % DM_REPLIES.length] }); });
+  } else {
+    if (c.fresh) { c.title = text.length > 32 ? text.slice(0, 30) + '…' : text; c.fresh = false; renderHeader(); renderTabs(); renderChatList(); }
+    push(c.id, { role: 'me', text });
+    zoyaRespond(c, text);
+  }
+}
+
+function zoyaRespond(c, text) {
+  const t = text.toLowerCase();
+  const p = plan();
+  later(500, () => setTyping(c.id, 'zoya'));
+  later(1600, () => {
+    setTyping(c.id, null);
+    const wantsIdeas = /trip|where|somewhere|idea|destination|europe|go to|vacation|holiday|getaway/.test(t) && !/cheap|budget|food|day/.test(t);
+    if (!p || (c.kind === 'personal' && wantsIdeas)) {
+      push(c.id, { role: 'zoya', text: 'Here are some ideas that you might like, each with dates that work in early December.' });
+      later(350, () => push(c.id, { type: 'dests', selected: null }));
+      return;
+    }
+    if (/cheap|budget|save|less|afford/.test(t)) {
+      const before = estimate(p).total;
+      setTier('budget', true);
+      const after = estimate(p).total;
+      push(c.id, { role: 'zoya', text: `Done. I switched to budget stays and the cheapest good flight. That's <b>${money(after)}</b> per person, down from ${money(before)}.`, attach: { type: 'update', plan: p.id, tab: 'finances', title: 'Switched to budget picks', meta: `${money(after)} per person · ${p.days.length} days` } });
+      return;
+    }
+    if (/food|eat|dinner|lunch|restaurant|pasta|tapas|cook/.test(t)) {
+      const used = new Set(p.days.flatMap(d => d.acts.map(a => a.title)));
+      const si = p.suggest.findIndex(s => s.food && !used.has(s.title));
+      if (si > -1) {
+        const day = Math.min(2, p.days.length - 2);
+        const a = addAct(p, day, p.suggest[si], 'zoya');
+        if (activePlanId === p.id) { renderPanel(); updatePins(false); }
+        push(c.id, { role: 'zoya', text: `Added <b>${a.title}</b> to Day ${day + 1}. ${a.desc}`, attach: { type: 'update', plan: p.id, day, act: a, title: a.title, meta: `Day ${day + 1} · ${a.time}` } });
+        if (c.kind !== 'group') logEdit(p, `<b>Zoya</b> added <b>${esc(a.title)}</b> to Day ${day + 1}`, day, 'sparkles');
+        return;
+      }
+    }
+    if (/day|longer|extend|another|extra/.test(t) && p.days.length < 6) {
+      const n = p.days.length + 1;
+      const cities = p.days.filter(d => d.kind === 'city');
+      const used = new Set(p.days.flatMap(d => d.acts.map(a => a.title)));
+      const fill = p.suggest.filter(s => !used.has(s.title)).slice(0, 2).map(s => ({ ...s, by: 'zoya', _fresh: true }));
+      cities.push({ kind: 'city', acts: fill });
+      p.days = [p.days[0], ...cities, p.days[p.days.length - 1]];
+      p.open.add(n - 2);
+      if (activePlanId === p.id) { renderPanel(); updatePins(false); }
+      push(c.id, { role: 'zoya', text: `Made it ${n} days (${planRange(p)}) and filled the new day with ${fill.length ? fill.map(f => f.title).join(' and ') : 'free time'}.`, attach: { type: 'update', plan: p.id, day: n - 2, title: `Day ${n - 1} added`, meta: planRange(p) } });
+      if (c.kind !== 'group') logEdit(p, `<b>Zoya</b> extended the trip to <b>${n} days</b>`, n - 2, 'sparkles');
+      return;
+    }
+    if (/share|invite|friend/.test(t) && !p.shared) {
+      push(c.id, { role: 'zoya', text: 'Happy to. Pick who to invite and I\'ll set up a group chat.', chips: [{ label: 'Choose friends', action: 'share' }] });
+      return;
+    }
+    push(c.id, {
+      role: 'zoya',
+      text: c.kind === 'group' ? `Noted for everyone. I'll keep that in mind for the ${p.name} plan. Want me to change anything?` : `Got it. I'll keep that in mind for your ${p.name} plan. Anything you'd like me to change?`,
+      chips: [{ label: 'Make it cheaper', send: 'Make it cheaper' }, { label: 'Add a food experience', send: 'Add a food experience' }, { label: 'Add another day', send: 'Add another day' }],
+    });
+  });
+}
+
+function chipClick(mi, ci) {
+  const c = active();
+  const m = c.messages[mi];
+  const chip = m.chips[ci];
+  if (chip.action === 'share') { openShareModal(); return; }
+  m.chipsUsed = true;
+  renderMessages();
+  if (chip.action === 'dismiss') return;
+  if (chip.action === 'add') {
+    const p = PLANS[chip.plan];
+    activePlanId = p.id;
+    const a = addAct(p, chip.day, p.suggest[chip.idx], 'zoya');
+    push(c.id, { role: 'me', text: chip.label, toZoya: c.kind === 'group' });
+    later(800, () => {
+      push(c.id, { role: 'zoya', text: `Added <b>${a.title}</b> to Day ${chip.day + 1} as the rainy-day plan.`, attach: { type: 'update', plan: p.id, day: chip.day, act: a, title: a.title, meta: `Day ${chip.day + 1} · ${a.time}` } });
+      if (document.getElementById('tripPanel').classList.contains('open')) { renderPanel(); updatePins(false); }
+    });
+    return;
+  }
+  if (chip.send) {
+    if (c.kind === 'group') { push(c.id, { role: 'me', text: chip.send, toZoya: true }); zoyaRespond(c, chip.send); }
+    else send(chip.send);
+  }
+}
+
+/* ===================== MISC ===================== */
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.innerHTML = `${lucide('check', 14)} ${msg}`;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function hydrateIcons() {
+  document.querySelectorAll('[data-icon]').forEach(el => {
+    el.insertAdjacentHTML('afterbegin', lucide(el.dataset.icon, el.classList.contains('rail-icon') ? 20 : 16));
+  });
+  document.getElementById('railUser').insertAdjacentHTML('beforeend', avatarTooltipHTML(ME));
+}
+
+hydrateIcons();
+seedChats();
+renderChat();
+</script>
+</body>
+</html>
