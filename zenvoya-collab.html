@@ -6,8 +6,8 @@
 <title>Zenvoya — Plan Together</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="zenvoya-tokens.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; }
@@ -452,7 +452,9 @@ button { font-family: var(--font-body); }
 }
 .tp-map-wrap { position: relative; }
 .tp-map { height: 260px; background: var(--color-gray-100); }
-.tp-map .leaflet-container { font-family: var(--font-body); }
+.tp-map .maplibregl-map { font-family: var(--font-body); }
+.tp-map .maplibregl-ctrl-group { border-radius: var(--radius-md); box-shadow: var(--shadow-small); }
+.map-pin { cursor: pointer; }
 .tp-map-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; z-index: 900; pointer-events: none; }
 .tp-map-top > * { pointer-events: auto; }
 .tp-float {
@@ -1472,7 +1474,6 @@ function renderPanel() {
     ? `${lucide('users', 13)} Shared with ${p.members.length - 1} · everyone can edit`
     : `${ZOYA_MINI} Drafted by Zoya`;
   const est = estimate(p);
-  const others = p.members.filter(m => m !== ME);
   document.getElementById('tpBody').innerHTML = `
     <div class="tp-head">
       <div class="tp-thumb" style="background-image:url('${p.img}')"></div>
@@ -1497,11 +1498,7 @@ function renderPanel() {
         </div>
       </div>
     </div>
-    ${p.shared ? `<div class="share-banner">
-        <span class="avatar-stack">${p.members.map(stackAvatarHTML).join('')}</span>
-        <span class="share-banner-text"><b>Planning with ${namesList(others)}</b>Edits show up for everyone and in the group chat.</span>
-        <button class="btn" onclick="openChat('g-${p.id}')">${lucide('message-square', 14)} Group chat</button>
-      </div>` : `<div class="share-banner">
+    ${p.shared ? '' : `<div class="share-banner">
         <span class="share-banner-icon">${lucide('lock', 15)}</span>
         <span class="share-banner-text"><b>Only you can see this draft</b>Share it to edit together, split costs and chat as a group.</span>
         <button class="btn" onclick="openShareModal()">${lucide('user-plus', 14)} Invite</button>
@@ -1745,32 +1742,47 @@ function addExpense() {
 }
 
 /* ===================== MAP ===================== */
-let map = null, mapLayer = null, mapPlanId = null;
+// OpenFreeMap vector street map via MapLibre: no API key, unlike Google Maps,
+// and not rate-blocked like OSM's own tile servers.
+const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
+let map = null, mapMarkers = [], mapPlanId = null;
+function planPoints(p) { return p.days.flatMap((d, di) => d.acts.filter(a => a.ll).map(a => ({ a, di }))); }
 function initMap() {
   const p = plan();
-  if (typeof L === 'undefined') return;
+  if (typeof maplibregl === 'undefined') return;
   if (!map) {
-    map = L.map('tpMap', { scrollWheelZoom: false, zoomControl: false });
-    L.control.zoom({ position: 'bottomleft' }).addTo(map);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors', maxZoom: 19 }).addTo(map);
+    const first = planPoints(p)[0];
+    map = new maplibregl.Map({
+      container: 'tpMap', style: MAP_STYLE,
+      center: first ? [first.a.ll[1], first.a.ll[0]] : [0, 30], zoom: 12,
+      attributionControl: { compact: true },
+    });
+    map.scrollZoom.disable();
+    // Start with the credits collapsed to the (i) button so they don't cover the pins.
+    map.on('load', () => { const a = document.querySelector('#tpMap .maplibregl-ctrl-attrib'); if (a) a.classList.remove('maplibregl-compact-show'); });
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-left');
   }
-  setTimeout(() => { map.invalidateSize(); updatePins(mapPlanId !== p.id); mapPlanId = p.id; }, 30);
+  setTimeout(() => { map.resize(); updatePins(mapPlanId !== p.id); mapPlanId = p.id; }, 30);
 }
 function updatePins(fit) {
   const p = plan();
   if (!map || !p) return;
-  if (mapLayer) mapLayer.remove();
-  mapLayer = L.layerGroup().addTo(map);
-  const pts = [];
-  p.days.forEach((d, di) => d.acts.forEach(a => {
-    if (!a.ll) return;
-    pts.push(a.ll);
-    L.marker(a.ll, { icon: L.divIcon({ className: '', html: `<div class="map-pin-marker"><div class="map-pin-dot"><span>${di + 1}</span></div><div class="map-pin-label">${esc(a.title)}</div></div>`, iconSize: [26, 46], iconAnchor: [13, 40] }) })
-      .addTo(mapLayer).on('click', () => viewInPlan(p.id, di));
-  }));
-  if (fit !== false && pts.length) map.fitBounds(pts, { padding: [50, 50], maxZoom: 14 });
+  mapMarkers.forEach(m => m.remove());
+  const pts = planPoints(p);
+  mapMarkers = pts.map(({ a, di }) => {
+    const el = document.createElement('div');
+    el.className = 'map-pin';
+    el.innerHTML = `<div class="map-pin-marker"><div class="map-pin-dot"><span>${di + 1}</span></div><div class="map-pin-label">${esc(a.title)}</div></div>`;
+    el.addEventListener('click', () => viewInPlan(p.id, di));
+    return new maplibregl.Marker({ element: el, anchor: 'top', offset: [0, -32] }).setLngLat([a.ll[1], a.ll[0]]).addTo(map);
+  });
+  if (fit !== false && pts.length) {
+    const b = new maplibregl.LngLatBounds();
+    pts.forEach(({ a }) => b.extend([a.ll[1], a.ll[0]]));
+    map.fitBounds(b, { padding: { top: 60, bottom: 50, left: 60, right: 60 }, maxZoom: 14.5, duration: mapPlanId ? 600 : 0 });
+  }
 }
-window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
+window.addEventListener('resize', () => { if (map) map.resize(); });
 
 /* ===================== SHARING → GROUP CHAT ===================== */
 let shareSel = new Set(['mia', 'liam', 'ava']);
