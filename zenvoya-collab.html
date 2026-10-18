@@ -22,7 +22,7 @@ body {
 button { font-family: var(--font-body); }
 :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
-#app { display: flex; height: 100dvh; width: 100%; }
+#app { display: flex; height: 100dvh; width: 100%; position: relative; }
 
 /* ===================== ICON RAIL ===================== */
 .rail {
@@ -404,7 +404,15 @@ button { font-family: var(--font-body); }
 }
 .trip-panel.open { display: flex; animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
-.trip-panel.shared { flex-basis: min(68%, 1160px); }
+.trip-panel.overlay {
+  /* Shared plan with the group chat open: float over the private chat instead of squeezing it. */
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: min(calc(100% - 76px), 1320px);
+  min-width: 0;
+  z-index: 60;
+  padding: 16px;
+}
+.trip-panel.overlay .tp-card { box-shadow: var(--shadow-xxlarge); }
 .tp-card {
   flex: 1;
   min-width: 0;
@@ -419,8 +427,17 @@ button { font-family: var(--font-body); }
 .tp-plan { flex: 1; min-width: 0; overflow-y: auto; overflow-x: hidden; position: relative; }
 
 /* Group chat column (shared plans only) */
-.tp-group { display: none; flex: 0 0 360px; min-width: 0; flex-direction: column; border-right: 1px solid var(--color-gray-200); background: var(--color-gray-50); }
-.tp-card.shared .tp-group { display: flex; }
+.tp-group { display: none; flex: 1 1 0; min-width: 0; flex-direction: column; border-right: 1px solid var(--color-gray-200); background: var(--color-gray-50); }
+.tp-card.group-open .tp-group { display: flex; animation: groupIn 0.3s ease; }
+.tp-card.group-open .tp-plan { flex: 1 1 0; }
+@keyframes groupIn { from { opacity: 0; } to { opacity: 1; } }
+.tp-group-head { display: flex; align-items: flex-start; gap: 10px; }
+.tp-group-head-main { flex: 1; min-width: 0; }
+.tp-float.as-btn { border: none; cursor: pointer; font-family: var(--font-body); }
+.tp-float.as-btn:hover { background: var(--color-gray-50); }
+.tp-float .avatar-stack .stack-avatar { width: 18px; height: 18px; font-size: 8px; border-width: 1.5px; margin-left: -6px; }
+.tp-float .avatar-stack .stack-avatar:first-child { margin-left: 0; }
+.tp-float-count { min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--radius-full); background: var(--color-accent-blue); color: var(--color-white); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
 .tp-group-head { padding: 18px 18px 12px; border-bottom: 1px solid var(--color-gray-200); background: var(--color-white); }
 .tp-group-title { font-size: 16px; font-weight: 700; color: var(--color-gray-900); }
 .tp-group .chat-sub .avatar-stack .stack-avatar, .tp-group .chat-sub .avatar-stack .zoya-mini { width: 20px; height: 20px; font-size: 9px; }
@@ -726,7 +743,7 @@ button { font-family: var(--font-body); }
   .chatlist { display: none; }
   .rail { width: 60px; }
   .rail-item { width: 50px; font-size: 11px; }
-  .trip-panel.open { position: fixed; inset: 0; z-index: 1000; padding: 0; background: var(--color-white); min-width: 0; }
+  .trip-panel.open { position: fixed; inset: 0; z-index: 1000; padding: 0; background: var(--color-white); min-width: 0; width: auto; }
   .tp-card { border-radius: 0; border: none; box-shadow: none; flex-direction: column; }
   .tp-card.shared .tp-mswitch { display: flex; align-self: center; margin: 10px 0; flex-shrink: 0; }
   .tp-card.shared .tp-group { display: none; flex: 1; border-right: none; min-height: 0; }
@@ -832,6 +849,7 @@ function lucide(name, size) {
     'bookmark': '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
     'plus': '<path d="M5 12h14"/><path d="M12 5v14"/>',
     'panel-left': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>',
+    'panel-left-close': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/>',
     'x': '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     'share-up': '<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/>',
     'trash-2': '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
@@ -1213,8 +1231,11 @@ function tripCardHTML(p) {
 // for a shared plan, the group-chat column inside the trip panel.
 function shownGroupId() {
   const p = plan();
-  return p && p.shared && document.getElementById('tripPanel').classList.contains('open') ? 'g-' + p.id : null;
+  return p && p.shared && groupVisible(p) && document.getElementById('tripPanel').classList.contains('open') ? 'g-' + p.id : null;
 }
+function isMobile() { return window.innerWidth <= 900; }
+// On mobile the group chat is one side of the Plan / Group chat switch, so it's never "collapsed".
+function groupVisible(p) { return p.groupOpen !== false || isMobile(); }
 function viewFor(chatId) {
   if (chatId === activeChatId) return { msgs: 'chatMessages', area: 'composerArea' };
   if (chatId === shownGroupId()) return { msgs: 'groupMessages', area: 'groupComposer' };
@@ -1243,7 +1264,7 @@ function push(chatId, m) {
   m._new = true;
   chat.messages.push(m);
   if (viewFor(chatId)) renderThread(chatId);
-  else chat.unread++;
+  else { chat.unread++; if (chat.kind === 'group') renderBadge(); }
   // most recent first in the list (a group thread counts toward its trip's chat)
   const r = chat.personalId || chatId;
   chatOrder = [r, ...chatOrder.filter(id => id !== r)];
@@ -1263,7 +1284,7 @@ function renderHeader() {
   document.getElementById('chatTitle').textContent = c.title;
   const g = c.groupId && CHATS[c.groupId];
   document.getElementById('chatSub').innerHTML = g
-    ? `${lucide('lock', 12)} Private with Zoya · <button class="sys-link" onclick="openPanel('${c.planId}')">Group chat</button>`
+    ? `${lucide('lock', 12)} Private with Zoya · <button class="sys-link" onclick="openGroupChat('${c.planId}')">Group chat</button>`
     : `${lucide('lock', 12)} Private — only you and Zoya can see this`;
 }
 
@@ -1422,15 +1443,9 @@ function openPanel(id, drafting) {
   const panel = document.getElementById('tripPanel');
   const card = document.getElementById('tpCard');
   panel.classList.add('open');
-  panel.classList.toggle('shared', p.shared);
-  card.classList.toggle('shared', p.shared);
   card.classList.toggle('drafting', !!drafting);
   if (drafting) later(1800, () => card.classList.remove('drafting'));
-  const roomy = p.shared ? 1760 : 1500;
-  if (window.innerWidth < roomy && window.innerWidth > 900) {
-    const list = document.getElementById('chatList');
-    if (!list.classList.contains('collapsed')) toggleChatList();
-  }
+  applyPanelLayout();
   document.getElementById('tpPlan').scrollTop = 0;
   renderPanel();
   renderGroupPane();
@@ -1438,14 +1453,45 @@ function openPanel(id, drafting) {
 }
 function closePanel() { document.getElementById('tripPanel').classList.remove('open'); }
 
+function applyPanelLayout() {
+  const p = plan();
+  const panel = document.getElementById('tripPanel');
+  const card = document.getElementById('tpCard');
+  const groupOpen = p.shared && p.groupOpen !== false && !isMobile();
+  card.classList.toggle('shared', p.shared);
+  card.classList.toggle('group-open', groupOpen);
+  panel.classList.toggle('overlay', groupOpen);
+  // Side-by-side with the private chat: make room by hiding the chat list on smaller screens.
+  if (!groupOpen && window.innerWidth < 1500 && !isMobile()) {
+    const list = document.getElementById('chatList');
+    if (!list.classList.contains('collapsed')) toggleChatList();
+  }
+  if (map) setTimeout(() => map.resize(), 0);
+}
+function setGroupOpen(open) {
+  const p = plan();
+  p.groupOpen = open;
+  applyPanelLayout();
+  renderBadge();
+  if (open) renderGroupPane();
+}
+function openGroupChat(planId) {
+  PLANS[planId].groupOpen = true;
+  openPanel(planId);
+}
+
 function renderGroupPane() {
   const p = plan();
   const g = p && p.shared && groupChatFor(p);
   if (!g) return;
   g.unread = 0;
   document.getElementById('tpGroupHead').innerHTML = `
-    <div class="tp-group-title">Group chat</div>
-    <div class="chat-sub"><div class="avatar-stack">${g.members.map(stackAvatarHTML).join('')}${ZOYA_MINI}</div> ${namesList(g.members)} and Zoya</div>`;
+    <div class="tp-group-head-main">
+      <div class="tp-group-title">Group chat</div>
+      <div class="chat-sub"><div class="avatar-stack">${g.members.map(stackAvatarHTML).join('')}${ZOYA_MINI}</div> ${namesList(g.members)} and Zoya</div>
+    </div>
+    <button class="icon-btn" onclick="setGroupOpen(false)" title="Hide group chat" aria-label="Hide group chat">${lucide('panel-left-close', 18)}</button>`;
+  renderBadge();
   renderThread(g.id);
   renderComposer(g.id);
   renderChatList();
@@ -1468,9 +1514,7 @@ function viewInPlan(id, day, tab) {
 function renderPanel() {
   const p = plan();
   if (!p) return;
-  document.getElementById('tpBadge').innerHTML = p.shared
-    ? `${lucide('users', 13)} Shared with ${p.members.length - 1} · everyone can edit`
-    : `${ZOYA_MINI} Drafted by Zoya`;
+  renderBadge();
   const est = estimate(p);
   document.getElementById('tpBody').innerHTML = `
     <div class="tp-head">
@@ -1507,6 +1551,22 @@ function renderPanel() {
     </div>
     <div>${({ itinerary: itineraryHTML, about: aboutHTML, flights: flightsHTML, stay: stayHTML, finances: financesHTML })[p.tab](p)}</div>`;
   p.days.forEach(d => d.acts.forEach(a => { delete a._fresh; }));
+}
+
+function renderBadge() {
+  const p = plan();
+  const badge = document.getElementById('tpBadge');
+  if (!p || !badge) return;
+  const g = p.shared && groupChatFor(p);
+  const hidden = g && !groupVisible(p);
+  badge.classList.toggle('as-btn', !!hidden);
+  badge.onclick = hidden ? () => setGroupOpen(true) : null;
+  badge.onkeydown = hidden ? e => { if (e.key === 'Enter') setGroupOpen(true); } : null;
+  if (hidden) { badge.setAttribute('role', 'button'); badge.tabIndex = 0; badge.title = 'Show group chat'; }
+  else { badge.removeAttribute('role'); badge.removeAttribute('tabindex'); badge.removeAttribute('title'); }
+  badge.innerHTML = hidden
+    ? `${lucide('message-square', 14)} Group chat <span class="avatar-stack">${g.members.map(stackAvatarHTML).join('')}</span>${g.unread ? `<span class="tp-float-count">${g.unread}</span>` : ''}`
+    : p.shared ? `${lucide('users', 13)} Shared with ${p.members.length - 1} · everyone can edit` : `${ZOYA_MINI} Drafted by Zoya`;
 }
 
 function setTab(t) { plan().tab = t; renderPanel(); }
@@ -1860,8 +1920,10 @@ function confirmShare() {
     g.messages.push({ role: 'system', icon: 'users', html: `<b>You</b> started the group with ${namesList(added)}` });
     g.messages.push({ role: 'me', text: `Made us a plan for ${p.name}, ${planRange(p)}. Edit anything!`, attach: { type: 'trip', plan: p.id } });
     if (activeChatId !== root.id) selectChat(root.id);
+    p.groupOpen = true;
     openPanel(p.id);
     renderHeader();
+    renderComposer(root.id);
     push(root.id, { role: 'zoya', text: `Shared with ${namesList(added)}. Your group chat now lives inside the trip plan, next to the itinerary. This chat stays private between you and me.` });
     runGroupScript(p, g);
   } else {
