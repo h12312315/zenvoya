@@ -404,15 +404,13 @@ button { font-family: var(--font-body); }
 }
 .trip-panel.open { display: flex; animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
-.trip-panel.overlay {
-  /* Shared plan with the group chat open: float over the private chat instead of squeezing it. */
-  position: absolute; top: 0; right: 0; bottom: 0;
-  width: min(calc(100% - 76px), 1320px);
+.trip-panel.wide {
+  /* Shared plan with the group chat open: three columns side by side —
+     private chat | group chat | plan. */
+  flex-basis: min(64%, 1240px);
   min-width: 0;
-  z-index: 60;
-  padding: 16px;
 }
-.trip-panel.overlay .tp-card { box-shadow: var(--shadow-xxlarge); }
+@media (min-width: 901px) { .chat-col { min-width: 340px; } }
 .tp-card {
   flex: 1;
   min-width: 0;
@@ -428,8 +426,11 @@ button { font-family: var(--font-body); }
 
 /* Group chat column (shared plans only) */
 .tp-group { display: none; flex: 1 1 0; min-width: 0; flex-direction: column; border-right: 1px solid var(--color-gray-200); background: var(--color-gray-50); }
-.tp-card.group-open .tp-group { display: flex; animation: groupIn 0.3s ease; }
-.tp-card.group-open .tp-plan { flex: 1 1 0; }
+.tp-card.group-open .tp-group { display: flex; flex: 0.85 1 0; animation: groupIn 0.3s ease; }
+.tp-card.group-open .tp-plan { flex: 1.15 1 0; }
+.tp-card.group-open .tp-thumb { width: 72px; height: 72px; }
+.tp-card.group-open .tp-title { font-size: 22px; }
+.tp-card.group-open .tp-body { padding: 18px 18px 24px; }
 @keyframes groupIn { from { opacity: 0; } to { opacity: 1; } }
 .tp-group-head { display: flex; align-items: flex-start; gap: 10px; }
 .tp-group-head-main { flex: 1; min-width: 0; }
@@ -1460,9 +1461,9 @@ function applyPanelLayout() {
   const groupOpen = p.shared && p.groupOpen !== false && !isMobile();
   card.classList.toggle('shared', p.shared);
   card.classList.toggle('group-open', groupOpen);
-  panel.classList.toggle('overlay', groupOpen);
-  // Side-by-side with the private chat: make room by hiding the chat list on smaller screens.
-  if (!groupOpen && window.innerWidth < 1500 && !isMobile()) {
+  panel.classList.toggle('wide', groupOpen);
+  // Make room by hiding the chat history list: always for three columns, on smaller screens otherwise.
+  if (!isMobile() && (groupOpen || window.innerWidth < 1500)) {
     const list = document.getElementById('chatList');
     if (!list.classList.contains('collapsed')) toggleChatList();
   }
