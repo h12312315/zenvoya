@@ -172,20 +172,11 @@ button { font-family: var(--font-body); }
   font-weight: 600;
 }
 .chat-tab-label { overflow: hidden; text-overflow: ellipsis; }
-.chat-tab-close {
-  width: 18px; height: 18px;
-  border-radius: 4px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--color-gray-400);
-  opacity: 0;
-}
-.chat-tab:hover .chat-tab-close, .chat-tab.active .chat-tab-close { opacity: 1; }
-.chat-tab-close:hover { background: var(--color-gray-200); color: var(--color-gray-800); }
 .chat-tab-icon { display: flex; align-items: center; flex-shrink: 0; }
 .chat-tab-icon .stack-avatar { width: 16px !important; height: 16px !important; font-size: 8px !important; border-width: 1.5px !important; margin-left: -5px !important; }
 .chat-tab-icon .stack-avatar:first-child { margin-left: 0 !important; }
-.chat-tab-icon .friend-avatar { width: 18px; height: 18px; font-size: 9px; }
-.chat-tab-add { margin: 0 0 4px 2px; }
+.chatlist-avatars .stack-avatar { width: 18px; height: 18px; font-size: 8px; border-width: 1.5px; margin-left: -6px; }
+.chatlist-avatars .stack-avatar:first-child { margin-left: 0; }
 .tab-menu {
   position: absolute;
   top: calc(100% + 6px);
@@ -802,10 +793,8 @@ button { font-family: var(--font-body); }
       <button class="icon-btn" onclick="openShareModal()" title="Share trip plan" data-icon="share-up"></button>
       <button class="icon-btn" onclick="deleteActiveChat()" title="Delete chat" data-icon="trash-2"></button>
     </header>
-    <div class="chat-tabs-row">
+    <div class="chat-tabs-row" id="chatTabsRow" style="display:none;">
       <div class="chat-tabs" id="chatTabs" role="tablist"></div>
-      <button class="icon-btn chat-tab-add" id="tabAddBtn" onclick="toggleTabMenu(event)" title="Open a chat in a new tab" data-icon="plus"></button>
-      <div class="tab-menu" id="tabMenu"></div>
     </div>
     <div class="chat-messages" id="chatMessages"></div>
     <div class="composer-area" id="composerArea"></div>
@@ -1084,7 +1073,6 @@ function optionEstimate(id) { return estimate({ ...TEMPLATES[id], days: [1, 2, 3
 /* ===================== CHATS ===================== */
 const CHATS = {};
 let chatOrder = [];
-let openTabs = [];
 let activeChatId = null;
 let chatSeq = 1;
 
@@ -1119,7 +1107,6 @@ function seedChats() {
     { role: 'zoya', text: 'Here are some ideas that you might like. Each one has dates that work around early December.' },
     { type: 'dests', selected: null },
   ]});
-  openTabs = ['c-main'];
   activeChatId = 'c-main';
 }
 
@@ -1226,9 +1213,6 @@ function renderMessages() {
   const chat = active();
   const el = document.getElementById('chatMessages');
   let html = chat.messages.map((m, i) => messageHTML(m, i, chat)).join('');
-  if (!chat.messages.length && chat.kind === 'dm') {
-    html = `<div class="sys-line" style="margin-top:auto;margin-bottom:8px;">${lucide('lock', 13)}<span>Start a private chat with ${chat.person.name.split(' ')[0]}. Nobody else in the group can see it.</span></div>`;
-  }
   if (chat.typing) {
     const who = chat.typing;
     html += `<div class="typing">${who === 'zoya' ? `<div class="message-avatar">${ZOYA_SVG}</div>` : `<div class="message-avatar">${friendAvatarHTML(who, 'width:28px;height:28px;font-size:11px;')}</div>`}<span class="typing-dots"><span></span><span></span><span></span></span>${who === 'zoya' ? 'Zoya is' : firstName(who) + ' is'} typing</div>`;
@@ -1238,6 +1222,11 @@ function renderMessages() {
   requestAnimationFrame(() => el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }));
 }
 
+// A conversation is either a solo chat (you + Zoya, no tabs) or a shared trip:
+// the original private thread plus a group thread, shown as two fixed tabs.
+function rootId(id) { return CHATS[id].personalId || id; }
+function rootOf(id) { return CHATS[rootId(id)]; }
+
 function push(chatId, m) {
   const chat = CHATS[chatId];
   if (!chat) return;
@@ -1246,7 +1235,8 @@ function push(chatId, m) {
   if (chatId === activeChatId) renderMessages();
   else chat.unread++;
   // most recent first in the list
-  chatOrder = [chatId, ...chatOrder.filter(id => id !== chatId)];
+  const r = rootId(chatId);
+  chatOrder = [r, ...chatOrder.filter(id => id !== r)];
   renderTabs();
   renderChatList();
 }
@@ -1259,20 +1249,15 @@ function setTyping(chatId, who) {
 function later(ms, fn) { return setTimeout(fn, ms); }
 
 /* ===================== HEADER, TABS, LIST ===================== */
-function chatIconHTML(c) {
-  if (c.kind === 'group') return `<span class="chat-tab-icon avatar-stack">${c.members.slice(0, 3).map(stackAvatarHTML).join('')}</span>`;
-  if (c.kind === 'dm') return `<span class="chat-tab-icon">${friendAvatarHTML(c.person)}</span>`;
-  return `<span class="chat-tab-icon">${ZOYA_MINI}</span>`;
-}
-
 function renderHeader() {
   const c = active();
-  document.getElementById('chatTitle').textContent = c.title;
-  let sub = '';
+  const root = rootOf(c.id);
+  document.getElementById('chatTitle').textContent = root.title;
+  let sub;
   if (c.kind === 'group') {
     sub = `<div class="avatar-stack">${c.members.map(stackAvatarHTML).join('')}${ZOYA_MINI}</div> Group chat with ${namesList(c.members.filter(m => m !== ME))} and Zoya`;
-  } else if (c.kind === 'dm') {
-    sub = `${lucide('lock', 12)} Private — only you and ${c.person.name.split(' ')[0]} can see this`;
+  } else if (c.groupId) {
+    sub = `${lucide('lock', 12)} Private — the group can't see this tab`;
   } else {
     sub = `${lucide('lock', 12)} Private — only you and Zoya can see this`;
   }
@@ -1280,39 +1265,42 @@ function renderHeader() {
 }
 
 function renderTabs() {
-  document.getElementById('chatTabs').innerHTML = openTabs.map(id => {
-    const c = CHATS[id];
+  const row = document.getElementById('chatTabsRow');
+  const root = rootOf(activeChatId);
+  if (!root.groupId) { row.style.display = 'none'; return; }
+  row.style.display = '';
+  const g = CHATS[root.groupId];
+  const tabs = [
+    [g.id, `<span class="chat-tab-icon avatar-stack">${g.members.slice(0, 3).map(stackAvatarHTML).join('')}</span>`, 'Group chat'],
+    [root.id, `<span class="chat-tab-icon">${ZOYA_MINI}</span>`, 'Just you &amp; Zoya'],
+  ];
+  document.getElementById('chatTabs').innerHTML = tabs.map(([id, icon, label]) => {
     const on = id === activeChatId;
-    return `<div class="chat-tab${on ? ' active' : ''}" role="tab" aria-selected="${on}" tabindex="0" onclick="switchTab('${id}')" onkeydown="if(event.key==='Enter')switchTab('${id}')" title="${esc(c.title)}">
-      ${chatIconHTML(c)}<span class="chat-tab-label">${esc(c.title)}</span>
-      ${c.unread && !on ? '<span class="unread-dot" aria-label="Unread"></span>' : ''}
-      ${openTabs.length > 1 ? `<span class="chat-tab-close" role="button" aria-label="Close tab" onclick="event.stopPropagation(); closeTab('${id}')">${lucide('x', 12)}</span>` : ''}
+    return `<div class="chat-tab${on ? ' active' : ''}" role="tab" aria-selected="${on}" tabindex="0" onclick="switchTab('${id}')" onkeydown="if(event.key==='Enter')switchTab('${id}')">
+      ${icon}<span class="chat-tab-label">${label}</span>
+      ${CHATS[id].unread && !on ? '<span class="unread-dot" aria-label="Unread"></span>' : ''}
     </div>`;
   }).join('');
-  const tabsEl = document.getElementById('chatTabs');
-  const on = tabsEl.querySelector('.chat-tab.active');
-  if (on) {
-    const r = on.getBoundingClientRect(), box = tabsEl.getBoundingClientRect();
-    if (r.right > box.right) tabsEl.scrollLeft += r.right - box.right + 4;
-    else if (r.left < box.left) tabsEl.scrollLeft -= box.left - r.left + 4;
-  }
 }
 
 function renderChatList() {
-  const groups = chatOrder.filter(id => CHATS[id].kind === 'group');
-  const rest = chatOrder.filter(id => CHATS[id].kind !== 'group');
+  const roots = chatOrder.filter(id => !CHATS[id].personalId);
+  const shared = roots.filter(id => CHATS[id].groupId);
+  const solo = roots.filter(id => !CHATS[id].groupId);
+  const current = rootId(activeChatId);
   const item = id => {
     const c = CHATS[id];
-    const icon = c.kind === 'group' ? lucide('users', 14) : c.kind === 'dm' ? lucide('lock', 13) : '';
-    return `<button class="chatlist-item${id === activeChatId ? ' active' : ''}" onclick="openChat('${id}')">
-      ${icon ? `<span class="chatlist-item-icon">${icon}</span>` : ''}
+    const g = c.groupId && CHATS[c.groupId];
+    const unread = id !== current && (c.unread || (g && g.unread));
+    return `<button class="chatlist-item${id === current ? ' active' : ''}" onclick="openChat('${id}')">
+      ${g ? `<span class="chatlist-item-icon avatar-stack chatlist-avatars">${g.members.slice(0, 3).map(stackAvatarHTML).join('')}</span>` : ''}
       <span class="chatlist-item-name">${esc(c.title)}</span>
-      ${c.unread && id !== activeChatId ? '<span class="unread-dot"></span>' : ''}
+      ${unread ? '<span class="unread-dot"></span>' : ''}
     </button>`;
   };
   document.getElementById('chatListItems').innerHTML =
-    (groups.length ? `<div class="chatlist-label">Group trips</div>${groups.map(item).join('')}<div class="chatlist-label">Your chats</div>` : '') +
-    rest.map(item).join('');
+    (shared.length ? `<div class="chatlist-label">Group trips</div>${shared.map(item).join('')}<div class="chatlist-label">Your chats</div>` : '') +
+    solo.map(item).join('');
 }
 
 function renderComposer() {
@@ -1344,7 +1332,7 @@ function renderComposer() {
     </div>
     <div class="composer-hint">Tip: type <b>@Zoya</b> to include Zoya for one message.</div>`;
   } else {
-    const ph = c.kind === 'dm' ? `Message ${c.person.name.split(' ')[0]}…` : 'Ask anything travel';
+    const ph = c.groupId ? 'Ask Zoya privately — the group won\'t see this' : 'Ask anything travel';
     html = `<div class="composer">
       <input class="composer-input" id="composerInput" placeholder="${ph}" autocomplete="off">
       <button class="icon-btn" title="Voice input" onclick="toast('Voice input isn\\'t part of this prototype')">${lucide('mic', 18)}</button>
@@ -1375,64 +1363,16 @@ function switchTab(id) {
   closeMenus();
   renderChat();
 }
-function openChat(id) {
-  if (!openTabs.includes(id)) openTabs.push(id);
-  switchTab(id);
-}
-function closeTab(id) {
-  const idx = openTabs.indexOf(id);
-  openTabs = openTabs.filter(t => t !== id);
-  if (activeChatId === id) switchTab(openTabs[Math.max(0, idx - 1)]);
-  else renderTabs();
-}
+// Opening a shared trip lands on its group chat by default.
+function openChat(id) { switchTab(CHATS[id].groupId || id); }
 
 function newPersonalChat() {
   const id = 'c-new-' + (chatSeq++);
   addChat({ id, kind: 'personal', title: 'New chat', fresh: true, messages: [{ role: 'zoya', text: GREETING }] });
-  openChat(id);
-  document.getElementById('composerInput').focus();
-}
-function openDM(personId) {
-  const person = friendById(personId);
-  const id = 'dm-' + personId;
-  if (!CHATS[id]) addChat({ id, kind: 'dm', title: person.name.split(' ')[0], person, messages: [] });
-  openChat(id);
-  closeMenus();
+  switchTab(id);
   document.getElementById('composerInput').focus();
 }
 
-function toggleTabMenu(e) {
-  e.stopPropagation();
-  const menu = document.getElementById('tabMenu');
-  const wasOpen = menu.classList.contains('open');
-  closeMenus();
-  if (wasOpen) return;
-  const p = plan();
-  const group = p && groupChatFor(p);
-  const people = group ? group.members.filter(m => m !== ME) : [];
-  menu.innerHTML = `
-    <div class="menu-label">Private</div>
-    <button class="menu-item" onclick="closeMenus(); newPersonalChat()">
-      <span class="menu-item-icon">${ZOYA_SVG}</span>
-      <span><div class="menu-item-title">New chat with Zoya</div><div class="menu-item-desc">Only you can see it</div></span>
-    </button>
-    ${people.map(f => `<button class="menu-item" onclick="openDM('${f.id}')">
-      <span class="menu-item-icon">${friendAvatarHTML(f)}</span>
-      <span><div class="menu-item-title">Message ${f.name.split(' ')[0]} privately</div><div class="menu-item-desc">The rest of the group won't see it</div></span>
-    </button>`).join('')}
-    ${group ? `<div class="menu-label">Group</div>
-    <button class="menu-item" onclick="closeMenus(); openChat('${group.id}')">
-      <span class="menu-item-icon">${lucide('users', 15)}</span>
-      <span><div class="menu-item-title">${esc(group.title)}</div><div class="menu-item-desc">${group.members.length} people and Zoya</div></span>
-    </button>` : `<div class="menu-label">Group</div>
-    <button class="menu-item" onclick="closeMenus(); openShareModal()">
-      <span class="menu-item-icon">${lucide('user-plus', 15)}</span>
-      <span><div class="menu-item-title">Start a group chat</div><div class="menu-item-desc">Share a trip plan to plan together</div></span>
-    </button>`}`;
-  const btn = document.getElementById('tabAddBtn');
-  menu.style.left = Math.min(btn.offsetLeft, btn.parentElement.clientWidth - 270) + 'px';
-  menu.classList.add('open');
-}
 function toggleAudienceMenu(e) {
   e.stopPropagation();
   const m = document.getElementById('audienceMenu');
@@ -1457,15 +1397,12 @@ function toggleChatList() {
   document.getElementById('showListBtn').style.display = list.classList.contains('collapsed') ? '' : 'none';
 }
 function deleteActiveChat() {
-  const c = active();
-  if (c.id === 'c-main') { toast('This chat started your trip plan, so it stays'); return; }
-  if (!confirm(`Delete "${c.title}"?`)) return;
-  delete CHATS[c.id];
-  chatOrder = chatOrder.filter(id => id !== c.id);
-  openTabs = openTabs.filter(id => id !== c.id);
-  if (!openTabs.length) openTabs = ['c-main'];
-  activeChatId = openTabs[openTabs.length - 1];
-  renderChat();
+  const root = rootOf(activeChatId);
+  if (root.id === 'c-main') { toast('This chat started your trip plan, so it stays'); return; }
+  if (!confirm(`Delete "${root.title}"?`)) return;
+  [root.id, root.groupId].filter(Boolean).forEach(id => { delete CHATS[id]; });
+  chatOrder = chatOrder.filter(id => CHATS[id]);
+  openChat(chatOrder.find(id => !CHATS[id].personalId));
 }
 
 /* ===================== DESTINATION → TRIP PLAN SHELL ===================== */
@@ -1475,7 +1412,8 @@ function pickDestination(id, msgIndex) {
   const firstTime = !PLANS[id];
   m.selected = id;
   const p = ensurePlan(id);
-  if (chat.id === 'c-main') chat.title = `New York > ${p.name}`;
+  if (firstTime) p.chatId = chat.id;
+  if (chat.id === 'c-main' && !chat.groupId) chat.title = `New York > ${p.name}`;
   renderHeader(); renderTabs(); renderChatList();
   renderMessages();
   if (!firstTime) { openPanel(id); return; }
@@ -1584,7 +1522,7 @@ function renameTrip(el) {
   p.title = v;
   logEdit(p, `<b>You</b> renamed the trip to <b>${esc(v)}</b>`, null, 'pencil');
   const g = groupChatFor(p);
-  if (g) { g.title = v; if (activeChatId === g.id) renderHeader(); renderTabs(); renderChatList(); }
+  if (g) { g.title = v; CHATS[g.personalId].title = v; renderHeader(); renderChatList(); }
   rerenderChatIfShowing();
 }
 function toggleSave() { const p = plan(); p.saved = !p.saved; renderPanel(); toast(p.saved ? 'Saved to Trips' : 'Removed from Trips'); }
@@ -1836,7 +1774,6 @@ window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
 
 /* ===================== SHARING → GROUP CHAT ===================== */
 let shareSel = new Set(['mia', 'liam', 'ava']);
-let shareStartsGroup = true;
 function openShareModal() {
   const p = plan();
   if (!p) { toast('Pick a destination first, then share the plan'); return; }
@@ -1847,7 +1784,6 @@ function openShareModal() {
 }
 function closeShareModal() { document.getElementById('shareOverlay').classList.remove('active'); }
 function toggleShareFriend(id) { shareSel.has(id) ? shareSel.delete(id) : shareSel.add(id); renderShareModal(); }
-function toggleStartGroup() { shareStartsGroup = !shareStartsGroup; renderShareModal(); }
 function renderShareModal() {
   const p = plan();
   const already = new Set(p.members.map(m => m.id));
@@ -1871,10 +1807,10 @@ function renderShareModal() {
         <input class="modal-share-input" value="zenvoya.app/t/${p.id}-dec" readonly aria-label="Share link">
         <button class="btn" onclick="toast('Link copied')">${lucide('link', 14)} Copy link</button>
       </div>
-      ${p.shared ? '' : `<button class="toggle-row" onclick="toggleStartGroup()">
-        <span class="toggle-row-text"><b>Start a group chat</b>Opens a new tab where the group and Zoya can talk about the trip.</span>
-        <span class="switch${shareStartsGroup ? ' on' : ''}"></span>
-      </button>`}
+      ${p.shared ? '' : `<div class="toggle-row" style="cursor:default;">
+        <span class="share-banner-icon">${lucide('users', 15)}</span>
+        <span class="toggle-row-text"><b>This chat becomes a group trip</b>It gets two tabs: a group chat where everyone can plan with Zoya, and your private chat with Zoya.</span>
+      </div>`}
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeShareModal()">Cancel</button>
@@ -1897,16 +1833,24 @@ function confirmShare() {
       { title: `${p.days[1].acts[0] ? p.days[1].acts[0].title : 'Tickets'} tickets`, amount: 28 * p.members.length, payer: ME, icon: 'ticket' },
     ];
   }
-  const g = groupChatFor(p) || addChat({ id: 'g-' + p.id, kind: 'group', title: p.title, members: p.members, audience: 'group', messages: [] });
+  let root = CHATS[p.chatId] || CHATS['c-main'];
+  if (!wasShared && root.groupId) {
+    // That chat already hosts another group trip, so this plan gets its own conversation.
+    root = addChat({ id: 'c-' + p.id, kind: 'personal', title: p.title, messages: [{ role: 'zoya', text: `This is your private side of the ${p.name} plan. Ask me anything here — the group won't see it.` }] });
+    p.chatId = root.id;
+  }
+  const g = groupChatFor(p) || addChat({ id: 'g-' + p.id, kind: 'group', title: p.title, members: p.members, audience: 'group', personalId: root.id, messages: [] });
   g.members = p.members;
+  root.groupId = g.id;
+  root.title = p.title;
   renderPanel();
   toast(`Shared with ${namesList(added)}`);
 
   if (!wasShared) {
     g.messages.push({ role: 'system', icon: 'users', html: `<b>You</b> started the group with ${namesList(added)}` });
     g.messages.push({ role: 'me', text: `Made us a plan for ${p.name}, ${planRange(p)}. Edit anything!`, attach: { type: 'trip', plan: p.id } });
-    push('c-main', { role: 'zoya', text: `Shared. I opened a group chat with ${namesList(added)} in a new tab — this chat stays private between us.` });
-    if (shareStartsGroup) openChat(g.id); else { if (!openTabs.includes(g.id)) openTabs.push(g.id); renderTabs(); renderChatList(); }
+    root.messages.push({ role: 'zoya', text: `Shared with ${namesList(added)}. This is now a group trip with two tabs: <b>Group chat</b>, where everyone can plan with me, and <b>Just you &amp; Zoya</b> — this one, which stays private.` });
+    switchTab(g.id);
     runGroupScript(p, g);
   } else {
     push(g.id, { role: 'system', icon: 'user-plus', html: `<b>You</b> added ${namesList(added)}` });
@@ -1955,7 +1899,6 @@ function runGroupScript(p, g) {
 
 /* ===================== SENDING + ZOYA ===================== */
 const GROUP_REPLIES = ['Love that 👍', 'Works for me', 'Agreed, let\'s do it', 'Ha, yes', 'I can book that if nobody else does'];
-const DM_REPLIES = ['Haha yes', 'Between us, I\'d skip the museum day 😅', 'Let me check my calendar and get back to you', 'Totally'];
 let replySeq = 0;
 
 function send(textArg) {
@@ -1975,10 +1918,6 @@ function send(textArg) {
       later(700, () => setTyping(c.id, who));
       later(2000, () => { setTyping(c.id, null); push(c.id, { role: 'friend', person: who, text: reply }); });
     }
-  } else if (c.kind === 'dm') {
-    push(c.id, { role: 'me', text });
-    later(700, () => setTyping(c.id, c.person));
-    later(2000, () => { setTyping(c.id, null); push(c.id, { role: 'friend', person: c.person, text: DM_REPLIES[replySeq++ % DM_REPLIES.length] }); });
   } else {
     if (c.fresh) { c.title = text.length > 32 ? text.slice(0, 30) + '…' : text; c.fresh = false; renderHeader(); renderTabs(); renderChatList(); }
     push(c.id, { role: 'me', text });
