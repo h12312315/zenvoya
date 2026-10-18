@@ -139,42 +139,6 @@ button { font-family: var(--font-body); }
 .chat-sub { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-gray-500); margin-top: 4px; }
 .chat-sub .avatar-stack .stack-avatar, .chat-sub .avatar-stack .zoya-mini { width: 20px; height: 20px; font-size: 9px; }
 
-/* Chat tabs */
-.chat-tabs-row {
-  display: flex; align-items: flex-end; gap: 4px;
-  padding: 0 24px;
-  max-width: 760px; width: 100%; margin: 0 auto;
-  border-bottom: 1px solid var(--color-gray-200);
-  position: relative;
-}
-.chat-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
-.chat-tabs::-webkit-scrollbar { display: none; }
-.chat-tab {
-  display: flex; align-items: center; gap: 8px;
-  padding: 9px 10px 9px 12px;
-  border: 1px solid transparent;
-  border-bottom: none;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  background: none;
-  font-size: 13px; font-weight: 500;
-  color: var(--color-gray-500);
-  cursor: pointer;
-  white-space: nowrap;
-  max-width: 220px;
-  position: relative;
-  top: 1px;
-}
-.chat-tab:hover { color: var(--color-gray-800); background: var(--color-gray-50); }
-.chat-tab.active {
-  background: var(--color-white);
-  border-color: var(--color-gray-200);
-  color: var(--color-gray-900);
-  font-weight: 600;
-}
-.chat-tab-label { overflow: hidden; text-overflow: ellipsis; }
-.chat-tab-icon { display: flex; align-items: center; flex-shrink: 0; }
-.chat-tab-icon .stack-avatar { width: 16px !important; height: 16px !important; font-size: 8px !important; border-width: 1.5px !important; margin-left: -5px !important; }
-.chat-tab-icon .stack-avatar:first-child { margin-left: 0 !important; }
 .chatlist-avatars .stack-avatar { width: 18px; height: 18px; font-size: 8px; border-width: 1.5px; margin-left: -6px; }
 .chatlist-avatars .stack-avatar:first-child { margin-left: 0; }
 .tab-menu {
@@ -427,7 +391,7 @@ button { font-family: var(--font-body); }
 .audience-btn .stack-avatar { width: 18px !important; height: 18px !important; font-size: 8px !important; margin-left: -6px !important; border-width: 1.5px !important; }
 .audience-btn .stack-avatar:first-child { margin-left: 0 !important; }
 .audience-btn.with-zoya .stack-avatar { border-color: var(--color-primary) !important; }
-.audience-btn .zoya-mini { width: 18px; height: 18px; margin-left: -6px; box-shadow: 0 0 0 1.5px var(--color-white); }
+.audience-btn .zoya-mini { width: 18px; height: 18px; box-shadow: 0 0 0 1.5px var(--color-white); }
 .audience-menu { bottom: calc(100% + 8px); top: auto; left: 0; min-width: 300px; }
 .composer-hint { font-size: 12px; color: var(--color-gray-400); margin-top: 8px; padding-left: 18px; display: flex; align-items: center; gap: 6px; }
 
@@ -440,16 +404,35 @@ button { font-family: var(--font-body); }
 }
 .trip-panel.open { display: flex; animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+.trip-panel.shared { flex-basis: min(68%, 1160px); }
 .tp-card {
   flex: 1;
+  min-width: 0;
+  display: flex;
   border: 1px solid var(--color-gray-200);
   border-radius: 20px;
   box-shadow: var(--shadow-large);
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
   background: var(--color-white);
 }
+.tp-plan { flex: 1; min-width: 0; overflow-y: auto; overflow-x: hidden; position: relative; }
+
+/* Group chat column (shared plans only) */
+.tp-group { display: none; flex: 0 0 360px; min-width: 0; flex-direction: column; border-right: 1px solid var(--color-gray-200); background: var(--color-gray-50); }
+.tp-card.shared .tp-group { display: flex; }
+.tp-group-head { padding: 18px 18px 12px; border-bottom: 1px solid var(--color-gray-200); background: var(--color-white); }
+.tp-group-title { font-size: 16px; font-weight: 700; color: var(--color-gray-900); }
+.tp-group .chat-sub .avatar-stack .stack-avatar, .tp-group .chat-sub .avatar-stack .zoya-mini { width: 20px; height: 20px; font-size: 9px; }
+.tp-group .chat-messages { padding: 16px; gap: 12px; }
+.tp-group .message-col { max-width: 88%; }
+.tp-group .message.me .message-bubble { background: var(--color-gray-200); }
+.tp-group .message.friend .message-bubble, .tp-group .typing-dots { background: var(--color-white); }
+.tp-group .trip-card { padding: 8px; gap: 10px; }
+.tp-group .trip-card-thumb { width: 48px; height: 48px; }
+.tp-group .composer-area { padding: 8px 14px 14px; }
+.tp-group .composer-hint { padding-left: 14px; }
+.tp-card .tp-mswitch { display: none; }
 .tp-map-wrap { position: relative; }
 .tp-map { height: 260px; background: var(--color-gray-100); }
 .tp-map .maplibregl-map { font-family: var(--font-body); }
@@ -744,8 +727,13 @@ button { font-family: var(--font-body); }
   .rail { width: 60px; }
   .rail-item { width: 50px; font-size: 11px; }
   .trip-panel.open { position: fixed; inset: 0; z-index: 1000; padding: 0; background: var(--color-white); min-width: 0; }
-  .tp-card { border-radius: 0; border: none; box-shadow: none; }
-  .chat-header, .chat-tabs-row { padding-left: 16px; padding-right: 16px; }
+  .tp-card { border-radius: 0; border: none; box-shadow: none; flex-direction: column; }
+  .tp-card.shared .tp-mswitch { display: flex; align-self: center; margin: 10px 0; flex-shrink: 0; }
+  .tp-card.shared .tp-group { display: none; flex: 1; border-right: none; min-height: 0; }
+  .tp-card.shared.show-group .tp-group { display: flex; }
+  .tp-card.shared.show-group .tp-plan { display: none; }
+  .tp-card.shared:not(.show-group) .plan-btn, .tp-card.shared.show-group .group-btn { background: var(--color-white); color: var(--color-gray-900); box-shadow: var(--shadow-xsmall); }
+  .chat-header { padding-left: 16px; padding-right: 16px; }
   .chat-messages { padding: 16px; }
   .composer-area { padding: 8px 16px 16px; }
   .facts { grid-template-columns: 1fr 1fr; }
@@ -795,9 +783,6 @@ button { font-family: var(--font-body); }
       <button class="icon-btn" onclick="openShareModal()" title="Share trip plan" data-icon="share-up"></button>
       <button class="icon-btn" onclick="deleteActiveChat()" title="Delete chat" data-icon="trash-2"></button>
     </header>
-    <div class="chat-tabs-row" id="chatTabsRow" style="display:none;">
-      <div class="chat-tabs" id="chatTabs" role="tablist"></div>
-    </div>
     <div class="chat-messages" id="chatMessages"></div>
     <div class="composer-area" id="composerArea"></div>
   </main>
@@ -805,14 +790,27 @@ button { font-family: var(--font-body); }
   <!-- Trip plan panel -->
   <section class="trip-panel" id="tripPanel" aria-label="Trip plan">
     <div class="tp-card" id="tpCard">
-      <div class="tp-map-wrap">
-        <div class="tp-map" id="tpMap"></div>
-        <div class="tp-map-top">
-          <span class="tp-float" id="tpBadge"></span>
-          <button class="tp-close" onclick="closePanel()" title="Close trip plan" data-icon="x"></button>
-        </div>
+      <div class="tp-mswitch seg-toggle" role="group" aria-label="Show">
+        <button class="seg-btn plan-btn" onclick="setPanelView('plan')">Plan</button>
+        <button class="seg-btn group-btn" onclick="setPanelView('group')">Group chat</button>
       </div>
-      <div class="tp-body" id="tpBody"></div>
+      <!-- Group chat column: only for shared plans -->
+      <div class="tp-group" id="tpGroup">
+        <div class="tp-group-head" id="tpGroupHead"></div>
+        <div class="chat-messages" id="groupMessages"></div>
+        <div class="composer-area" id="groupComposer"></div>
+      </div>
+      <!-- Plan column: map, header, tabs -->
+      <div class="tp-plan" id="tpPlan">
+        <div class="tp-map-wrap">
+          <div class="tp-map" id="tpMap"></div>
+          <div class="tp-map-top">
+            <span class="tp-float" id="tpBadge"></span>
+            <button class="tp-close" onclick="closePanel()" title="Close trip plan" data-icon="x"></button>
+          </div>
+        </div>
+        <div class="tp-body" id="tpBody"></div>
+      </div>
     </div>
   </section>
 </div>
@@ -1125,7 +1123,7 @@ function messageHTML(m, i, chat) {
   const grouped = prev && senderKey(prev) && senderKey(prev) === senderKey(m) && !m.type;
   const isNew = m._new ? ' is-new' : '';
   const isGroup = chat.kind === 'group';
-  if (m.type === 'dests') return destOptionsHTML(m, i, isNew);
+  if (m.type === 'dests') return destOptionsHTML(m, i, isNew, chat);
   if (m.role === 'system') {
     return `<div class="sys-line${isNew}">${lucide(m.icon || 'pencil', 13)}<span>${m.html}</span>${m.view ? `<button class="sys-link" onclick="viewInPlan('${m.view.plan}', ${m.view.day})">View</button>` : ''}</div>`;
   }
@@ -1152,16 +1150,16 @@ function messageHTML(m, i, chat) {
       ${isGroup && !grouped ? `<div class="message-name">Zoya</div>` : ''}
       ${m.text ? `<div class="message-bubble">${m.text}</div>` : ''}
       ${m.attach ? attachHTML(m.attach) : ''}
-      ${m.chips ? `<div class="chips">${m.chips.map((c, ci) => `<button class="chip" ${m.chipsUsed ? 'disabled' : ''} onclick="chipClick(${i}, ${ci})">${c.label}</button>`).join('')}</div>` : ''}
+      ${m.chips ? `<div class="chips">${m.chips.map((c, ci) => `<button class="chip" ${m.chipsUsed ? 'disabled' : ''} onclick="chipClick('${chat.id}', ${i}, ${ci})">${c.label}</button>`).join('')}</div>` : ''}
     </div>
   </div>`;
 }
 
-function destOptionsHTML(m, i, isNew) {
+function destOptionsHTML(m, i, isNew, chat) {
   return `<div class="dest-wrap${isNew}">${DEST_OPTIONS.map(o => {
     const t = TEMPLATES[o.id];
     const sel = m.selected === o.id;
-    return `<button class="dest-card${sel ? ' selected' : ''}" onclick="pickDestination('${o.id}', ${i})" aria-pressed="${sel}">
+    return `<button class="dest-card${sel ? ' selected' : ''}" onclick="pickDestination('${o.id}', '${chat.id}', ${i})" aria-pressed="${sel}">
       <div class="dest-photo" style="background-image:url('${t.img}')"><span class="dest-price">≈ ${money(optionEstimate(o.id))} pp</span></div>
       <div class="dest-info">
         <div class="dest-info-text">
@@ -1211,9 +1209,22 @@ function tripCardHTML(p) {
   </div>`;
 }
 
-function renderMessages() {
-  const chat = active();
-  const el = document.getElementById('chatMessages');
+// Two places show a thread: the main column (your private chat with Zoya) and,
+// for a shared plan, the group-chat column inside the trip panel.
+function shownGroupId() {
+  const p = plan();
+  return p && p.shared && document.getElementById('tripPanel').classList.contains('open') ? 'g-' + p.id : null;
+}
+function viewFor(chatId) {
+  if (chatId === activeChatId) return { msgs: 'chatMessages', area: 'composerArea' };
+  if (chatId === shownGroupId()) return { msgs: 'groupMessages', area: 'groupComposer' };
+  return null;
+}
+function renderThread(chatId) {
+  const v = viewFor(chatId);
+  const chat = CHATS[chatId];
+  if (!v || !chat) return;
+  const el = document.getElementById(v.msgs);
   let html = chat.messages.map((m, i) => messageHTML(m, i, chat)).join('');
   if (chat.typing) {
     const who = chat.typing;
@@ -1223,78 +1234,48 @@ function renderMessages() {
   chat.messages.forEach(m => { delete m._new; });
   requestAnimationFrame(() => el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }));
 }
-
-// A conversation is either a solo chat (you + Zoya, no tabs) or a shared trip:
-// the original private thread plus a group thread, shown as two fixed tabs.
-function rootId(id) { return CHATS[id].personalId || id; }
-function rootOf(id) { return CHATS[rootId(id)]; }
+function renderMessages() { renderThread(activeChatId); }
+function rerenderChatIfShowing() { renderThread(activeChatId); const g = shownGroupId(); if (g) renderThread(g); }
 
 function push(chatId, m) {
   const chat = CHATS[chatId];
   if (!chat) return;
   m._new = true;
   chat.messages.push(m);
-  if (chatId === activeChatId) renderMessages();
+  if (viewFor(chatId)) renderThread(chatId);
   else chat.unread++;
-  // most recent first in the list
-  const r = rootId(chatId);
+  // most recent first in the list (a group thread counts toward its trip's chat)
+  const r = chat.personalId || chatId;
   chatOrder = [r, ...chatOrder.filter(id => id !== r)];
-  renderTabs();
   renderChatList();
 }
 function setTyping(chatId, who) {
   const chat = CHATS[chatId];
   if (!chat) return;
   chat.typing = who;
-  if (chatId === activeChatId) renderMessages();
+  renderThread(chatId);
 }
 function later(ms, fn) { return setTimeout(fn, ms); }
 
-/* ===================== HEADER, TABS, LIST ===================== */
+/* ===================== HEADER + CHAT LIST ===================== */
 function renderHeader() {
   const c = active();
-  const root = rootOf(c.id);
-  document.getElementById('chatTitle').textContent = root.title;
-  let sub;
-  if (c.kind === 'group') {
-    sub = `<div class="avatar-stack">${c.members.map(stackAvatarHTML).join('')}${ZOYA_MINI}</div> Group chat with ${namesList(c.members.filter(m => m !== ME))} and Zoya`;
-  } else if (c.groupId) {
-    sub = `${lucide('lock', 12)} Private — the group can't see this tab`;
-  } else {
-    sub = `${lucide('lock', 12)} Private — only you and Zoya can see this`;
-  }
-  document.getElementById('chatSub').innerHTML = sub;
-}
-
-function renderTabs() {
-  const row = document.getElementById('chatTabsRow');
-  const root = rootOf(activeChatId);
-  if (!root.groupId) { row.style.display = 'none'; return; }
-  row.style.display = '';
-  const g = CHATS[root.groupId];
-  const tabs = [
-    [g.id, `<span class="chat-tab-icon avatar-stack">${g.members.slice(0, 3).map(stackAvatarHTML).join('')}</span>`, 'Group chat'],
-    [root.id, `<span class="chat-tab-icon">${ZOYA_MINI}</span>`, 'Just you &amp; Zoya'],
-  ];
-  document.getElementById('chatTabs').innerHTML = tabs.map(([id, icon, label]) => {
-    const on = id === activeChatId;
-    return `<div class="chat-tab${on ? ' active' : ''}" role="tab" aria-selected="${on}" tabindex="0" onclick="switchTab('${id}')" onkeydown="if(event.key==='Enter')switchTab('${id}')">
-      ${icon}<span class="chat-tab-label">${label}</span>
-      ${CHATS[id].unread && !on ? '<span class="unread-dot" aria-label="Unread"></span>' : ''}
-    </div>`;
-  }).join('');
+  document.getElementById('chatTitle').textContent = c.title;
+  const g = c.groupId && CHATS[c.groupId];
+  document.getElementById('chatSub').innerHTML = g
+    ? `${lucide('lock', 12)} Private with Zoya · <button class="sys-link" onclick="openPanel('${c.planId}')">Group chat</button>`
+    : `${lucide('lock', 12)} Private — only you and Zoya can see this`;
 }
 
 function renderChatList() {
-  const roots = chatOrder.filter(id => !CHATS[id].personalId);
+  const roots = chatOrder.filter(id => CHATS[id].kind !== 'group');
   const shared = roots.filter(id => CHATS[id].groupId);
   const solo = roots.filter(id => !CHATS[id].groupId);
-  const current = rootId(activeChatId);
   const item = id => {
     const c = CHATS[id];
     const g = c.groupId && CHATS[c.groupId];
-    const unread = id !== current && (c.unread || (g && g.unread));
-    return `<button class="chatlist-item${id === current ? ' active' : ''}" onclick="openChat('${id}')">
+    const unread = (id !== activeChatId && c.unread) || (g && g.unread);
+    return `<button class="chatlist-item${id === activeChatId ? ' active' : ''}" onclick="selectChat('${id}')">
       ${g ? `<span class="chatlist-item-icon avatar-stack chatlist-avatars">${g.members.slice(0, 3).map(stackAvatarHTML).join('')}</span>` : ''}
       <span class="chatlist-item-name">${esc(c.title)}</span>
       ${unread ? '<span class="unread-dot"></span>' : ''}
@@ -1305,89 +1286,86 @@ function renderChatList() {
     solo.map(item).join('');
 }
 
-function renderComposer() {
-  const c = active();
+function renderComposer(chatId) {
+  const c = CHATS[chatId];
+  const v = viewFor(chatId);
+  if (!c || !v) return;
+  const inputId = 'input-' + chatId;
   let html;
   if (c.kind === 'group') {
     const withZoya = c.audience === 'zoya';
     const others = c.members.filter(m => m !== ME);
     html = `<div class="composer has-audience">
-      <button class="audience-btn${withZoya ? ' with-zoya' : ''}" onclick="toggleAudienceMenu(event)" aria-haspopup="menu" title="Choose who gets this message">
-        <span class="avatar-stack">${others.slice(0, 3).map(stackAvatarHTML).join('')}${withZoya ? ZOYA_MINI : ''}</span>
+      <button class="audience-btn${withZoya ? ' with-zoya' : ''}" onclick="toggleAudienceMenu(event, '${chatId}')" aria-haspopup="menu" title="Choose who gets this message">
+        ${withZoya ? ZOYA_MINI : lucide('users', 15)}
         <span class="audience-label">${withZoya ? 'Group + Zoya' : 'Group'}</span>${lucide('chevron-down', 14)}
       </button>
-      <input class="composer-input" id="composerInput" placeholder="${withZoya ? 'Ask Zoya and the group…' : 'Message the group…'}" autocomplete="off">
-      <button class="icon-btn" title="Voice input" onclick="toast('Voice input isn\\'t part of this prototype')">${lucide('mic', 18)}</button>
-      <button class="send-btn" onclick="send()" title="Send">${lucide('arrow-up', 20)}</button>
-      <div class="tab-menu audience-menu" id="audienceMenu" role="menu">
-        <button class="menu-item${!withZoya ? ' selected' : ''}" onclick="setAudience('group')">
-          <span class="menu-item-icon">${lucide('users', 15)}</span>
-          <span><div class="menu-item-title">Group</div><div class="menu-item-desc">Only ${namesList(others)} see it. Zoya stays quiet.</div></span>
-          <span class="menu-item-check">${lucide('check', 16)}</span>
-        </button>
-        <button class="menu-item${withZoya ? ' selected' : ''}" onclick="setAudience('zoya')">
+      <input class="composer-input" id="${inputId}" placeholder="${withZoya ? 'Message everyone…' : 'Message the group…'}" autocomplete="off">
+      <button class="send-btn" onclick="send('${chatId}')" title="Send">${lucide('arrow-up', 20)}</button>
+      <div class="tab-menu audience-menu" id="audience-${chatId}" role="menu">
+        <button class="menu-item${withZoya ? ' selected' : ''}" onclick="setAudience('${chatId}', 'zoya')">
           <span class="menu-item-icon">${ZOYA_SVG}</span>
           <span><div class="menu-item-title">Group + Zoya</div><div class="menu-item-desc">Zoya replies to everyone and can edit the trip plan.</div></span>
           <span class="menu-item-check">${lucide('check', 16)}</span>
         </button>
+        <button class="menu-item${!withZoya ? ' selected' : ''}" onclick="setAudience('${chatId}', 'group')">
+          <span class="menu-item-icon">${lucide('users', 15)}</span>
+          <span><div class="menu-item-title">Group only</div><div class="menu-item-desc">Only ${namesList(others)} see it. Zoya stays quiet.</div></span>
+          <span class="menu-item-check">${lucide('check', 16)}</span>
+        </button>
       </div>
     </div>
-    <div class="composer-hint">Tip: type <b>@Zoya</b> to include Zoya for one message.</div>`;
+    <div class="composer-hint">${withZoya ? 'Zoya will reply to everyone.' : 'Type <b>@Zoya</b> to include Zoya for one message.'}</div>`;
   } else {
     const ph = c.groupId ? 'Ask Zoya privately — the group won\'t see this' : 'Ask anything travel';
     html = `<div class="composer">
-      <input class="composer-input" id="composerInput" placeholder="${ph}" autocomplete="off">
+      <input class="composer-input" id="${inputId}" placeholder="${ph}" autocomplete="off">
       <button class="icon-btn" title="Voice input" onclick="toast('Voice input isn\\'t part of this prototype')">${lucide('mic', 18)}</button>
-      <button class="send-btn" onclick="send()" title="Send">${lucide('arrow-up', 20)}</button>
+      <button class="send-btn" onclick="send('${chatId}')" title="Send">${lucide('arrow-up', 20)}</button>
     </div>`;
   }
-  document.getElementById('composerArea').innerHTML = html;
-  const input = document.getElementById('composerInput');
+  document.getElementById(v.area).innerHTML = html;
+  const input = document.getElementById(inputId);
   input.value = c.draft || '';
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') send(chatId); });
   input.addEventListener('input', () => { c.draft = input.value; });
 }
 
 function renderChat() {
   renderHeader();
-  renderTabs();
   renderChatList();
   renderMessages();
-  renderComposer();
+  renderComposer(activeChatId);
 }
 
-function switchTab(id) {
-  const prev = active();
-  const input = document.getElementById('composerInput');
-  if (prev && input) prev.draft = input.value;
+// Selecting a chat shows its trip plan alongside it; a shared plan brings its group chat.
+function selectChat(id) {
   activeChatId = id;
   CHATS[id].unread = 0;
   closeMenus();
   renderChat();
+  const c = CHATS[id];
+  if (c.planId) openPanel(c.planId); else closePanel();
 }
-// Opening a shared trip lands on its group chat by default.
-function openChat(id) { switchTab(CHATS[id].groupId || id); }
 
 function newPersonalChat() {
   const id = 'c-new-' + (chatSeq++);
   addChat({ id, kind: 'personal', title: 'New chat', fresh: true, messages: [{ role: 'zoya', text: GREETING }] });
-  switchTab(id);
-  document.getElementById('composerInput').focus();
+  selectChat(id);
+  document.getElementById('input-' + id).focus();
 }
 
-function toggleAudienceMenu(e) {
+function toggleAudienceMenu(e, chatId) {
   e.stopPropagation();
-  const m = document.getElementById('audienceMenu');
+  const m = document.getElementById('audience-' + chatId);
   const wasOpen = m.classList.contains('open');
   closeMenus();
   if (!wasOpen) m.classList.add('open');
 }
-function setAudience(a) {
-  active().audience = a;
-  const input = document.getElementById('composerInput');
-  active().draft = input ? input.value : '';
-  renderComposer();
-  document.getElementById('composerInput').focus();
+function setAudience(chatId, a) {
+  CHATS[chatId].audience = a;
+  renderComposer(chatId);
+  document.getElementById('input-' + chatId).focus();
 }
 function closeMenus() { document.querySelectorAll('.tab-menu.open').forEach(m => m.classList.remove('open')); }
 document.addEventListener('click', e => { if (!e.target.closest('.tab-menu')) closeMenus(); });
@@ -1399,25 +1377,26 @@ function toggleChatList() {
   document.getElementById('showListBtn').style.display = list.classList.contains('collapsed') ? '' : 'none';
 }
 function deleteActiveChat() {
-  const root = rootOf(activeChatId);
-  if (root.id === 'c-main') { toast('This chat started your trip plan, so it stays'); return; }
-  if (!confirm(`Delete "${root.title}"?`)) return;
-  [root.id, root.groupId].filter(Boolean).forEach(id => { delete CHATS[id]; });
+  const c = active();
+  if (c.id === 'c-main') { toast('This chat started your trip plan, so it stays'); return; }
+  if (!confirm(`Delete "${c.title}"?`)) return;
+  [c.id, c.groupId].filter(Boolean).forEach(id => { delete CHATS[id]; });
   chatOrder = chatOrder.filter(id => CHATS[id]);
-  openChat(chatOrder.find(id => !CHATS[id].personalId));
+  selectChat(chatOrder.find(id => CHATS[id].kind !== 'group'));
 }
 
 /* ===================== DESTINATION → TRIP PLAN SHELL ===================== */
-function pickDestination(id, msgIndex) {
-  const chat = active();
+function pickDestination(id, chatId, msgIndex) {
+  const chat = CHATS[chatId];
   const m = chat.messages[msgIndex];
   const firstTime = !PLANS[id];
   m.selected = id;
   const p = ensurePlan(id);
   if (firstTime) p.chatId = chat.id;
+  if (!chat.groupId) chat.planId = id;
   if (chat.id === 'c-main' && !chat.groupId) chat.title = `New York > ${p.name}`;
-  renderHeader(); renderTabs(); renderChatList();
-  renderMessages();
+  renderHeader(); renderChatList();
+  renderThread(chat.id);
   if (!firstTime) { openPanel(id); return; }
 
   push(chat.id, { role: 'me', text: `Let's do ${p.name}, ${planRange(p)}` });
@@ -1427,7 +1406,7 @@ function pickDestination(id, msgIndex) {
     later(500, () => openPanel(id, true));
     [1, 2, 3].forEach(s => later(500 + s * 650, () => {
       draft.attach.step = s;
-      if (activeChatId === chat.id) renderMessages();
+      renderThread(chat.id);
     }));
     later(500 + 4 * 650, () => push(chat.id, {
       role: 'zoya',
@@ -1439,20 +1418,39 @@ function pickDestination(id, msgIndex) {
 
 function openPanel(id, drafting) {
   activePlanId = id;
+  const p = PLANS[id];
   const panel = document.getElementById('tripPanel');
   const card = document.getElementById('tpCard');
   panel.classList.add('open');
+  panel.classList.toggle('shared', p.shared);
+  card.classList.toggle('shared', p.shared);
   card.classList.toggle('drafting', !!drafting);
   if (drafting) later(1800, () => card.classList.remove('drafting'));
-  if (window.innerWidth < 1500 && window.innerWidth > 900) {
+  const roomy = p.shared ? 1760 : 1500;
+  if (window.innerWidth < roomy && window.innerWidth > 900) {
     const list = document.getElementById('chatList');
     if (!list.classList.contains('collapsed')) toggleChatList();
   }
-  card.scrollTop = 0;
+  document.getElementById('tpPlan').scrollTop = 0;
   renderPanel();
+  renderGroupPane();
   initMap();
 }
 function closePanel() { document.getElementById('tripPanel').classList.remove('open'); }
+
+function renderGroupPane() {
+  const p = plan();
+  const g = p && p.shared && groupChatFor(p);
+  if (!g) return;
+  g.unread = 0;
+  document.getElementById('tpGroupHead').innerHTML = `
+    <div class="tp-group-title">Group chat</div>
+    <div class="chat-sub"><div class="avatar-stack">${g.members.map(stackAvatarHTML).join('')}${ZOYA_MINI}</div> ${namesList(g.members)} and Zoya</div>`;
+  renderThread(g.id);
+  renderComposer(g.id);
+  renderChatList();
+}
+function setPanelView(v) { document.getElementById('tpCard').classList.toggle('show-group', v === 'group'); }
 
 function viewInPlan(id, day, tab) {
   openPanel(id);
@@ -1851,22 +1849,25 @@ function confirmShare() {
     root = addChat({ id: 'c-' + p.id, kind: 'personal', title: p.title, messages: [{ role: 'zoya', text: `This is your private side of the ${p.name} plan. Ask me anything here — the group won't see it.` }] });
     p.chatId = root.id;
   }
-  const g = groupChatFor(p) || addChat({ id: 'g-' + p.id, kind: 'group', title: p.title, members: p.members, audience: 'group', personalId: root.id, messages: [] });
+  const g = groupChatFor(p) || addChat({ id: 'g-' + p.id, kind: 'group', title: p.title, members: p.members, audience: 'zoya', personalId: root.id, messages: [] });
   g.members = p.members;
   root.groupId = g.id;
+  root.planId = p.id;
   root.title = p.title;
-  renderPanel();
   toast(`Shared with ${namesList(added)}`);
 
   if (!wasShared) {
     g.messages.push({ role: 'system', icon: 'users', html: `<b>You</b> started the group with ${namesList(added)}` });
     g.messages.push({ role: 'me', text: `Made us a plan for ${p.name}, ${planRange(p)}. Edit anything!`, attach: { type: 'trip', plan: p.id } });
-    root.messages.push({ role: 'zoya', text: `Shared with ${namesList(added)}. This is now a group trip with two tabs: <b>Group chat</b>, where everyone can plan with me, and <b>Just you &amp; Zoya</b> — this one, which stays private.` });
-    switchTab(g.id);
+    if (activeChatId !== root.id) selectChat(root.id);
+    openPanel(p.id);
+    renderHeader();
+    push(root.id, { role: 'zoya', text: `Shared with ${namesList(added)}. Your group chat now lives inside the trip plan, next to the itinerary. This chat stays private between you and me.` });
     runGroupScript(p, g);
   } else {
+    renderPanel();
+    renderGroupPane();
     push(g.id, { role: 'system', icon: 'user-plus', html: `<b>You</b> added ${namesList(added)}` });
-    renderHeader(); renderComposer();
   }
 }
 
@@ -1902,7 +1903,7 @@ function runGroupScript(p, g) {
       const s = p.suggest[rainy];
       push(g.id, {
         role: 'zoya',
-        text: `Good question, ${firstName(c)}. December can be wet in ${p.name}. <b>${s.title}</b> is a great indoor backup — ${s.desc.charAt(0).toLowerCase() + s.desc.slice(1)} Want me to add it to Day 2 as a rainy-day option?`,
+        text: `Good question, ${firstName(c)}. December can be wet in ${p.name}. <b>${s.title}</b> is a great indoor backup. ${s.desc} Want me to add it to Day 2 as a rainy-day option?`,
         chips: [{ label: 'Add it to Day 2', action: 'add', plan: p.id, day: 1, idx: rainy }, { label: 'Not now', action: 'dismiss' }],
       });
     });
@@ -1913,9 +1914,9 @@ function runGroupScript(p, g) {
 const GROUP_REPLIES = ['Love that 👍', 'Works for me', 'Agreed, let\'s do it', 'Ha, yes', 'I can book that if nobody else does'];
 let replySeq = 0;
 
-function send(textArg) {
-  const c = active();
-  const input = document.getElementById('composerInput');
+function send(chatId, textArg) {
+  const c = CHATS[chatId];
+  const input = document.getElementById('input-' + chatId);
   const text = (textArg != null ? textArg : input.value).trim();
   if (!text) return;
   if (textArg == null) { input.value = ''; c.draft = ''; }
@@ -1931,7 +1932,7 @@ function send(textArg) {
       later(2000, () => { setTyping(c.id, null); push(c.id, { role: 'friend', person: who, text: reply }); });
     }
   } else {
-    if (c.fresh) { c.title = text.length > 32 ? text.slice(0, 30) + '…' : text; c.fresh = false; renderHeader(); renderTabs(); renderChatList(); }
+    if (c.fresh) { c.title = text.length > 32 ? text.slice(0, 30) + '…' : text; c.fresh = false; renderHeader(); renderChatList(); }
     push(c.id, { role: 'me', text });
     zoyaRespond(c, text);
   }
@@ -1993,13 +1994,13 @@ function zoyaRespond(c, text) {
   });
 }
 
-function chipClick(mi, ci) {
-  const c = active();
+function chipClick(chatId, mi, ci) {
+  const c = CHATS[chatId];
   const m = c.messages[mi];
   const chip = m.chips[ci];
   if (chip.action === 'share') { openShareModal(); return; }
   m.chipsUsed = true;
-  renderMessages();
+  renderThread(c.id);
   if (chip.action === 'dismiss') return;
   if (chip.action === 'add') {
     const p = PLANS[chip.plan];
@@ -2014,7 +2015,7 @@ function chipClick(mi, ci) {
   }
   if (chip.send) {
     if (c.kind === 'group') { push(c.id, { role: 'me', text: chip.send, toZoya: true }); zoyaRespond(c, chip.send); }
-    else send(chip.send);
+    else send(c.id, chip.send);
   }
 }
 
