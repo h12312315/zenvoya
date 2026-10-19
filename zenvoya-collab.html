@@ -130,7 +130,7 @@ button { font-family: var(--font-body); }
 /* ===================== CHAT COLUMN ===================== */
 .chat-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .workspace { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.ws-body { flex: 1; min-height: 0; display: flex; }
+.ws-body { flex: 1; min-height: 0; display: flex; position: relative; }
 .chat-header {
   display: flex; align-items: center; gap: 10px;
   height: var(--header-height);
@@ -431,13 +431,15 @@ button { font-family: var(--font-body); }
 }
 .trip-panel.open { display: flex; animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
-.trip-panel.wide {
-  /* Shared plan with the group chat open: three columns side by side —
-     private chat | group chat | plan. */
-  flex-basis: min(64%, 1240px);
+.trip-panel.overlay {
+  /* Group trip open: float over the private thread (below the header) instead of squeezing it. */
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: min(100%, 1320px);
   min-width: 0;
+  z-index: 20;
+  padding: 12px 16px 16px;
 }
-@media (min-width: 901px) { .chat-col { min-width: 340px; } }
+.trip-panel.overlay .tp-card { box-shadow: var(--shadow-xxlarge); }
 .tp-card {
   flex: 1;
   min-width: 0;
@@ -454,11 +456,8 @@ button { font-family: var(--font-body); }
 
 /* Group chat column (shared plans only) */
 .tp-group { display: none; flex: 1 1 0; min-width: 0; flex-direction: column; border-right: 1px solid var(--color-gray-200); background: var(--color-gray-50); }
-.tp-card.group-open .tp-group { display: flex; flex: 0.85 1 0; animation: groupIn 0.3s ease; }
-.tp-card.group-open .tp-plan { flex: 1.15 1 0; }
-.tp-card.group-open .tp-thumb { width: 72px; height: 72px; }
-.tp-card.group-open .tp-title { font-size: 22px; }
-.tp-card.group-open .tp-body { padding: 18px 18px 24px; }
+.tp-card.group-open .tp-group { display: flex; flex: 1 1 0; animation: groupIn 0.3s ease; }
+.tp-card.group-open .tp-plan { flex: 1 1 0; }
 @keyframes groupIn { from { opacity: 0; } to { opacity: 1; } }
 .tp-group-head { display: flex; align-items: flex-start; gap: 10px; }
 .tp-group-head-main { flex: 1; min-width: 0; }
@@ -1616,9 +1615,9 @@ function applyPanelLayout() {
   const groupOpen = p.shared && p.groupOpen !== false && !isMobile();
   card.classList.toggle('shared', p.shared);
   card.classList.toggle('group-open', groupOpen);
-  panel.classList.toggle('wide', groupOpen);
-  // Make room by hiding the chat history list: always for three columns, on smaller screens otherwise.
-  if (!isMobile() && (groupOpen || window.innerWidth < 1500)) {
+  panel.classList.toggle('overlay', groupOpen);
+  // Side-by-side with the private thread: make room by hiding the chat list on smaller screens.
+  if (!groupOpen && !isMobile() && window.innerWidth < 1500) {
     const list = document.getElementById('chatList');
     if (!list.classList.contains('collapsed')) toggleChatList();
   }
