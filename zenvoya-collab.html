@@ -141,6 +141,10 @@ button { font-family: var(--font-body); }
   z-index: 30;
 }
 .chat-title { flex: 1; min-width: 0; font-size: 18px; font-weight: 700; color: var(--color-gray-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-head-group { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.chat-head-group:empty { display: none; }
+.chat-head-avatars .stack-avatar { width: 28px; height: 28px; font-size: 11px; }
+.chatlist-glyph { color: var(--color-gray-400); display: flex; align-items: center; justify-content: center; }
 .header-menu-wrap { position: relative; }
 .trips-btn { padding: 7px 12px 7px 10px; }
 .trips-btn .count { font-variant-numeric: tabular-nums; }
@@ -823,7 +827,8 @@ button { font-family: var(--font-body); }
   <header class="chat-header">
     <button class="icon-btn" id="showListBtn" onclick="toggleChatList()" title="Show chat list" data-icon="panel-left" style="display:none;"></button>
     <h1 class="chat-title" id="chatTitle"></h1>
-    <div class="header-menu-wrap">
+    <div class="chat-head-group" id="chatHeadGroup"></div>
+    <div class="header-menu-wrap" id="tripsBtnWrap">
       <button class="btn trips-btn" id="tripsBtn" onclick="toggleTripsMenu(event)" aria-haspopup="menu"></button>
       <div class="tab-menu trips-menu" id="tripsMenu" role="menu"></div>
     </div>
@@ -842,16 +847,6 @@ button { font-family: var(--font-body); }
   <!-- Trip plan panel -->
   <section class="trip-panel" id="tripPanel" aria-label="Trip plan">
     <div class="tp-card" id="tpCard">
-      <div class="tp-mswitch seg-toggle" role="group" aria-label="Show">
-        <button class="seg-btn plan-btn" onclick="setPanelView('plan')">Plan</button>
-        <button class="seg-btn group-btn" onclick="setPanelView('group')">Group chat</button>
-      </div>
-      <!-- Group chat column: only for shared plans -->
-      <div class="tp-group" id="tpGroup">
-        <div class="tp-group-head" id="tpGroupHead"></div>
-        <div class="chat-messages" id="groupMessages"></div>
-        <div class="composer-area" id="groupComposer"></div>
-      </div>
       <!-- Plan column: map, header, tabs -->
       <div class="tp-plan" id="tpPlan">
         <div class="tp-map-wrap">
@@ -882,6 +877,7 @@ function lucide(name, size) {
   size = size || 18;
   const icons = {
     'message-square': '<path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/>',
+    'arrow-up-right': '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
     'shopping-cart': '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
     'bookmark': '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
     'plus': '<path d="M5 12h14"/><path d="M12 5v14"/>',
@@ -1186,9 +1182,9 @@ function seedChats() {
   addChat({ id: 'c-barca', kind: 'personal', title: bcn.title, planId: bcn.id, groupId: 'g-' + bcn.id, tripIds: [bcn.id], messages: [
     { role: 'zoya', text: GREETING },
     { role: 'me', text: 'Long weekend in Barcelona in February with Mia and Kai' },
-    { role: 'zoya', text: 'Love it. I drafted a plan and set up a group chat with Mia and Kai inside it.', attach: { type: 'trip', plan: bcn.id } },
+    { role: 'zoya', text: 'Love it. I drafted a plan and set up a group chat with Mia and Kai — find it under Group chats.', attach: { type: 'trip', plan: bcn.id } },
   ]});
-  addChat({ id: 'g-' + bcn.id, kind: 'group', title: bcn.title, members: bcn.members, audience: 'zoya', personalId: 'c-barca', messages: [
+  addChat({ id: 'g-' + bcn.id, kind: 'group', title: bcn.title, members: bcn.members, audience: 'zoya', personalId: 'c-barca', planId: bcn.id, messages: [
     { role: 'system', icon: 'users', html: '<b>You</b> started the group with Mia and Kai' },
     { role: 'me', text: 'Barcelona in Feb! Plan is in here, edit away', attach: { type: 'trip', plan: bcn.id } },
     { role: 'friend', person: kai, text: 'Added a Boqueria lunch on Day 3 🥘' },
@@ -1304,18 +1300,10 @@ function tripCardHTML(p) {
 }
 
 // Two places show a thread: the main column (your private chat with Zoya) and,
-// for a shared plan, the group-chat column inside the trip panel.
-function shownGroupId() {
-  const p = plan();
-  return p && p.shared && groupVisible(p) && document.getElementById('tripPanel').classList.contains('open') ? 'g-' + p.id : null;
-}
+// Group chats are standalone threads now, not an embedded panel column.
 function isMobile() { return window.innerWidth <= 900; }
-// On mobile the group chat is one side of the Plan / Group chat switch, so it's never "collapsed".
-function groupVisible(p) { return p.groupOpen !== false || isMobile(); }
 function viewFor(chatId) {
-  if (chatId === activeChatId) return { msgs: 'chatMessages', area: 'composerArea' };
-  if (chatId === shownGroupId()) return { msgs: 'groupMessages', area: 'groupComposer' };
-  return null;
+  return chatId === activeChatId ? { msgs: 'chatMessages', area: 'composerArea' } : null;
 }
 function renderThread(chatId) {
   const v = viewFor(chatId);
@@ -1332,7 +1320,6 @@ function renderThread(chatId) {
   requestAnimationFrame(() => el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }));
 }
 function renderMessages() { renderThread(activeChatId); }
-function rerenderChatIfShowing() { renderThread(activeChatId); const g = shownGroupId(); if (g) renderThread(g); }
 
 function push(chatId, m) {
   const chat = CHATS[chatId];
@@ -1358,9 +1345,27 @@ function later(ms, fn) { return setTimeout(fn, ms); }
 function renderHeader() {
   const c = active();
   document.getElementById('chatTitle').textContent = c.title;
-  const n = (c.tripIds || []).length;
-  document.getElementById('tripsBtn').innerHTML = `${lucide('luggage', 16)} <span class="label">${n ? `<span class="count">${n}</span> ${n === 1 ? 'trip' : 'trips'}` : 'Trips'}</span> ${lucide('chevron-down', 14)}`;
-  document.getElementById('tripsBtn').title = n ? `${n} ${n === 1 ? 'trip' : 'trips'} in this chat` : 'Your trips';
+  const isGroup = c.kind === 'group';
+  // Group chat: member avatars + a "View trip" link. Individual chat: trips menu.
+  const wrap = document.getElementById('tripsBtnWrap');
+  if (wrap) wrap.style.display = isGroup ? 'none' : '';
+  const extra = document.getElementById('chatHeadGroup');
+  if (extra) {
+    extra.innerHTML = isGroup
+      ? `<span class="avatar-stack chat-head-avatars">${c.members.map(stackAvatarHTML).join('')}</span>
+         ${c.planId && PLANS[c.planId] ? `<button class="btn" onclick="openPanel('${c.planId}')">${lucide('map-pin', 14)} View trip</button>` : ''}`
+      : '';
+  }
+  if (!isGroup) {
+    const n = (c.tripIds || []).length;
+    document.getElementById('tripsBtn').innerHTML = `${lucide('luggage', 16)} <span class="label">${n ? `<span class="count">${n}</span> ${n === 1 ? 'trip' : 'trips'}` : 'Trips'}</span> ${lucide('chevron-down', 14)}`;
+    document.getElementById('tripsBtn').title = n ? `${n} ${n === 1 ? 'trip' : 'trips'} in this chat` : 'Your trips';
+  }
+}
+
+function openTripGroup(planId) {
+  const g = groupChatFor(PLANS[planId]);
+  if (g) selectChat(g.id); else openShareModal();
 }
 
 /* ---- Trips menu: trips referenced in this chat, or every trip you've planned ---- */
@@ -1440,22 +1445,23 @@ function toggleMoreMenu(e) {
 }
 
 function renderChatList() {
-  const roots = chatOrder.filter(id => CHATS[id].kind !== 'group');
-  const shared = roots.filter(id => CHATS[id].groupId);
-  const solo = roots.filter(id => !CHATS[id].groupId);
+  const groups = chatOrder.filter(id => CHATS[id].kind === 'group');
+  const indiv = chatOrder.filter(id => CHATS[id].kind !== 'group');
   const item = id => {
     const c = CHATS[id];
-    const g = c.groupId && CHATS[c.groupId];
-    const unread = (id !== activeChatId && c.unread) || (g && g.unread);
+    const unread = id !== activeChatId && c.unread;
+    const icon = c.kind === 'group'
+      ? `<span class="chatlist-item-icon avatar-stack chatlist-avatars">${c.members.slice(0, 3).map(stackAvatarHTML).join('')}</span>`
+      : `<span class="chatlist-item-icon chatlist-glyph">${lucide('message-square', 15)}</span>`;
     return `<button class="chatlist-item${id === activeChatId ? ' active' : ''}" onclick="selectChat('${id}')">
-      ${g ? `<span class="chatlist-item-icon avatar-stack chatlist-avatars">${g.members.slice(0, 3).map(stackAvatarHTML).join('')}</span>` : ''}
+      ${icon}
       <span class="chatlist-item-name">${esc(c.title)}</span>
       ${unread ? '<span class="unread-dot"></span>' : ''}
     </button>`;
   };
   document.getElementById('chatListItems').innerHTML =
-    (shared.length ? `<div class="chatlist-label">Group trips</div>${shared.map(item).join('')}<div class="chatlist-label">Your chats</div>` : '') +
-    solo.map(item).join('');
+    (groups.length ? `<div class="chatlist-label">Group chats</div>${groups.map(item).join('')}` : '') +
+    (indiv.length ? `<div class="chatlist-label">Individual chats</div>${indiv.map(item).join('')}` : '');
 }
 
 function renderComposer(chatId) {
@@ -1517,7 +1523,9 @@ function selectChat(id) {
   closeMenus();
   renderChat();
   const c = CHATS[id];
-  if (c.planId) openPanel(c.planId); else closePanel();
+  // Group chats stand alone — the plan opens on demand via "View trip".
+  if (c.kind === 'group') closePanel();
+  else if (c.planId) openPanel(c.planId); else closePanel();
 }
 
 function newPersonalChat() {
@@ -1603,55 +1611,16 @@ function openPanel(id, drafting) {
   applyPanelLayout();
   document.getElementById('tpPlan').scrollTop = 0;
   renderPanel();
-  renderGroupPane();
   initMap();
 }
 function closePanel() { document.getElementById('tripPanel').classList.remove('open'); }
 
 function applyPanelLayout() {
   const p = plan();
-  const panel = document.getElementById('tripPanel');
   const card = document.getElementById('tpCard');
-  const groupOpen = p.shared && p.groupOpen !== false && !isMobile();
-  card.classList.toggle('shared', p.shared);
-  card.classList.toggle('group-open', groupOpen);
-  panel.classList.toggle('overlay', groupOpen);
-  // Group trip goes full screen, so the chat list closes; side-by-side, it closes on smaller screens.
-  if (!isMobile() && (groupOpen || window.innerWidth < 1500)) {
-    const list = document.getElementById('chatList');
-    if (!list.classList.contains('collapsed')) toggleChatList();
-  }
+  card.classList.toggle('shared', !!(p && p.shared));
   if (map) setTimeout(() => map.resize(), 0);
 }
-function setGroupOpen(open) {
-  const p = plan();
-  p.groupOpen = open;
-  applyPanelLayout();
-  renderBadge();
-  if (open) renderGroupPane();
-}
-function openGroupChat(planId) {
-  PLANS[planId].groupOpen = true;
-  openPanel(planId);
-}
-
-function renderGroupPane() {
-  const p = plan();
-  const g = p && p.shared && groupChatFor(p);
-  if (!g) return;
-  g.unread = 0;
-  document.getElementById('tpGroupHead').innerHTML = `
-    <div class="tp-group-head-main">
-      <div class="tp-group-title">Group chat</div>
-      <div class="chat-sub"><div class="avatar-stack">${g.members.map(stackAvatarHTML).join('')}${ZOYA_MINI}</div> ${namesList(g.members)} and Zoya</div>
-    </div>
-    <button class="icon-btn" onclick="setGroupOpen(false)" title="Hide group chat" aria-label="Hide group chat">${lucide('panel-left-close', 18)}</button>`;
-  renderBadge();
-  renderThread(g.id);
-  renderComposer(g.id);
-  renderChatList();
-}
-function setPanelView(v) { document.getElementById('tpCard').classList.toggle('show-group', v === 'group'); }
 
 function viewInPlan(id, day, tab) {
   openPanel(id);
@@ -1681,6 +1650,7 @@ function renderPanel() {
             <div class="tp-country">${p.name}, ${p.country}</div>
           </div>
           <div class="tp-actions">
+            ${p.shared ? `<button class="btn" onclick="openTripGroup('${p.id}')">${lucide('users', 14)} Group chat ${lucide('arrow-up-right', 13)}</button>` : ''}
             <button class="btn" onclick="toggleSave()">${lucide(p.saved ? 'check' : 'bookmark', 14)} ${p.saved ? 'Saved' : 'Save'}</button>
             <button class="btn${p.shared ? '' : ' primary'}" onclick="openShareModal()">${lucide('share-up', 14)} Share</button>
           </div>
@@ -1712,16 +1682,10 @@ function renderBadge() {
   const p = plan();
   const badge = document.getElementById('tpBadge');
   if (!p || !badge) return;
-  const g = p.shared && groupChatFor(p);
-  const hidden = g && !groupVisible(p);
-  badge.classList.toggle('as-btn', !!hidden);
-  badge.onclick = hidden ? () => setGroupOpen(true) : null;
-  badge.onkeydown = hidden ? e => { if (e.key === 'Enter') setGroupOpen(true); } : null;
-  if (hidden) { badge.setAttribute('role', 'button'); badge.tabIndex = 0; badge.title = 'Show group chat'; }
-  else { badge.removeAttribute('role'); badge.removeAttribute('tabindex'); badge.removeAttribute('title'); }
-  badge.innerHTML = hidden
-    ? `${lucide('message-square', 14)} Group chat <span class="avatar-stack">${g.members.map(stackAvatarHTML).join('')}</span>${g.unread ? `<span class="tp-float-count">${g.unread}</span>` : ''}`
-    : p.shared ? `${lucide('users', 13)} Shared with ${p.members.length - 1} · everyone can edit` : `${ZOYA_MINI} Drafted by Zoya`;
+  badge.classList.remove('as-btn');
+  badge.onclick = null; badge.onkeydown = null;
+  badge.removeAttribute('role'); badge.removeAttribute('tabindex'); badge.removeAttribute('title');
+  badge.innerHTML = p.shared ? `${lucide('users', 13)} Shared with ${p.members.length - 1} · everyone can edit` : `${ZOYA_MINI} Drafted by Zoya`;
 }
 
 function setTab(t) { plan().tab = t; renderPanel(); }
@@ -2064,8 +2028,10 @@ function confirmShare() {
     root = addChat({ id: 'c-' + p.id, kind: 'personal', title: p.title, messages: [{ role: 'zoya', text: `This is your private side of the ${p.name} plan. Ask me anything here — the group won't see it.` }] });
     p.chatId = root.id;
   }
-  const g = groupChatFor(p) || addChat({ id: 'g-' + p.id, kind: 'group', title: p.title, members: p.members, audience: 'zoya', personalId: root.id, messages: [] });
+  const g = groupChatFor(p) || addChat({ id: 'g-' + p.id, kind: 'group', title: p.title, members: p.members, audience: 'zoya', personalId: root.id, planId: p.id, messages: [] });
   g.members = p.members;
+  g.planId = p.id;
+  g.title = p.title;
   root.groupId = g.id;
   root.planId = p.id;
   addTripToChat(root, p.id);
@@ -2075,17 +2041,14 @@ function confirmShare() {
   if (!wasShared) {
     g.messages.push({ role: 'system', icon: 'users', html: `<b>You</b> started the group with ${namesList(added)}` });
     g.messages.push({ role: 'me', text: `Made us a plan for ${p.name}, ${planRange(p)}. Edit anything!`, attach: { type: 'trip', plan: p.id } });
-    if (activeChatId !== root.id) selectChat(root.id);
-    p.groupOpen = true;
-    openPanel(p.id);
-    renderHeader();
-    renderComposer(root.id);
-    push(root.id, { role: 'zoya', text: `Shared with ${namesList(added)}. Your group chat now lives inside the trip plan, next to the itinerary. This chat stays private between you and me.` });
+    // Leave a private note on your solo side, then drop into the new group chat.
+    push(root.id, { role: 'zoya', text: `Shared with ${namesList(added)}. I set up a group chat with everyone — find it under Group chats. This thread stays private between you and me.` });
+    selectChat(g.id);
     runGroupScript(p, g);
   } else {
-    renderPanel();
-    renderGroupPane();
     push(g.id, { role: 'system', icon: 'user-plus', html: `<b>You</b> added ${namesList(added)}` });
+    if (activeChatId === g.id) renderChat(); else selectChat(g.id);
+    if (activePlanId === p.id) renderPanel();
   }
 }
 
