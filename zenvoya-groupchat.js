@@ -31,7 +31,7 @@ const GREETING = 'Hi I’m Zoya, your personal travel assistant. What should we 
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const TRIP_TABS = ['Overview', 'Itinerary', 'Flights', 'Stays', 'Activities'];
 const LOC_TABS = ['Overview', 'Reviews', 'About'];
-const SHEET = { trip: { open: 61, peek: 275 }, loc: { open: 78, peek: 257 } };
+const SHEET = { trip: { open: 61, peek: 284 }, loc: { open: 78, peek: 281 } };
 const FRIEND_LINES = ['I think so...', 'Love this plan!', 'Works for me 🙌', 'Can we add one more food stop?', 'I’m in. Which dates are we looking at?'];
 
 let _uid = 0;
@@ -525,19 +525,38 @@ function mountTripMap(p) {
 function renderSheet() {
   const chat = activeChat(), p = chat.panel, sheet = $('#sheet');
   if (!sheet) return;
-  const view = p.loc ? `loc:${p.loc}:${p.locTab}` : `trip:${p.tab}`;
+  const scope = p.loc ? `loc:${p.loc}` : 'trip';
+  const view = p.loc ? `${scope}:${p.locTab}` : `${scope}:${p.tab}`;
   const old = sheet.querySelector('.sheet-scroll');
-  const keep = sheet.dataset.view === view && old ? old.scrollTop : 0;
+  const sameView = sheet.dataset.view === view, sameScope = sheet.dataset.scope === scope;
+  const keep = old ? old.scrollTop : 0;
+  const wasStuck = !!old && !!old.querySelector('.tabs-bar.stuck');
   const dims = p.loc ? SHEET.loc : SHEET.trip;
   sheet.dataset.view = view;
+  sheet.dataset.scope = scope;
   sheet.className = 'sheet' + (p.sheet === 'collapsed' ? ' collapsed' : '');
   sheet.style.setProperty('--sheet-open', dims.open + 'px');
   sheet.style.setProperty('--sheet-peek', dims.peek + 'px');
   sheet.innerHTML = p.loc ? locSheetHTML(chat, p) : tripSheetHTML(chat, p);
   const sc = sheet.querySelector('.sheet-scroll');
-  if (sc) sc.scrollTop = keep;
+  if (sc) {
+    /* Same view keeps its place; a new tab stays pinned if the tabs were pinned; a collapsed drawer shows its top. */
+    sc.scrollTop = p.sheet === 'collapsed' ? 0 : sameView ? keep : sameScope && wasStuck ? stickPoint(sc) : 0;
+    syncStuck(sc);
+    sc.addEventListener('scroll', () => syncStuck(sc), { passive: true });
+  }
   Object.entries(tripMarkers).forEach(([id, el]) => el.classList.toggle('on', id === p.loc));
   renderMapDays(chat, p);
+}
+
+/* The tab bar sticks to the top of the drawer once the title block has scrolled away. */
+function stickPoint(sc) {
+  const bar = sc.querySelector('.tabs-bar'), head = bar && bar.previousElementSibling;
+  return head ? head.offsetTop + head.offsetHeight + parseFloat(getComputedStyle(bar).marginTop) : 0;
+}
+function syncStuck(sc) {
+  const bar = sc.querySelector('.tabs-bar');
+  if (bar) bar.classList.toggle('stuck', sc.scrollTop > 0 && sc.scrollTop >= stickPoint(sc) - 0.5);
 }
 
 /* Day filter floating on the map, shown while the trip drawer is collapsed.
@@ -562,24 +581,33 @@ function fitPins(ids) {
 }
 
 const handleHTML = p => `<button class="sheet-handle" aria-label="${p.sheet === 'collapsed' ? 'Expand' : 'Collapse'} details" aria-expanded="${p.sheet !== 'collapsed'}"><i></i></button>`;
+/* Score with five stars: "Match 4.5 ★★★★☆". Stars fill to the nearest whole, halves down, as drawn in Figma. */
+const ratingHTML = (value, label = '', after = '') => {
+  const on = Math.ceil(value - 0.5);
+  return `<div class="rating"><b>${label ? label + ' ' : ''}${value.toFixed(1)}</b><span class="stars" role="img" aria-label="${on} out of 5 stars">${[0, 1, 2, 3, 4].map(i => ic('star', i < on ? 'fill' : 'fill off')).join('')}</span>${after}</div>`;
+};
 const tabsHTML = (tabs, active, act) => `<div class="tabs" role="tablist">${tabs.map(t => `<button class="tab ${t === active ? 'active' : ''}" role="tab" aria-selected="${t === active}" data-act="${act}" data-tab="${t}">${t}</button>`).join('')}</div>`;
 
 function tripSheetHTML(chat, p) {
   const city = CITIES[p.cityId], trip = tripOf(chat, p.cityId);
   const faces = trip.members.length ? trip.members.slice(0, 2).map(personById) : [ME];
-  return `<div class="sheet-fixed">
-      ${handleHTML(p)}
-      <div class="sheet-title"><h2>${city.name} ${trip.days} days</h2><span>${city.flag} ${city.country}</span></div>
-      <div class="sheet-controls">
+  return `<div class="sheet-fixed">${handleHTML(p)}</div>
+    <div class="sheet-scroll">
+      <div class="sheet-head">
+        <div class="sheet-title"><h2>${city.name} ${trip.days} days</h2><span>${city.flag} ${city.country}</span></div>
+        <div class="props">
+          <div class="props-row">${ratingHTML(city.match, 'Match')}<i class="dot lt"></i>${ratingHTML(city.pop, 'Popularity')}</div>
+          <p class="t16 muted">${city.tags}</p>
+        </div>
         <div class="sel-row">
           <button class="sel" data-act="pop" data-pop="days">${ic('calendar_today')}<span>${trip.days} day</span>${ic('arrow_drop_down')}</button>
           <button class="sel" data-act="pop" data-pop="budget">${ic('attach_money')}<span>${trip.budget}</span>${ic('arrow_drop_down')}</button>
           <button class="sel" data-act="pop" data-pop="trip-people" aria-label="People on this trip">${ic('person')}<span>${1 + trip.members.length}</span><span class="av-stack">${faces.map(f => avatarHTML(f, 20)).join('')}</span>${ic('arrow_drop_down')}</button>
         </div>
-        ${tabsHTML(TRIP_TABS, p.tab, 'tab')}
       </div>
-    </div>
-    <div class="sheet-scroll">${TAB_BODY[p.tab](city, trip)}</div>`;
+      <div class="tabs-bar trip">${tabsHTML(TRIP_TABS, p.tab, 'tab')}</div>
+      <div class="tab-body">${TAB_BODY[p.tab](city, trip)}</div>
+    </div>`;
 }
 
 const locCardHTML = pl => `<button class="loc-card" data-act="open-loc" data-place="${pl.id}">${ph(pl.img, pl.emoji)}<div><b>${pl.name}</b><span>📍 ${pl.area}</span></div></button>`;
@@ -703,19 +731,15 @@ const TAB_BODY = {
 function locSheetHTML(chat, p) {
   const pl = placeById(p.loc), city = CITIES[pl.city], d = placeDetail(pl), trip = tripOf(chat, p.cityId);
   const inTrip = trip.saved.has(pl.id);
-  const rating = `<div class="rating"><b>${d.rating}</b><span class="stars">${ic('star', 'fill').repeat(5)}</span><span class="n">${d.count.toLocaleString()} reviews</span></div>`;
   const kv = ([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`;
   const body = {
-    Overview: () => `${rating}
-      <p class="t16 muted">${pl.meta}</p>
-      <p class="t16">${pl.desc}</p>
+    Overview: () => `<p class="t16">${pl.desc}</p>
       <div class="hr"></div>
       <div class="kv-block"><h4 class="h16">Plan your visit</h4>${d.visit.map(kv).join('')}</div>
       <div class="hr"></div>
       <div class="kv-block g8"><h4 class="h16">Good to know</h4><p class="t16 muted">${pl.good}</p></div>
       <button class="btn lg block ${inTrip ? 'secondary' : 'primary'}" data-act="add-to-trip" data-place="${pl.id}">${inTrip ? 'In your itinerary' : 'Add to trip'}</button>`,
-    Reviews: () => `${rating}
-      <h4 class="h16">What travelers are saying</h4>
+    Reviews: () => `<h4 class="h16">What travelers are saying</h4>
       ${d.reviews.map(r => `<div class="review">
         <div class="review-top"><span class="review-score">${r.score}</span><b>${r.title}</b></div>
         <div class="review-row"><span class="ic up">${ic('thumb_up')}</span><p>${r.up}</p></div>
@@ -733,15 +757,19 @@ function locSheetHTML(chat, p) {
   };
   return `<div class="sheet-fixed">${handleHTML(p)}</div>
     <div class="sheet-scroll">
-      <div class="loc-head" style="padding-top:12px">
+      <div class="loc-head">
         <div class="loc-titleblock">
           <button class="loc-back" data-act="back-trip">${ic('chevron_left')}Back to trip</button>
           <div class="sheet-title"><h2>${pl.name}</h2><span>${city.flag} ${city.name}</span></div>
         </div>
+        <div class="props">
+          ${ratingHTML(Number(d.rating), '', `<span class="n">${d.count.toLocaleString()} reviews</span>`)}
+          <p class="t16 muted">${pl.meta}</p>
+        </div>
         ${placeGridHTML(pl)}
-        ${tabsHTML(LOC_TABS, p.locTab, 'loc-tab')}
       </div>
-      <div class="loc-body">${body[p.locTab]()}</div>
+      <div class="tabs-bar">${tabsHTML(LOC_TABS, p.locTab, 'loc-tab')}</div>
+      <div class="tab-body loc-body">${body[p.locTab]()}</div>
     </div>`;
 }
 

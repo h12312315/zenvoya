@@ -128,6 +128,17 @@ const CITIES = {
   },
 };
 Object.values(CITIES).forEach(c => c.places.forEach(p => { p.city = c.id; }));
+/* Trip properties shown under the drawer title: [match, popularity, themes]. Tokyo's are from Figma. */
+Object.entries({
+  tokyo: [4.5, 3.8, 'Culture · Shopping · Food'],
+  kyoto: [4.6, 4.2, 'Temples · Gardens · Food'],
+  paris: [4.3, 4.8, 'Art · Food · Architecture'],
+  rome: [4.4, 4.6, 'History · Food · Architecture'],
+  barcelona: [4.2, 4.4, 'Architecture · Beach · Food'],
+  lisbon: [4.1, 4.0, 'Views · Food · Culture'],
+  santorini: [4.0, 4.3, 'Views · Beach · Food'],
+  reykjavik: [4.4, 3.6, 'Nature · Hot springs · Northern lights'],
+}).forEach(([id, [match, pop, tags]]) => Object.assign(CITIES[id], { match, pop, tags }));
 const placeById = id => { for (const c of Object.values(CITIES)) { const p = c.places.find(x => x.id === id); if (p) return p; } return null; };
 /* Ramen X uses the Figma gallery */
 (rx => {

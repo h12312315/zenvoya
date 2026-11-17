@@ -436,7 +436,7 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .maplibregl-ctrl-attrib { font-size: 10px; }
 
 /* Day filter floating on the map, just above the collapsed drawer */
-.map-days { position: absolute; left: 0; right: 0; bottom: calc(275px + 8px); z-index: 3; display: flex; gap: 8px; padding: 6px 16px; overflow-x: auto; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 0.2s, transform 0.2s; }
+.map-days { position: absolute; left: 0; right: 0; bottom: calc(284px + 8px); z-index: 3; display: flex; gap: 8px; padding: 6px 16px; overflow-x: auto; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 0.2s, transform 0.2s; }
 .map-days.show { opacity: 1; transform: none; pointer-events: auto; }
 .day-chip.float { background: var(--z-white); box-shadow: var(--z-shadow-card); }
 .day-chip.float.active { background: var(--z-purple-100); }
@@ -446,25 +446,36 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
   background: var(--z-white); border-radius: var(--z-r-20) var(--z-r-20) 0 0; box-shadow: var(--z-shadow-sheet);
   display: flex; flex-direction: column; transition: top 0.36s cubic-bezier(0.22, 0.8, 0.24, 1);
 }
-.sheet.collapsed { top: calc(100% - var(--sheet-peek, 275px)); }
+.sheet.collapsed { top: calc(100% - var(--sheet-peek, 284px)); }
 .sheet.dragging { transition: none; }
-.sheet-fixed { flex: none; padding: 16px 16px 0; display: flex; flex-direction: column; gap: 12px; }
+.sheet-fixed { flex: none; padding: 16px 16px 12px; }
+.sheet-head { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+/* Properties under the title: scores with stars, then a line of themes */
+.props { display: flex; flex-direction: column; gap: 8px; }
+.props-row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; }
+.dot.lt { background: var(--z-placeholder); }
+/* Tab bar: scrolls with the drawer, then pins under the handle with a shadow */
+.tabs-bar { position: sticky; top: 0; z-index: 2; margin-top: 12px; padding: 0 16px; background: var(--z-white); }
+.tabs-bar.trip { margin-top: 4px; padding-top: 4px; }
+.tabs-bar.stuck { box-shadow: var(--z-shadow-card); }
+/* Short tabs still fill the drawer below the bar, so the bar can always reach the top */
+.tab-body { min-height: calc(100% - 44px); }
+.tabs-bar.trip + .tab-body { min-height: calc(100% - 48px); }
 .sheet-handle { display: flex; justify-content: center; padding: 12px 0; margin: -12px 0; cursor: grab; touch-action: none; width: 100%; }
 .sheet-handle i { width: 50px; height: 4px; border-radius: 20px; background: var(--z-gray-400); }
 .sheet-handle:hover i { background: #888; }
 .sheet-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; height: 34px; }
 .sheet-title h2 { font-family: var(--z-font-display); font-size: 24px; font-weight: 700; line-height: 1.4; color: var(--z-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sheet-title span { font-size: 16px; color: var(--z-muted); white-space: nowrap; }
-.sheet-controls { display: flex; flex-direction: column; gap: 8px; }
 .sel-row { display: flex; height: 36px; border: 1px solid var(--z-line); border-radius: var(--z-r-8); }
 .sel { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px 12px; font-size: 14px; font-weight: 500; color: var(--z-ink); white-space: nowrap; }
 .sel + .sel { border-left: 1px solid var(--z-line); }
 .sel .ms { font-size: 16px; color: var(--z-black); }
 .sel:hover { background: rgba(0, 0, 0, 0.02); }
 .tabs { display: flex; gap: 12px; border-bottom: 1px solid var(--z-line); }
-.tab { padding: 12px 8px; font-size: 14px; font-weight: 500; line-height: 20px; color: var(--z-ink); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tab { padding: 12px 8px 10px; font-size: 14px; font-weight: 500; line-height: 20px; color: var(--z-ink); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
 .tab.active { font-weight: 700; color: var(--z-purple); border-bottom-color: var(--z-purple); }
-.sheet-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+.sheet-scroll { flex: 1; min-height: 0; overflow-y: auto; position: relative; }
 .sheet.collapsed .sheet-scroll { overflow: hidden; }
 .hr { height: 1px; background: var(--z-line); flex: none; }
 
@@ -540,6 +551,7 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .rating b { font-size: 16px; font-weight: 600; line-height: 24px; color: var(--z-ink); }
 .rating .stars { display: flex; gap: 2px; color: var(--z-yellow); }
 .rating .stars .ms { font-size: 16px; }
+.rating .stars .ms.off { color: var(--z-bg); }
 .rating span.n { font-size: 16px; color: var(--z-muted); }
 .t16 { font-size: 16px; line-height: 1.4; color: var(--z-ink); }
 .t16.muted { color: var(--z-muted); }
