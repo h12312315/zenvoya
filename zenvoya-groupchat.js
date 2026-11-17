@@ -39,7 +39,7 @@ function makeChat(name, members = []) {
   return { id: 'chat' + (++_uid), name, named: !!name, members: [...members], messages: [{ from: 'zoya', text: GREETING }], trips: [], tripState: {}, panel: null };
 }
 
-const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: false, cartOpen: false, cart: CART_SEED.map(i => ({ ...i })), pop: null, popRect: null, friend: null };
+const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: false, cartOpen: false, cart: CART_SEED.map(i => ({ ...i })), pop: null, popRect: null, friend: null, attach: { home: [], chat: [] }, pickFor: 'chat' };
 
 (function seed() {
   const japan = makeChat('Japan trip');
@@ -64,7 +64,20 @@ const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: fals
     { from: 'me', text: 'Flights from New York to Rome' },
     { from: 'zoya', text: 'Here are some ideas that you might like.', flights: { dest: 'rome' } });
 
-  state.chats = [japan, onsite, rome];
+  /* A trip that is further along: flights booked, a stay waiting in the cart */
+  const iceland = makeChat('Iceland trip');
+  iceland.messages.push(
+    { from: 'me', text: '5-day trip from New York to Iceland' },
+    { from: 'zoya', text: 'Here are some ideas that you might like:', cards: ['reykjavik'] },
+    { from: 'me', text: 'Book the cheapest flights and add the best stay to my cart' },
+    { from: 'zoya', text: 'Done. Your flights to Reykjavik are booked, and The Frederick Hotel is in your cart.' });
+  iceland.trips = ['reykjavik'];
+  const ice = tripOf(iceland, 'reykjavik');
+  ice.bookedFlights = [0];
+  ice.cartStays = [0];
+  state.cart.push(cartHotel('Reykjavik 5 day', CITIES.reykjavik.img, HOTELS[0].img, '07:22:45', 'yellow'));
+
+  state.chats = [japan, iceland, onsite, rome];
 })();
 
 const activeChat = () => state.chats.find(c => c.id === state.activeChatId) || null;
@@ -106,7 +119,7 @@ function bookingHTML(item, inCart) {
   </div>`;
 }
 
-const labelsHTML = labels => labels.length ? `<div class="flight-labels">${labels.map(l => `<span class="label ${l === 'Best' ? 'blue' : 'green'}">${l}</span>`).join('')}</div>` : '';
+const labelsHTML = labels => labels.length ? `<div class="flight-labels">${labels.map(l => `<span class="label ${(l === 'Best' || l === 'In cart') ? 'blue' : 'green'}">${l}</span>`).join('')}</div>` : '';
 
 function flightItemHTML(f, city, { tag = 'div', attrs = '', selected = false, details = false } = {}) {
   const line = n => `<span class="fl-line"><i class="end"></i>${n === 2 ? '<i class="stop" style="left:22px"></i><i class="stop" style="left:44px"></i>' : n === 1 ? '<i class="stop" style="left:33px"></i>' : ''}<i class="end r"></i></span>`;
@@ -153,11 +166,29 @@ function placeGridHTML(p) {
 }
 
 function chatInputHTML(id, soft) {
-  return `<form class="chat-input ${soft ? 'soft' : ''}" data-form="${id}" autocomplete="off">
-    <input id="${id}Input" type="text" placeholder="Ask anything travel" aria-label="Ask anything travel">
-    ${ic('mic', 'mic')}
-    <button class="send-btn" type="submit" aria-label="Send">${ic('arrow_upward')}</button>
-  </form>`;
+  return `<div class="composer">
+    <div class="attach-row" id="${id}Attach"></div>
+    <form class="chat-input ${soft ? 'soft' : ''}" data-form="${id}" autocomplete="off">
+      <button class="plus-btn" type="button" data-act="attach" data-for="${id}" aria-label="Add files">${ic('add')}</button>
+      <input id="${id}Input" type="text" placeholder="Ask anything travel" aria-label="Ask anything travel">
+      ${ic('mic', 'mic')}
+      <button class="send-btn" type="submit" aria-label="Send">${ic('arrow_upward')}</button>
+    </form>
+  </div>`;
+}
+
+/* Attachments: chips above the input before sending, and inside the sent message */
+const fmtSize = b => (b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB');
+function fileChipHTML(f, removeAttrs) {
+  return `<span class="file-chip">
+    ${f.url ? `<span class="file-thumb" style="background-image:url('${f.url}')"></span>` : `<span class="file-thumb">${ic('description')}</span>`}
+    <span class="file-meta"><b>${esc(f.name)}</b><small>${fmtSize(f.size)}</small></span>
+    ${removeAttrs ? `<button class="file-x" type="button" ${removeAttrs} aria-label="Remove ${esc(f.name)}">${ic('close', 's16')}</button>` : ''}
+  </span>`;
+}
+function renderAttach(id) {
+  const el = $(`#${id}Attach`);
+  if (el) el.innerHTML = state.attach[id].map((f, i) => fileChipHTML(f, `data-act="attach-remove" data-for="${id}" data-i="${i}"`)).join('');
 }
 
 /* ───────── App render ───────── */
@@ -188,6 +219,8 @@ function render() {
   }
   if (PAGES[state.page].render) PAGES[state.page].render();
   renderCart();
+  renderAttach('home');
+  renderAttach('chat');
 }
 
 function go(page) { state.page = page; closePop(); render(); }
@@ -196,8 +229,10 @@ function go(page) { state.page = page; closePop(); render(); }
 function homeHTML() {
   const trips = allTrips();
   const seen = new Set();
-  const planned = trips.filter(t => !seen.has(t.city.id) && seen.add(t.city.id)).slice(0, 4);
-  const upcoming = planned.slice(0, 1);
+  const uniq = trips.filter(t => !seen.has(t.city.id) && seen.add(t.city.id));
+  const isBooked = t => { const s = t.chat.tripState[t.city.id]; return !!(s && s.bookedFlights && s.bookedFlights.length); };
+  const upcoming = uniq.some(isBooked) ? uniq.filter(isBooked) : uniq.slice(0, 1);
+  const planned = uniq.filter(t => !isBooked(t)).slice(0, 4);
   const tiles = [['Flights', 0, 'images/figma/tile-flights.jpg', 'Flights from New York to Rome'], ['Stays', 1, 'images/figma/tile-stays.jpg', 'Find places to stay in Tokyo'], ['Activities', 2, 'images/figma/tile-activities.jpg', 'Things to do on a trip to Japan']];
   return `<div class="home">
     <section class="home-hero">
@@ -289,7 +324,11 @@ function chatHeadHTML(chat) {
 function msgHTML(m, i, chat) {
   const group = chat.members.length > 0;
   if (m.system) return `<div class="msg-system">${esc(m.text)}</div>`;
-  if (m.from === 'me') return `<div class="msg me"><div class="bubble">${esc(m.text)}</div>${group ? avatarHTML(ME, 28) : ''}</div>`;
+  if (m.from === 'me') {
+    const bubble = m.text ? `<div class="bubble">${esc(m.text)}</div>` : '';
+    const body = m.files ? `<div class="me-stack"><div class="msg-files">${m.files.map(f => fileChipHTML(f)).join('')}</div>${bubble}</div>` : bubble;
+    return `<div class="msg me">${body}${group ? avatarHTML(ME, 28) : ''}</div>`;
+  }
   if (m.from !== 'zoya') return `<div class="msg friend">${avatarHTML(personById(m.from), 28)}<div class="bubble">${esc(m.text)}</div></div>`;
   const text = `<div class="msg from-zoya">${group ? zoyaSVG() : ''}${m.typing ? '<span class="typing" aria-label="Zoya is typing"><i></i><i></i><i></i></span>' : `<span>${esc(m.text)}</span>`}</div>`;
   if (m.cards) {
@@ -308,6 +347,11 @@ function msgHTML(m, i, chat) {
     return `<div class="flights">${text}
       <div class="route-line"><span>${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span></div>
       ${HOTELS.map((h, hi) => hotelItemHTML(h, imgs[hi])).join('')}
+    </div>`;
+  }
+  if (m.recs) {
+    return `<div class="flights">${text}
+      <div class="rec-list">${m.recs.items.map(([title, meta, third, placeId, img]) => { const pl = placeById(placeId); return `<button class="rec" data-act="open-loc-chat" data-city="${m.recs.city}" data-place="${placeId}">${ph(img || pl.img, pl.emoji)}<div><b>${title}</b><span>${meta}</span><span class="price">${third}</span></div></button>`; }).join('')}</div>
     </div>`;
   }
   return text;
@@ -357,21 +401,27 @@ function detect(text) {
 
 function refresh(chat) { if (state.page === 'chat' && activeChat() === chat) renderChatPage(); }
 
-function send(text) {
+/* preset: a ready reply (object or function) for prompts the UI sends on the user's behalf */
+function send(text, preset, files) {
   text = text.trim();
-  if (!text) return;
+  const hasFiles = !!(files && files.length);
+  if (!text && !hasFiles) return;
   let chat = activeChat();
   if (!chat) { chat = makeChat(''); state.chats.unshift(chat); state.activeChatId = chat.id; }
-  chat.messages.push({ from: 'me', text });
+  const m = { from: 'me', text };
+  if (hasFiles) m.files = files;
+  chat.messages.push(m);
   render();
-  respond(chat, text);
+  respond(chat, text, preset, hasFiles ? files : null);
 }
 
-function respond(chat, text) {
-  const intent = detect(text);
+function respond(chat, text, preset, files) {
+  let intent = preset ? { type: 'preset' } : detect(text);
+  if (files && intent.type === 'chat') intent = { type: 'files' };
+  const short = s => (s.length > 24 ? s.slice(0, 24) + '…' : s);
   const nameChat = n => { if (!chat.named) { chat.name = n; chat.named = true; } };
   if (intent.type === 'chat' && chat.members.length) {
-    nameChat(text.length > 24 ? text.slice(0, 24) + '…' : text);
+    nameChat(short(text));
     const f = chat.members[chat.messages.length % chat.members.length];
     setTimeout(() => { chat.messages.push({ from: f, text: FRIEND_LINES[chat.messages.length % FRIEND_LINES.length] }); refresh(chat); }, 1100);
     refresh(chat);
@@ -384,7 +434,13 @@ function respond(chat, text) {
     const i = chat.messages.indexOf(typing);
     if (i < 0) return;
     let reply;
-    if (intent.type === 'flights') {
+    if (intent.type === 'preset') {
+      reply = { from: 'zoya', ...(typeof preset === 'function' ? preset() : preset) };
+      nameChat(short(text));
+    } else if (intent.type === 'files') {
+      reply = { from: 'zoya', text: files.length === 1 ? `Got it. I’ve added ${files[0].name} to this chat. Want me to use it for your trip?` : `Got it. I’ve added ${files.length} files to this chat. Want me to use them for your trip?` };
+      nameChat(short(text || files[0].name));
+    } else if (intent.type === 'flights') {
       reply = { from: 'zoya', text: 'Here are some ideas that you might like.', flights: { dest: intent.dest } };
       nameChat(`${CITIES[intent.dest].name} flights`);
     } else if (intent.type === 'hotels') {
@@ -396,11 +452,18 @@ function respond(chat, text) {
       nameChat(`${intent.label} trip`);
     } else {
       reply = { from: 'zoya', text: 'Do you want any adjustment? I’m here for you!' };
-      nameChat(text.length > 24 ? text.slice(0, 24) + '…' : text);
+      nameChat(short(text));
     }
     chat.messages[i] = reply;
     refresh(chat);
   }, 1000);
+}
+
+/* Places not yet saved to the trip, then bookable activities */
+function moreIdeas(chat, cityId) {
+  const city = CITIES[cityId], trip = tripOf(chat, cityId), recs = recsOf(city);
+  const places = city.places.filter(x => !trip.saved.has(x.id)).map(x => [x.name, `${x.area} · ${x.time}`, x.meta, x.id, x.img]);
+  return [...places.slice(0, 2), ...recs.spots, ...recs.social].slice(0, 4);
 }
 
 function openTrip(chat, cityId) {
@@ -552,7 +615,15 @@ const TAB_BODY = {
     </div>`;
   },
 
-  Flights(city) {
+  Flights(city, trip) {
+    if (trip.bookedFlights && trip.bookedFlights.length) {
+      return `<div class="sec">
+        <div class="sec-title">${ic('flight')}Booked flights</div>
+        <div class="route-line"><span>NYC → ${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span></div>
+        ${trip.bookedFlights.map(i => flightItemHTML({ ...FLIGHTS[i], labels: ['Booked'] }, city)).join('')}
+        <p class="status-line ok">${ic('check', 's16')}Confirmed · ${plural(1 + trip.members.length, 'traveler')} · Confirmation ZNV-48213</p>
+      </div>`;
+    }
     return `<div class="sec">
       <p class="empty-note">You haven’t booked any flights.</p>
       <div class="deal-box">
@@ -565,8 +636,16 @@ const TAB_BODY = {
     </div>`;
   },
 
-  Stays(city) {
+  Stays(city, trip) {
     const imgs = hotelImgs();
+    if (trip.cartStays && trip.cartStays.length) {
+      return `<div class="sec">
+        <div class="sec-title">${ic('shopping_cart')}Added to cart</div>
+        ${trip.cartStays.map(i => hotelItemHTML({ ...HOTELS[i], labels: ['In cart'] }, imgs[i])).join('')}
+        <p class="status-line">${ic('schedule', 's16')}Not booked yet. Check out to confirm this stay.</p>
+        <button class="btn secondary" style="align-self:flex-start;padding:8px 16px" data-act="cart">View cart</button>
+      </div>`;
+    }
     return `<div class="sec">
       <p class="empty-note">You haven’t booked any stays.</p>
       <div class="deal-box">
@@ -867,15 +946,38 @@ const ACTIONS = {
   'toggle-day': d => { const t = tripOf(activeChat(), panelOf().cityId), i = +d.day; if (t.filter !== 'all') return; t.open.has(i) ? t.open.delete(i) : t.open.add(i); renderSheet(); },
   'del-act': d => { const t = tripOf(activeChat(), panelOf().cityId); t.itin.forEach(day => day.slots.forEach(s => { s.acts = s.acts.filter(a => a.id !== d.id); })); renderSheet(); toast('Removed from itinerary'); },
   'add-act': d => { const t = tripOf(activeChat(), panelOf().cityId), i = $('#chatInput'); i.value = `Add something to ${t.itin[+d.day].label}`; i.focus(); },
-  'explore-more': () => { panelOf().sheet = 'collapsed'; renderSheet(); toast('Tap a pin on the map to explore more places'); },
+  'explore-more': () => {
+    const chat = activeChat(), city = CITIES[panelOf().cityId];
+    send(`Show me more places and activities in ${city.name}`, () => ({ text: `Here are some more places and activities you might like in ${city.name}:`, recs: { city: city.id, items: moreIdeas(chat, city.id) } }));
+  },
+  'open-loc-chat': d => {
+    const chat = activeChat();
+    if (!chat.panel || chat.panel.type !== 'trip' || chat.panel.cityId !== d.city) openTrip(chat, d.city);
+    const p = chat.panel; p.loc = d.place; p.locTab = 'Overview'; p.sheet = 'open';
+    renderSheet();
+  },
+  attach: d => { state.pickFor = d.for; $('#filePick').click(); },
+  'attach-remove': d => { state.attach[d.for].splice(+d.i, 1); renderAttach(d.for); },
   'explore-flights': () => send(`Find flights from New York to ${CITIES[panelOf().cityId].name}`),
   'explore-stays': () => send(`Find places to stay in ${CITIES[panelOf().cityId].name}`),
 
   pop: (d, el) => { if (state.pop && state.pop.type === d.pop && !el.closest('#pop')) return closePop(); openPop(d.pop, el.closest('#pop') ? null : el); },
   'toggle-person': d => { const s = state.pop.sel; s.has(d.id) ? s.delete(d.id) : s.add(d.id); renderPop(); },
   'people-done': peopleDone,
-  'set-days': d => { const chat = activeChat(), t = tripOf(chat, chat.panel.cityId); t.days = +d.n; t.itin = buildItinerary(CITIES[t.cityId], t.days); t.open = new Set(); t.filter = 'all'; closePop(); render(); },
-  'set-budget': d => { tripOf(activeChat(), panelOf().cityId).budget = d.b; closePop(); renderSheet(); },
+  'set-days': d => {
+    const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId], n = +d.n;
+    closePop();
+    if (n === t.days) return;
+    t.days = n; t.itin = buildItinerary(city, n); t.open = new Set(); t.filter = 'all';
+    send(`Change ${city.name} to ${n} days`, { text: `Done. ${city.name} is now ${n} days, ${dateRange(n)}. I’ve updated the itinerary to match.` });
+  },
+  'set-budget': d => {
+    const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId];
+    closePop();
+    if (d.b === t.budget) return;
+    t.budget = d.b;
+    send(`Set the ${city.name} budget to $${d.b}`, { text: `Got it. I’ll keep ${city.name} within $${d.b} per person and flag anything that goes over.` });
+  },
   'delete-chat': () => { state.chats = state.chats.filter(c => c.id !== state.activeChatId); state.activeChatId = null; closePop(); render(); toast('Chat deleted'); },
 
   'open-flight': d => { activeChat().panel = { type: 'flight', msg: +d.msg, i: +d.i }; render(); },
@@ -917,13 +1019,28 @@ document.addEventListener('click', e => {
 
 document.addEventListener('submit', e => {
   e.preventDefault();
-  const input = e.target.querySelector('input'), text = input.value;
-  if (!text.trim()) return;
+  const id = e.target.dataset.form, input = e.target.querySelector('input[type=text]'), text = input.value, files = state.attach[id];
+  if (!text.trim() && !files.length) return;
   input.value = '';
-  if (e.target.dataset.form === 'home') { state.activeChatId = null; state.page = 'chat'; render(); }
-  send(text);
+  state.attach[id] = [];
+  renderAttach(id);
+  if (id === 'home') { state.activeChatId = null; state.page = 'chat'; render(); }
+  send(text, null, files);
   const next = $('#chatInput');
   if (next) next.focus();
+});
+
+/* Local files picked with the plus button */
+$('#filePick').addEventListener('change', e => {
+  const id = state.pickFor;
+  [...e.target.files].forEach(f => {
+    const image = f.type.startsWith('image/');
+    state.attach[id].push({ name: f.name, size: f.size, url: image ? URL.createObjectURL(f) : null });
+  });
+  e.target.value = '';
+  renderAttach(id);
+  const input = $(`#${id}Input`);
+  if (input) input.focus();
 });
 
 document.addEventListener('input', e => {

@@ -218,6 +218,26 @@ body[data-page="home"] .main { gap: 16px; }
 .send-btn .ms { font-size: 24px; }
 .send-btn:hover { background: #5a00cf; }
 
+/* Composer: plus button, attachment chips */
+.composer { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.chat-input:has(.plus-btn) { padding-left: 8px; }
+.plus-btn { width: 40px; height: 40px; flex: none; border-radius: 9999px; background: var(--z-bg); color: var(--z-black); display: grid; place-items: center; }
+.plus-btn:hover { background: #e4e4e4; }
+.attach-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.attach-row:empty { display: none; }
+.file-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 8px 6px 6px; max-width: 240px; background: var(--z-white); border: 1px solid var(--z-line); border-radius: var(--z-r-12); box-shadow: var(--z-shadow-item); }
+.file-thumb { width: 32px; height: 32px; flex: none; border-radius: var(--z-r-6); background: var(--z-bg) center / cover; display: grid; place-items: center; color: var(--z-icon); }
+.file-meta { min-width: 0; display: flex; flex-direction: column; }
+.file-meta b { font-size: 12px; font-weight: 500; line-height: 16px; color: var(--z-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-meta small { font-size: 11px; line-height: 14px; color: var(--z-muted); }
+.file-x { width: 20px; height: 20px; flex: none; border-radius: 50%; display: grid; place-items: center; color: var(--z-icon); }
+.file-x:hover { background: rgba(0, 0, 0, 0.06); }
+.me-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; max-width: 80%; }
+.me-stack .bubble { max-width: 100%; }
+.msg-files { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.status-line { display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 1.4; color: var(--z-muted); }
+.status-line.ok { color: var(--z-tag-green-fg); }
+
 .cb { width: 18px; height: 18px; flex: none; border-radius: var(--z-r-4); border: 1px solid var(--z-gray-400); display: grid; place-items: center; color: var(--z-white); background: var(--z-white); }
 .cb.on { background: var(--z-purple); border-color: var(--z-purple); }
 .cb.off { background: var(--z-gray-300); border-color: var(--z-gray-300); }
@@ -238,9 +258,9 @@ body[data-page="home"] .main { gap: 16px; }
 
 /* ───────── 6. HOME ───────── */
 .home { height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
-.home-hero { flex: none; height: 136px; display: flex; flex-direction: column; align-items: center; }
+.home-hero { flex: none; min-height: 136px; display: flex; flex-direction: column; align-items: center; }
 .home-hero h2 { height: 40px; display: flex; align-items: center; gap: 4px; font-size: 18px; font-weight: 700; color: var(--z-ink); }
-.home-hero .chat-input { max-width: 660px; margin-top: 20px; }
+.home-hero .composer { max-width: 660px; margin-top: 20px; padding-bottom: 20px; }
 .home-cards { flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; height: 429px; }
 .home-card { background: var(--z-white); border-radius: var(--z-r-20); overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
 .home-card h3, .home-block h3 { font-size: 16px; font-weight: 700; line-height: 1.4; color: var(--z-ink); }
