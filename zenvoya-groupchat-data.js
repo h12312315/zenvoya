@@ -182,10 +182,12 @@ const FIGMA_DAYS = {
     [['Morning', '09:00–10:00', 'Kissaten breakfast'], ['Afternoon', '12:30–14:00', 'Shimokitazawa curry', 'Option A'], ['Afternoon', '12:30–14:00', 'Soba & souvenir snacks', 'Option B'], ['Evening', '18:30–20:00', 'Farewell shabu-shabu']],
   ],
 };
-function figmaDay(rows, label, where) {
+/* Places on the map that sit near each Tokyo day's plan (used by the map's day filter) */
+const FIGMA_NEAR = { tokyo: [['goldengai'], ['sensoji', 'akihabara'], ['tsukiji', 'ramenx', 'teamlab'], ['omotesando', 'meiji', 'shibuya'], ['shibuya', 'akihabara']] };
+function figmaDay(rows, label, where, near) {
   const slots = ['Morning', 'Afternoon', 'Evening'].map(name => ({ name, acts: [] }));
   rows.forEach(([slot, time, title, opt, placeId]) => slots.find(s => s.name === slot).acts.push(act(time, title, where, '🍽️', { img: `images/figma/act-${actSlug(title)}.jpg`, opt, placeId })));
-  return { label, city: where, slots };
+  return { label, city: where, slots, near: near || [] };
 }
 
 function buildItinerary(city, nDays) {
@@ -202,7 +204,7 @@ function buildItinerary(city, nDays) {
     const label = `${WEEKDAYS[d % 7]}, Oct ${3 + d}`;
     if (d === 0) days.push(figmaDay(FIGMA_DAYS.first, label, 'New York City'));
     else if (d === n - 1) days.push(figmaDay(FIGMA_DAYS.last, label, 'New York City'));
-    else if (fixed) days.push(figmaDay(fixed[(d - 1) % fixed.length], label, city.name));
+    else if (fixed) { const k = (d - 1) % fixed.length; days.push(figmaDay(fixed[k], label, city.name, (FIGMA_NEAR[city.id] || [])[k])); }
     else {
       const a = spot(), b = spots.length > 2 ? spot() : eat();
       days.push({ label, city: city.name, slots: [

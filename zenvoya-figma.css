@@ -430,9 +430,16 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 
 .tp-map { position: absolute; inset: 0; background: #e8eef2; }
 .tp-close { position: absolute; top: 12px; right: 16px; z-index: 3; }
-.pin { width: 36px; height: 36px; border-radius: 18px; background: var(--z-white); box-shadow: var(--z-shadow-pin); display: grid; place-items: center; font-size: 18px; line-height: 1; cursor: pointer; }
+.pin { width: 36px; height: 36px; border-radius: 18px; background: var(--z-white); border: 2px solid var(--z-white); box-shadow: var(--z-shadow-pin); display: grid; place-items: center; font-size: 18px; line-height: 1; cursor: pointer; transition: border-color 0.2s; }
+.pin.day { border-color: var(--z-purple); }   /* a stop on the day picked in the map's day filter */
 .pin.on { background: var(--z-purple); border: 2px solid var(--z-white); box-shadow: var(--z-shadow-pin-on); z-index: 2; }
 .maplibregl-ctrl-attrib { font-size: 10px; }
+
+/* Day filter floating on the map, just above the collapsed drawer */
+.map-days { position: absolute; left: 0; right: 0; bottom: calc(275px + 8px); z-index: 3; display: flex; gap: 8px; padding: 6px 16px; overflow-x: auto; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 0.2s, transform 0.2s; }
+.map-days.show { opacity: 1; transform: none; pointer-events: auto; }
+.day-chip.float { background: var(--z-white); box-shadow: var(--z-shadow-card); }
+.day-chip.float.active { background: var(--z-purple-100); }
 
 .sheet {
   position: absolute; left: 0; right: 0; bottom: 0; top: var(--sheet-open, 61px); z-index: 4;
@@ -700,7 +707,7 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
   .plain-scroll { padding: 24px 20px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sheet, .cart, .toast { transition: none; }
+  .sheet, .cart, .toast, .map-days, .pin { transition: none; }
   .lightbox.open { animation: none; }
   .typing i { animation: none; }
 }

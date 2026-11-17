@@ -80,12 +80,14 @@ const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: fals
   state.chats = [japan, iceland, onsite, rome];
 })();
 
+/* Itinerary days start expanded. A function declaration so the seed above can use it. */
+function allOpen(n) { return new Set(Array.from({ length: n }, (_, i) => i)); }
 const activeChat = () => state.chats.find(c => c.id === state.activeChatId) || null;
 const chatById = id => state.chats.find(c => c.id === id);
 function tripOf(chat, cityId) {
   return chat.tripState[cityId] || (chat.tripState[cityId] = {
     cityId, members: [...chat.members], days: CITIES[cityId].days, budget: '4,000 - 5,000',
-    itin: buildItinerary(CITIES[cityId]), open: new Set(), filter: 'all',
+    itin: buildItinerary(CITIES[cityId]), open: allOpen(CITIES[cityId].days), filter: 'all',
     saved: new Set(CITIES[cityId].places.filter(p => !p.extra).map(p => p.id)),
   });
 }
@@ -493,6 +495,7 @@ function renderPanel() {
       ? `<aside class="side-panel" aria-label="Trip details">
            <div class="tp-map" id="tpMap"></div>
            <button class="round-btn tp-close" data-act="close-panel" aria-label="Close trip">${ic('close')}</button>
+           <div class="map-days no-bar" id="mapDays" role="group" aria-label="Show a day on the map"></div>
            <div class="sheet" id="sheet"></div>
          </aside>`
       : flightPanelHTML(chat, p);
@@ -534,6 +537,28 @@ function renderSheet() {
   const sc = sheet.querySelector('.sheet-scroll');
   if (sc) sc.scrollTop = keep;
   Object.entries(tripMarkers).forEach(([id, el]) => el.classList.toggle('on', id === p.loc));
+  renderMapDays(chat, p);
+}
+
+/* Day filter floating on the map, shown while the trip drawer is collapsed.
+   It shares the Itinerary tab's filter; the chosen day's pins get a purple outline. */
+const dayPinIds = (trip, i) => new Set([...(trip.itin[i].near || []), ...trip.itin[i].slots.flatMap(s => s.acts.map(a => a.placeId)).filter(Boolean)]);
+function renderMapDays(chat, p) {
+  const el = $('#mapDays');
+  if (!el) return;
+  const trip = tripOf(chat, p.cityId), f = trip.filter;
+  const show = p.sheet === 'collapsed' && !p.loc;
+  el.classList.toggle('show', show);
+  el.innerHTML = `<button class="day-chip float ${f === 'all' ? 'active' : ''}" data-act="map-day" data-day="all" aria-pressed="${f === 'all'}" ${show ? '' : 'tabindex="-1"'}>All</button>`
+    + trip.itin.map((_, i) => `<button class="day-chip float ${f === i ? 'active' : ''}" data-act="map-day" data-day="${i}" aria-pressed="${f === i}" ${show ? '' : 'tabindex="-1"'}>Day ${i + 1}</button>`).join('');
+  const on = f === 'all' ? new Set() : dayPinIds(trip, f);
+  Object.entries(tripMarkers).forEach(([id, m]) => m.classList.toggle('day', on.has(id)));
+}
+function fitPins(ids) {
+  if (!tripMap || !ids.length) return;
+  const b = new maplibregl.LngLatBounds();
+  ids.forEach(id => b.extend(placeById(id).ll));
+  tripMap.fitBounds(b, { padding: { top: 76, bottom: SHEET.trip.peek + 76, left: 48, right: 48 }, maxZoom: 13.5, duration: 600 });
 }
 
 const handleHTML = p => `<button class="sheet-handle" aria-label="${p.sheet === 'collapsed' ? 'Expand' : 'Collapse'} details" aria-expanded="${p.sheet !== 'collapsed'}"><i></i></button>`;
@@ -967,6 +992,17 @@ const ACTIONS = {
     toast(`Added to ${day.label}`);
   },
   'day-filter': d => { const t = tripOf(activeChat(), panelOf().cityId); t.filter = d.day === 'all' ? 'all' : +d.day; renderSheet(); },
+  'map-day': d => {
+    const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId];
+    const keep = $('#mapDays').scrollLeft;
+    t.filter = d.day === 'all' ? 'all' : +d.day;
+    renderSheet();
+    $('#mapDays').scrollLeft = keep;
+    if (t.filter === 'all') return fitPins(city.places.map(x => x.id));
+    const ids = [...dayPinIds(t, t.filter)];
+    if (!ids.length) return toast(`${t.itin[t.filter].label} is spent in ${t.itin[t.filter].city}, so it has no stops on this map`);
+    fitPins(ids);
+  },
   'toggle-day': d => { const t = tripOf(activeChat(), panelOf().cityId), i = +d.day; if (t.filter !== 'all') return; t.open.has(i) ? t.open.delete(i) : t.open.add(i); renderSheet(); },
   'del-act': d => { const t = tripOf(activeChat(), panelOf().cityId); t.itin.forEach(day => day.slots.forEach(s => { s.acts = s.acts.filter(a => a.id !== d.id); })); renderSheet(); toast('Removed from itinerary'); },
   'add-act': d => { const t = tripOf(activeChat(), panelOf().cityId), i = $('#chatInput'); i.value = `Add something to ${t.itin[+d.day].label}`; i.focus(); },
@@ -1001,7 +1037,7 @@ const ACTIONS = {
     const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId], n = +d.n;
     closePop();
     if (n === t.days) return;
-    t.days = n; t.itin = buildItinerary(city, n); t.open = new Set(); t.filter = 'all';
+    t.days = n; t.itin = buildItinerary(city, n); t.open = allOpen(n); t.filter = 'all';
     send(`Change ${city.name} to ${n} days`, { text: `Done. ${city.name} is now ${n} days, ${dateRange(n)}. I’ve updated the itinerary to match.` });
   },
   'set-budget': d => {
