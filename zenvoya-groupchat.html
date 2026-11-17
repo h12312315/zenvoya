@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zenvoya — Group chat prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0..1,0&icon_names=add,arrow_drop_down,arrow_upward,attach_money,bookmark,calendar_today,chat_bubble,check,chevron_left,chevron_right,close,delete,flight,group,home,hotel,keyboard_arrow_down,keyboard_arrow_up,left_panel_close,left_panel_open,mic,more_horiz,person,schedule,shopping_cart,star,thumb_down,thumb_up&display=block">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<link rel="stylesheet" href="zenvoya-figma.css">
+</head>
+<body data-page="home">
+
+<!-- Shared SVG symbols: Zoya star (redrawn from the Figma raster) and the airline mark -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="zg1" x1="4" y1="34" x2="36" y2="10" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3fb6ff"/><stop offset=".36" stop-color="#3a35f2"/><stop offset=".62" stop-color="#5b10f0"/><stop offset="1" stop-color="#6c12f4"/>
+    </linearGradient>
+    <radialGradient id="zg2" cx="20" cy="3" r="14" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff3fa4"/><stop offset=".5" stop-color="#d52fd0" stop-opacity=".75"/><stop offset="1" stop-color="#7a14f0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="zg3" cx="5" cy="30" r="10" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6adcff"/><stop offset="1" stop-color="#3a7bff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <symbol id="zoya" viewBox="0 0 40 40">
+    <path class="zs" fill="url(#zg1)"/><path class="zs" fill="url(#zg2)"/><path class="zs" fill="url(#zg3)"/>
+    <rect x="10.8" y="14.4" width="2.4" height="4.8" rx="1.2" fill="#fff"/>
+    <rect x="18.4" y="14.4" width="2.4" height="4.8" rx="1.2" fill="#fff"/>
+    <path d="M12.6 21.8 Q15.8 24.9 19 21.8" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="airline" viewBox="0 0 48 48">
+    <rect width="48" height="48" fill="#fff"/>
+    <path d="M4 19.5C16 18.6 30 17.6 38.5 18c4 .3 6.500 2.600 7.500 5.600C36 22 18 23 4 19.500Z" fill="#e1251b"/>
+    <path d="M46 24.200c-1.200 3.400-4 5.800-8 7L30.500 28.600c6-.800 11.500-2.200 15.500-4.400Z" fill="#2e5c99"/>
+  </symbol>
+</svg>
+
+<div class="app">
+  <nav class="side" aria-label="Main">
+    <svg class="zoya" viewBox="0 0 40 40" role="img" aria-label="Zenvoya"><use href="#zoya"/></svg>
+    <div class="side-nav">
+      <button class="nav-item" data-act="nav" data-page="home"><span class="ms" aria-hidden="true">home</span>Home</button>
+      <button class="nav-item" data-act="nav" data-page="chat"><span class="ms" aria-hidden="true">chat_bubble</span>Chat</button>
+      <button class="nav-item" data-act="nav" data-page="shop"><span class="ms" aria-hidden="true">shopping_cart</span>Shop</button>
+      <button class="nav-item" data-act="nav" data-page="trips"><span class="ms" aria-hidden="true">bookmark</span>Trips</button>
+      <button class="nav-item" data-act="nav" data-page="friends"><span class="ms" aria-hidden="true">group</span>Friends</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <h1 id="title">Home</h1>
+      <div class="topbar-right">
+        <button class="cart-btn" data-act="cart" aria-label="Open cart"><span class="ms s22" aria-hidden="true">shopping_cart</span><span class="cart-badge" id="cartBadge">0</span></button>
+        <span class="av me-top" style="--s:24px;background:#000;font-size:16px" title="George">G</span>
+      </div>
+    </header>
+    <div class="page" id="page"></div>
+  </div>
+</div>
+
+<aside class="cart" id="cart" aria-label="Cart"></aside>
+<div class="pop" id="pop" role="dialog"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="zenvoya-groupchat-data.js"></script>
+<script src="zenvoya-groupchat.js"></script>
+</body>
+</html>
