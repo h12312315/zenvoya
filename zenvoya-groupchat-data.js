@@ -12,6 +12,7 @@ const FRIENDS = [
   { id: 'sofia', name: 'Sofia Martinez', initial: 'S', color: '#944c32', loc: 'Barcelona, Spain',  status: 'Collecting little moments',    shared: '1 shared trip  ·  2 shared chats',  since: 'March 2026',     activity: 'Sofia shared El Born Tapas with you' },
   { id: 'noah',  name: 'Noah Kim',       initial: 'N', color: '#34c759', loc: 'Seattle, WA',       status: 'Mountains over meetings',      shared: '1 shared trip  ·  1 shared chat',   since: 'January 2026',   activity: 'Noah added Gullfoss Waterfall to Iceland' },
 ];
+FRIENDS.forEach(f => { f.photo = `images/figma/friend-${f.id}.jpg`; });
 const personById = id => (id === 'me' ? ME : FRIENDS.find(f => f.id === id));
 
 /* ───────── Places ─────────
@@ -22,7 +23,8 @@ const P = (id, name, area, emoji, img, lng, lat, cat, meta, hours, time, desc, g
 const CITIES = {
   tokyo: {
     id: 'tokyo', name: 'Tokyo', country: 'Japan', flag: '🇯🇵', days: 7, code: 'NRT', airport: 'Narita International Airport (NRT)',
-    img: 'images/trips/tokyo.jpg', airportImg: 'images/locations/narita-airport.jpg', currency: '¥',
+    img: 'images/figma/trip-tokyo.jpg', airportImg: 'images/locations/narita-airport.jpg', currency: '¥',
+    gallery: ['images/figma/trip-tokyo.jpg', 'images/figma/tokyo-gallery-2.jpg', 'images/figma/tokyo-gallery-3.jpg', 'images/figma/tokyo-gallery-4.jpg', 'images/figma/tokyo-gallery-5.jpg'],
     blurb: 'Explore Tokyo’s ancient temples, neon-lit streets, and unforgettable food.',
     places: [
       P('sensoji', 'Sensō-ji Temple', 'Asakusa', '⛩️', 'senso-ji-temple.jpg', 139.7967, 35.7148, 'spot', 'Buddhist temple · Free entry', 'Daily, 6:00–17:00', '60–90 minutes', 'Tokyo’s oldest temple, reached through the lantern-hung Kaminarimon gate and a street of snack stalls.', 'Go early · Free entry · Busy on weekends'),
@@ -36,13 +38,13 @@ const CITIES = {
       P('ramenx', 'Ramen X', 'Ginza', '🍜', null, 139.7650, 35.6717, 'food', 'Japanese · Ramen · ¥1,000–2,000 per person', 'Daily, 11:00–22:00', '45–60 minutes', 'A cozy ramen stop in Tokyo, with rich broth, springy noodles and comforting bowls topped with chashu and a soft-boiled egg.', 'Dine-in · Counter seating · Great for a quick lunch', true),
     ],
     recs: {
-      spots: [['Tsukiji food walk', 'Tsukiji · 3 hours', 'Est. ¥9,000 / person', 'tsukiji'], ['Tokyo skyline at sunset', 'Shibuya · 1–2 hours', 'Est. ¥3,000 / person', 'shibuya']],
-      social: [['Sushi-making class', 'Shinjuku · 2 hours', 'Est. ¥12,000 / person', 'goldengai'], ['Asakusa culture walk', 'Asakusa · 2 hours', 'Est. ¥6,000 / person', 'sensoji'], ['Shinjuku evening food tour', 'Shinjuku · 3 hours', 'Est. ¥13,000 / person', 'akihabara'], ['Traditional tea ceremony', 'Ueno · 1 hour', 'Est. ¥5,000 / person', 'meiji']],
+      spots: [['Tsukiji food walk', 'Tsukiji · 3 hours', 'Est. ¥9,000 / person', 'tsukiji', 'images/figma/rec-tsukiji-food-walk.jpg'], ['Tokyo skyline at sunset', 'Shibuya · 1–2 hours', 'Est. ¥3,000 / person', 'shibuya', 'images/figma/rec-tokyo-skyline-at-sunset.jpg']],
+      social: [['Sushi-making class', 'Shinjuku · 2 hours', 'Est. ¥12,000 / person', 'goldengai', 'images/figma/rec-sushi-making-class.jpg'], ['Asakusa culture walk', 'Asakusa · 2 hours', 'Est. ¥6,000 / person', 'sensoji', 'images/figma/rec-asakusa-culture-walk.jpg'], ['Shinjuku evening food tour', 'Shinjuku · 3 hours', 'Est. ¥13,000 / person', 'akihabara', 'images/figma/rec-shinjuku-evening-food-tour.jpg'], ['Traditional tea ceremony', 'Ueno · 1 hour', 'Est. ¥5,000 / person', 'meiji', 'images/figma/rec-traditional-tea-ceremony.jpg']],
     },
   },
   kyoto: {
     id: 'kyoto', name: 'Kyoto', country: 'Japan', flag: '🇯🇵', days: 7, code: 'KIX', airport: 'Kansai International Airport (KIX)',
-    img: 'images/trips/kyoto.jpg', airportImg: 'images/locations/kansai-airport.jpg', currency: '¥',
+    img: 'images/figma/trip-kyoto.jpg', airportImg: 'images/locations/kansai-airport.jpg', currency: '¥',
     blurb: 'Wander Kyoto’s golden temples, bamboo groves, and lantern-lit teahouse lanes.',
     places: [
       P('kinkakuji', 'Kinkaku-ji', 'Kita', '🏯', 'kinkaku-ji.jpg', 135.7292, 35.0394, 'spot', 'Zen temple · ¥500 per person', 'Daily, 9:00–17:00', '45–60 minutes', 'The Golden Pavilion, a gold-leaf temple reflected in a still pond and ringed by a strolling garden.', 'Go at opening · Cash only · No interior access'),
@@ -121,6 +123,8 @@ const CITIES = {
 };
 Object.values(CITIES).forEach(c => c.places.forEach(p => { p.city = c.id; }));
 const placeById = id => { for (const c of Object.values(CITIES)) { const p = c.places.find(x => x.id === id); if (p) return p; } return null; };
+/* Ramen X uses the Figma gallery */
+(rx => { rx.gallery = [1, 2, 3, 4, 5].map(i => `images/figma/ramenx-${i}.jpg`); rx.img = rx.gallery[0]; })(placeById('ramenx'));
 
 /* Search keywords → cities to suggest */
 const DESTINATIONS = [
@@ -135,36 +139,49 @@ const DESTINATIONS = [
   [/beach|island|sun/i, ['santorini', 'barcelona'], 'Beach'],
 ];
 
-/* ───────── Itinerary ───────── */
+/* ───────── Itinerary ─────────
+   Day 1, the last day and the Tokyo days are the Figma itinerary (text + photos).
+   Other cities get their middle days generated from their places. */
 const WEEKDAYS = ['Fri', 'Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
 let _actId = 0;
 const act = (time, title, where, emoji, o = {}) => ({ id: 'a' + (++_actId), time, title, where, emoji, img: o.img || null, placeId: o.placeId || null, opt: o.opt || null });
 const placeAct = (time, p, opt) => act(time, p.name, p.area, p.emoji, { img: p.img, placeId: p.id, opt });
+const actSlug = t => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+/* [slot, time, title, option, linked place id] */
+const FIGMA_DAYS = {
+  first: [['Morning', '08:00–09:00', 'Bagels in the East Village'], ['Afternoon', '12:00–13:30', 'Chelsea Market lunch', 'Option A'], ['Afternoon', '12:00–13:30', 'West Village pizza', 'Option B'], ['Evening', '18:00–21:00', 'Airport dinner & departure']],
+  last: [['Morning', '09:00–10:30', 'Arrival & breakfast'], ['Afternoon', '13:00–14:30', 'Neighborhood deli lunch', 'Option A'], ['Afternoon', '13:00–14:30', 'Chinatown dumplings', 'Option B'], ['Evening', '18:00–19:00', 'Welcome-home dinner']],
+  tokyo: [
+    [['Morning', '09:00–10:00', 'Arrival & coffee'], ['Afternoon', '13:00–14:30', 'Shinjuku ramen', 'Option A'], ['Afternoon', '13:00–14:30', 'Udon in Shinjuku', 'Option B'], ['Evening', '18:00–19:30', 'Omoide Yokocho dinner']],
+    [['Morning', '09:00–10:30', 'Asakusa street-food walk', null, 'sensoji'], ['Afternoon', '12:30–14:00', 'Asakusa tempura', 'Option A'], ['Afternoon', '12:30–14:00', 'Ueno market bites', 'Option B'], ['Evening', '18:30–20:00', 'Okonomiyaki dinner']],
+    [['Morning', '08:30–10:00', 'Tsukiji breakfast walk', null, 'tsukiji'], ['Afternoon', '13:00–15:00', 'Sushi-making class', 'Option A'], ['Afternoon', '13:00–15:00', 'Ginza tea & sweets', 'Option B'], ['Evening', '18:00–19:30', 'Ginza sushi dinner']],
+    [['Morning', '09:30–10:30', 'Omotesando café breakfast', null, 'omotesando'], ['Afternoon', '13:00–14:30', 'Harajuku snack trail', 'Option A'], ['Afternoon', '13:00–14:30', 'Shibuya depachika lunch', 'Option B'], ['Evening', '19:00–20:30', 'Shibuya izakaya dinner']],
+    [['Morning', '09:00–10:00', 'Kissaten breakfast'], ['Afternoon', '12:30–14:00', 'Shimokitazawa curry', 'Option A'], ['Afternoon', '12:30–14:00', 'Soba & souvenir snacks', 'Option B'], ['Evening', '18:30–20:00', 'Farewell shabu-shabu']],
+  ],
+};
+function figmaDay(rows, label, where) {
+  const slots = ['Morning', 'Afternoon', 'Evening'].map(name => ({ name, acts: [] }));
+  rows.forEach(([slot, time, title, opt, placeId]) => slots.find(s => s.name === slot).acts.push(act(time, title, where, '🍽️', { img: `images/figma/act-${actSlug(title)}.jpg`, opt, placeId })));
+  return { label, city: where, slots };
+}
 
 function buildItinerary(city, nDays) {
   const n = nDays || city.days;
   const spots = city.places.filter(p => p.cat === 'spot' && !p.extra);
   const food = city.places.filter(p => p.cat === 'food' && !p.extra);
   const all = city.places.filter(p => !p.extra);
+  const fixed = FIGMA_DAYS[city.id];
   let si = 0, fi = 0;
   const spot = () => spots[si++ % spots.length];
   const eat = () => (food.length ? food[fi++ % food.length] : all[(si + fi++) % all.length]);
   const days = [];
   for (let d = 0; d < n; d++) {
     const label = `${WEEKDAYS[d % 7]}, Oct ${3 + d}`;
-    if (d === 0) {
-      days.push({ label, city: 'New York City', slots: [
-        { name: 'Morning', acts: [act('08:00–09:00', 'Bagels in the East Village', 'New York City', '🥯')] },
-        { name: 'Afternoon', acts: [act('12:00–13:30', 'Chelsea Market lunch', 'New York City', '🍽️', { opt: 'Option A' }), act('12:00–13:30', 'West Village pizza', 'New York City', '🍕', { opt: 'Option B' })] },
-        { name: 'Evening', acts: [act('18:00–21:00', 'Airport dinner & departure', 'New York City', '✈️', { img: city.airportImg })] },
-      ] });
-    } else if (d === n - 1) {
-      days.push({ label, city: 'New York City', slots: [
-        { name: 'Morning', acts: [act('08:30–09:30', `Last breakfast in ${city.name}`, city.name, '☕')] },
-        { name: 'Afternoon', acts: [act('13:00–15:00', 'Flight home', city.airport, '✈️', { img: city.airportImg })] },
-        { name: 'Evening', acts: [act('19:00–20:00', 'Arrive in New York City', 'New York City', '🗽')] },
-      ] });
-    } else {
+    if (d === 0) days.push(figmaDay(FIGMA_DAYS.first, label, 'New York City'));
+    else if (d === n - 1) days.push(figmaDay(FIGMA_DAYS.last, label, 'New York City'));
+    else if (fixed) days.push(figmaDay(fixed[(d - 1) % fixed.length], label, city.name));
+    else {
       const a = spot(), b = spots.length > 2 ? spot() : eat();
       days.push({ label, city: city.name, slots: [
         { name: 'Morning', acts: [placeAct('09:00–10:30', spot())] },
@@ -218,10 +235,10 @@ const FLIGHTS = [
   { labels: [], price: '$1,410', out: { dep: '10:20pm', arr: '4:45pm', stops: 2, dur: '15h 25m', via: '48m in LHR' }, back: { dep: '8:00am', arr: '2:15pm', stops: 1, dur: '12h 15m', via: '55m in MAD' } },
 ];
 const HOTELS = [
-  { name: 'The Frederick Hotel', labels: ['Cheapest', 'Best'], score: '8.7', word: 'Excellent', reviews: '1004 Reviews', price: '$400' },
-  { name: 'The Frederick Hotel', labels: [], score: '8.7', word: 'Excellent', reviews: '1004 Reviews', price: '$400' },
-  { name: 'The Frederick Hotel', labels: [], score: '8.7', word: 'Excellent', reviews: '1004 Reviews', price: '$400' },
-  { name: 'The Frederick Hotel', labels: [], score: '8.7', word: 'Excellent', reviews: '1004 Reviews', price: '$400' },
+  { name: 'The Frederick Hotel', labels: ['Cheapest', 'Best'], score: '8.7', word: 'Excellent', reviews: '1004 Reviews', price: '$400', img: 'images/figma/hotel-1.jpg' },
+  { name: 'The Frederick Hotel', labels: [], score: '8.7', word: 'Excellent', reviews: '1004 Reviews', price: '$400', img: 'images/figma/hotel-2.jpg' },
+  { name: 'The Frederick Hotel', labels: [], score: '8.7', word: 'Excellent', reviews: '1004 Reviews', price: '$400', img: 'images/figma/hotel-3.jpg' },
+  { name: 'The Frederick Hotel', labels: [], score: '8.7', word: 'Excellent', reviews: '1004 Reviews', price: '$400', img: 'images/figma/hotel-1.jpg' },
 ];
 
 /* ───────── Cart seed ───────── */
@@ -229,9 +246,9 @@ let _cartId = 0;
 const cartFlight = (group, img, sub, price, offer, tone) => ({ id: 'c' + (++_cartId), group, groupImg: img, kind: 'flight', title: 'American Airlines', sub, price, priceSub: 'round trip', offer, tone, expired: false, checked: true });
 const cartHotel = (group, img, thumb, offer, tone, expired) => ({ id: 'c' + (++_cartId), group, groupImg: img, kind: 'hotel', thumb, title: 'The Frederick Hotel', sub: '3 stars · Refundable', price: '$400', priceSub: 'per night · per room', offer, tone, expired: !!expired, checked: !expired });
 const CART_SEED = [
-  cartFlight('Tokyo 7 day', 'images/trips/tokyo.jpg', 'JFK – NRT · Round trip', '$1,200', '02:22:45', 'red'),
-  cartHotel('Tokyo 7 day', 'images/trips/tokyo.jpg', 'images/locations/omotesando.jpg', '07:22:45', 'yellow'),
-  cartHotel('Tokyo 7 day', 'images/trips/tokyo.jpg', 'images/locations/akihabara.jpg', null, 'gray', true),
-  cartFlight('Kyoto 7 day', 'images/trips/kyoto.jpg', 'JFK – KIX · Round trip', '$1,200', '02:22:45', 'red'),
-  cartHotel('Kyoto 7 day', 'images/trips/kyoto.jpg', 'images/locations/gion-district.jpg', '07:22:45', 'yellow'),
+  cartFlight('Tokyo 7 day', 'images/figma/trip-tokyo.jpg', 'JFK – NRT · Round trip', '$1,200', '02:22:45', 'red'),
+  cartHotel('Tokyo 7 day', 'images/figma/trip-tokyo.jpg', 'images/figma/hotel-1.jpg', '07:22:45', 'yellow'),
+  cartHotel('Tokyo 7 day', 'images/figma/trip-tokyo.jpg', 'images/figma/hotel-1.jpg', null, 'gray', true),
+  cartFlight('Kyoto 7 day', 'images/figma/trip-kyoto.jpg', 'JFK – KIX · Round trip', '$1,200', '02:22:45', 'red'),
+  cartHotel('Kyoto 7 day', 'images/figma/trip-kyoto.jpg', 'images/figma/hotel-1.jpg', '07:22:45', 'yellow'),
 ];

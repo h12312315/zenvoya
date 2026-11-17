@@ -6,8 +6,8 @@
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const ic = (name, cls = '') => `<span class="ms ${cls}" aria-hidden="true">${name}</span>`;
-const zoyaSVG = () => `<svg class="zoya" viewBox="0 0 40 40" aria-hidden="true"><use href="#zoya"/></svg>`;
-const airLogo = (cls = '') => `<span class="air-logo ${cls}"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#airline"/></svg></span>`;
+const zoyaSVG = () => `<img class="zoya" src="images/figma/zoya.png" alt="">`;
+const airLogo = (cls = '') => `<span class="air-logo ${cls}"><img src="images/figma/airline.png" alt=""></span>`;
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 const names = ids => { const n = ids.map(id => personById(id).name.split(' ')[0]); return n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0]; };
 
@@ -22,17 +22,9 @@ function ph(img, emoji = '', cls = '', inner = '', style = '') {
 function avatarHTML(p, size = 24, cls = '') {
   return `<span class="av ${size === 28 ? 's28' : ''} ${cls}" style="--s:${size}px;background:${p.color}" title="${esc(p.name)}">${p.initial}</span>`;
 }
+/* Portrait version, used on the Friends page as in Figma */
+const photoAvatarHTML = (p, size) => `<span class="av photo" style="--s:${size}px;background-image:url('${p.photo}')" title="${esc(p.name)}">${p.initial}</span>`;
 const zoyaAvatar = (size = 24) => `<span class="av zoya-av" style="--s:${size}px" title="Zoya">${zoyaSVG()}</span>`;
-
-/* Zoya star outline: six rounded points, drawn once into the shared symbol */
-(function drawStar() {
-  let d = '';
-  for (let i = 0; i <= 144; i++) {
-    const t = (i / 144) * Math.PI * 2, r = 12.7 - 3.3 * Math.cos(6 * t);
-    d += (i ? 'L' : 'M') + (20 + r * Math.cos(t)).toFixed(2) + ' ' + (20 - r * Math.sin(t)).toFixed(2);
-  }
-  document.querySelectorAll('.zs').forEach(p => p.setAttribute('d', d + 'Z'));
-})();
 
 /* ───────── State ───────── */
 const GREETING = 'Hi I’m Zoya, your personal travel assistant. What should we explore today?';
@@ -81,10 +73,10 @@ function tripOf(chat, cityId) {
   return chat.tripState[cityId] || (chat.tripState[cityId] = {
     cityId, members: [...chat.members], days: CITIES[cityId].days, budget: '4,000 - 5,000',
     itin: buildItinerary(CITIES[cityId]), open: new Set(), filter: 'all',
+    saved: new Set(CITIES[cityId].places.filter(p => !p.extra).map(p => p.id)),
   });
 }
 const allTrips = () => state.chats.flatMap(c => c.trips.map(cityId => ({ chat: c, city: CITIES[cityId] })));
-const itinPlaceIds = trip => new Set(trip.itin.flatMap(d => d.slots.flatMap(s => s.acts.map(a => a.placeId))).filter(Boolean));
 
 /* ───────── Shared components ───────── */
 function tripCardHTML(city, chat, { selected = false, raised = false } = {}) {
@@ -106,7 +98,7 @@ function bookingHTML(item, inCart) {
     <div class="booking-pill-row"><span class="booking-pill ${item.tone}">${ic('schedule', 's12')}<span>${pill}</span></span></div>
     <button class="booking-card" data-act="${inCart ? 'cart-toggle' : 'cart'}" data-id="${item.id}">
       <div class="booking-left">${cb}
-        ${item.kind === 'flight' ? `<span class="booking-logo"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#airline"/></svg></span>` : ph(item.thumb, '🏨', 'booking-thumb')}
+        ${item.kind === 'flight' ? `<span class="booking-logo"><img src="images/figma/airline.png" alt=""></span>` : ph(item.thumb, '🏨', 'booking-thumb')}
         <div class="booking-text"><b>${item.title}</b><span>${item.sub}</span></div>
       </div>
       <div class="booking-price"><b>${item.price}</b><span>${item.priceSub}</span></div>
@@ -146,7 +138,7 @@ function hotelItemHTML(h, img) {
     <div class="hotel-price"><b>${h.price}</b><span>per night</span><span>per room</span></div>
   </div>`;
 }
-const hotelImgs = city => { const imgs = city.places.filter(p => p.img).map(p => p.img); return HOTELS.map((_, i) => imgs[(i + 1) % imgs.length]); };
+const hotelImgs = () => HOTELS.map(h => h.img);
 
 function photoGridHTML(imgs, emoji, cls = '') {
   const tile = (i, style = '') => ph(imgs[i % imgs.length], emoji, '', '', style);
@@ -154,6 +146,7 @@ function photoGridHTML(imgs, emoji, cls = '') {
 }
 /* A place has one photo, so its gallery tiles are four crops of it */
 function placeGridHTML(p) {
+  if (p.gallery) return photoGridHTML(p.gallery, p.emoji, 'h180');
   if (!p.img) return photoGridHTML([null], p.emoji, 'h180');
   const crop = pos => ph(p.img, '', '', '', `background-size:230%;background-position:${pos}`);
   return `<div class="photo-grid h180">${ph(p.img)}<div class="sub">${crop('8% 12%')}${crop('92% 18%')}${crop('15% 88%')}${crop('88% 92%')}</div></div>`;
@@ -205,7 +198,7 @@ function homeHTML() {
   const seen = new Set();
   const planned = trips.filter(t => !seen.has(t.city.id) && seen.add(t.city.id)).slice(0, 4);
   const upcoming = planned.slice(0, 1);
-  const tiles = [['Flights', '✈️', 'images/locations/narita-airport.jpg', 'Flights from New York to Rome'], ['Stays', '🛏️', 'images/locations/omotesando.jpg', 'Find places to stay in Tokyo'], ['Activities', '🎟️', 'images/locations/teamlab-planets.jpg', 'Things to do on a trip to Japan']];
+  const tiles = [['Flights', 0, 'images/figma/tile-flights.jpg', 'Flights from New York to Rome'], ['Stays', 1, 'images/figma/tile-stays.jpg', 'Find places to stay in Tokyo'], ['Activities', 2, 'images/figma/tile-activities.jpg', 'Things to do on a trip to Japan']];
   return `<div class="home">
     <section class="home-hero">
       <h2>${zoyaSVG()}Tell me about your next adventure</h2>
@@ -234,7 +227,7 @@ function homeHTML() {
       <div class="home-map" id="homeMap"></div>
     </section>
     <section class="home-tiles">
-      ${tiles.map(([label, emoji, img, text]) => `<button class="home-tile" style="background-image:url('${img}')" data-act="start" data-text="${esc(text)}"><span class="emoji">${emoji}</span><span>${label}</span></button>`).join('')}
+      ${tiles.map(([label, i, img, text]) => `<button class="home-tile" style="background-image:url('${img}')" data-act="start" data-text="${esc(text)}"><span class="icon" style="background-position:${40 - (i + 0.5) * 112}px -16px"></span><span>${label}</span></button>`).join('')}
     </section>
   </div>`;
 }
@@ -311,7 +304,7 @@ function msgHTML(m, i, chat) {
     </div>`;
   }
   if (m.hotels) {
-    const city = CITIES[m.hotels.dest], imgs = hotelImgs(city);
+    const city = CITIES[m.hotels.dest], imgs = hotelImgs();
     return `<div class="flights">${text}
       <div class="route-line"><span>${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span></div>
       ${HOTELS.map((h, hi) => hotelItemHTML(h, imgs[hi])).join('')}
@@ -511,9 +504,9 @@ function recsOf(city) {
 
 const TAB_BODY = {
   Overview(city, trip) {
-    const ids = itinPlaceIds(trip);
+    const ids = trip.saved;
     const spots = city.places.filter(x => x.cat === 'spot' && ids.has(x.id)), food = city.places.filter(x => x.cat === 'food' && ids.has(x.id));
-    const imgs = [city.img, ...city.places.filter(x => x.img).map(x => x.img)];
+    const imgs = city.gallery || [city.img, ...city.places.filter(x => x.img).map(x => x.img)];
     return `<div style="padding:12px 16px 16px">${photoGridHTML(imgs, city.flag)}</div>
       <div class="hr"></div>
       <div class="sec">
@@ -573,7 +566,7 @@ const TAB_BODY = {
   },
 
   Stays(city) {
-    const imgs = hotelImgs(city);
+    const imgs = hotelImgs();
     return `<div class="sec">
       <p class="empty-note">You haven’t booked any stays.</p>
       <div class="deal-box">
@@ -588,7 +581,7 @@ const TAB_BODY = {
 
   Activities(city) {
     const recs = recsOf(city);
-    const rec = ([title, meta, price, placeId]) => { const pl = placeById(placeId); return `<button class="rec" data-act="open-loc" data-place="${placeId}">${ph(pl.img, pl.emoji)}<div><b>${title}</b><span>${meta}</span><span class="price">${price}</span></div></button>`; };
+    const rec = ([title, meta, price, placeId, img]) => { const pl = placeById(placeId); return `<button class="rec" data-act="open-loc" data-place="${placeId}">${ph(img || pl.img, pl.emoji)}<div><b>${title}</b><span>${meta}</span><span class="price">${price}</span></div></button>`; };
     return `<div class="acts">
       <p class="empty-note">You haven’t booked any activities.</p>
       <h4>🏞️ Spots (${recs.spots.length})</h4>
@@ -602,7 +595,7 @@ const TAB_BODY = {
 /* ───────── Right panel: location drawer ───────── */
 function locSheetHTML(chat, p) {
   const pl = placeById(p.loc), city = CITIES[pl.city], d = placeDetail(pl), trip = tripOf(chat, p.cityId);
-  const inTrip = itinPlaceIds(trip).has(pl.id);
+  const inTrip = trip.saved.has(pl.id);
   const rating = `<div class="rating"><b>${d.rating}</b><span class="stars">${ic('star', 'fill').repeat(5)}</span><span class="n">${d.count.toLocaleString()} reviews</span></div>`;
   const kv = ([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`;
   const body = {
@@ -724,7 +717,7 @@ function renderFriends() {
         <div class="fr-tools"><input class="fr-field" placeholder="Search your friends" aria-label="Search your friends" data-filter="friends"><button class="fr-sort" data-act="soon" data-what="Sorting">Sort: Recently added</button></div>
         <div class="fr-tabs"><span class="active">All friends  ${FRIENDS.length}</span><span>Requests  0</span></div>
         <div class="fr-grid" id="frGrid">${FRIENDS.map(x => `<button class="fr-card ${state.friend === x.id ? 'selected' : ''}" data-act="friend" data-id="${x.id}" data-name="${esc(x.name.toLowerCase())}">
-          <div class="fr-who">${avatarHTML(x, 60)}<div><b>${x.name}</b><span>${x.loc}</span></div></div>
+          <div class="fr-who">${photoAvatarHTML(x, 60)}<div><b>${x.name}</b><span>${x.loc}</span></div></div>
           <p>${x.status}</p><hr><small>${x.shared}</small><em>View friend →</em>
         </button>`).join('')}</div>
         <div class="fr-banner"><div><b>Good trips start with great company.</b><span>Add someone you’d love to explore with. All you need is their name or email.</span></div><button class="btn secondary lg" data-act="soon" data-what="Finding a friend">Find a friend</button></div>
@@ -732,7 +725,7 @@ function renderFriends() {
     </div>
     ${f ? `<aside class="side-panel flat" aria-label="Friend detail">
       <div class="fd-head"><h2>Friend detail</h2><button class="icon-btn" data-act="friend-close" aria-label="Close friend detail">${ic('close')}</button></div>
-      <div class="fd-profile">${avatarHTML(f, 80)}<div><h3>${f.name}</h3><p>${f.loc}</p><p>Friends since ${f.since}</p></div>
+      <div class="fd-profile">${photoAvatarHTML(f, 80)}<div><h3>${f.name}</h3><p>${f.loc}</p><p>Friends since ${f.since}</p></div>
         <div class="acts-row"><button class="btn primary lg" data-act="friend-message" data-id="${f.id}">Message</button><button class="btn secondary lg" data-act="soon" data-what="Removing a friend">Remove</button></div></div>
       <div style="padding:0 24px"><div class="tabs"><span class="tab active">Recent activity</span><span class="tab">Shared trips</span></div></div>
       <div class="fd-activity"><i></i><div><b>${f.activity}</b><span>Trip planning · 2 hours ago</span></div></div>
@@ -863,7 +856,8 @@ const ACTIONS = {
   'loc-tab': d => { const p = panelOf(); p.locTab = d.tab; p.sheet = 'open'; renderSheet(); },
   'add-to-trip': d => {
     const chat = activeChat(), trip = tripOf(chat, chat.panel.cityId), pl = placeById(d.place);
-    if (itinPlaceIds(trip).has(pl.id)) return toast('Already in your itinerary');
+    if (trip.saved.has(pl.id)) return toast('Already in your itinerary');
+    trip.saved.add(pl.id);
     const day = trip.itin[Math.min(1, trip.itin.length - 1)];
     day.slots[day.slots.length - 1].acts.push(placeAct('20:00–21:00', pl));
     renderSheet();
