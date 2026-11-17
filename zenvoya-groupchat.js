@@ -12,9 +12,9 @@ const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 const names = ids => { const n = ids.map(id => personById(id).name.split(' ')[0]); return n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0]; };
 
 /* Photo → gradient + emoji fallback (never a bare icon when a photo exists) */
-function ph(img, emoji = '', cls = '', inner = '', style = '') {
+function ph(img, emoji = '', cls = '', inner = '', style = '', attrs = '') {
   return img
-    ? `<div class="ph ${cls}" style="background-image:url('${img}');${style}">${inner}</div>`
+    ? `<div class="ph ${cls}" style="background-image:url('${img}');${style}" ${attrs}>${inner}</div>`
     : `<div class="ph fallback ${cls}" style="${style}"><span>${emoji}</span>${inner}</div>`;
 }
 
@@ -39,7 +39,7 @@ function makeChat(name, members = []) {
   return { id: 'chat' + (++_uid), name, named: !!name, members: [...members], messages: [{ from: 'zoya', text: GREETING }], trips: [], tripState: {}, panel: null };
 }
 
-const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: false, cartOpen: false, cart: CART_SEED.map(i => ({ ...i })), pop: null, popRect: null, friend: null, attach: { home: [], chat: [] }, pickFor: 'chat' };
+const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: false, cartOpen: false, cart: CART_SEED.map(i => ({ ...i })), pop: null, popRect: null, friend: null, gallery: null, attach: { home: [], chat: [] }, pickFor: 'chat' };
 
 (function seed() {
   const japan = makeChat('Japan trip');
@@ -153,16 +153,20 @@ function hotelItemHTML(h, img) {
 }
 const hotelImgs = () => HOTELS.map(h => h.img);
 
-function photoGridHTML(imgs, emoji, cls = '') {
-  const tile = (i, style = '') => ph(imgs[i % imgs.length], emoji, '', '', style);
+/* Every gallery tile opens the photo gallery at that photo */
+const zoomAttrs = (kind, id, i, name) => `data-act="gallery" data-kind="${kind}" data-id="${id}" data-i="${i}" role="button" tabindex="0" aria-label="View photo: ${esc(name)}"`;
+function photoGridHTML(photos, emoji, cls, kind, id) {
+  if (!photos.length) return `<div class="photo-grid ${cls}">${ph(null, emoji)}<div class="sub">${ph(null, emoji).repeat(4)}</div></div>`;
+  const tile = i => { const j = i % photos.length, p = photos[j]; return ph(p.img, emoji, 'zoomable', '', '', zoomAttrs(kind, id, j, p.name)); };
   return `<div class="photo-grid ${cls}">${tile(0)}<div class="sub">${tile(1)}${tile(2)}${tile(3)}${tile(4)}</div></div>`;
 }
-/* A place has one photo, so its gallery tiles are four crops of it */
+/* A place with one photo shows four crops of it; all of them open that photo */
 function placeGridHTML(p) {
-  if (p.gallery) return photoGridHTML(p.gallery, p.emoji, 'h180');
-  if (!p.img) return photoGridHTML([null], p.emoji, 'h180');
-  const crop = pos => ph(p.img, '', '', '', `background-size:230%;background-position:${pos}`);
-  return `<div class="photo-grid h180">${ph(p.img)}<div class="sub">${crop('8% 12%')}${crop('92% 18%')}${crop('15% 88%')}${crop('88% 92%')}</div></div>`;
+  const photos = placePhotos(p);
+  if (photos.length !== 1) return photoGridHTML(photos, p.emoji, 'h180', 'place', p.id);
+  const a = zoomAttrs('place', p.id, 0, p.name);
+  const crop = pos => ph(p.img, '', 'zoomable', '', `background-size:230%;background-position:${pos}`, a);
+  return `<div class="photo-grid h180">${ph(p.img, '', 'zoomable', '', '', a)}<div class="sub">${crop('8% 12%')}${crop('92% 18%')}${crop('15% 88%')}${crop('88% 92%')}</div></div>`;
 }
 
 function chatInputHTML(id, soft) {
@@ -569,8 +573,7 @@ const TAB_BODY = {
   Overview(city, trip) {
     const ids = trip.saved;
     const spots = city.places.filter(x => x.cat === 'spot' && ids.has(x.id)), food = city.places.filter(x => x.cat === 'food' && ids.has(x.id));
-    const imgs = city.gallery || [city.img, ...city.places.filter(x => x.img).map(x => x.img)];
-    return `<div style="padding:12px 16px 16px">${photoGridHTML(imgs, city.flag)}</div>
+    return `<div style="padding:12px 16px 16px">${photoGridHTML(cityPhotos(city), city.flag, '', 'city', city.id)}</div>
       <div class="hr"></div>
       <div class="sec">
         <div class="sec-title">${ic('bookmark')}Saved to this trip</div>
@@ -904,6 +907,27 @@ function peopleDone() {
   if (joined.length) setTimeout(() => { chat.messages.push({ from: joined[0], text: 'Thanks for adding me! This looks great 😍' }); refresh(chat); }, 1200);
 }
 
+/* ───────── Photo gallery (full-screen scrim + modal) ───────── */
+function renderGallery() {
+  const el = $('#lightbox'), g = state.gallery;
+  el.classList.toggle('open', !!g);
+  if (!g) { el.innerHTML = ''; return; }
+  const it = g.items[g.i], many = g.items.length > 1;
+  el.innerHTML = `<div class="lb-modal" role="dialog" aria-modal="true" aria-label="${esc(g.title)} photos">
+    <div class="lb-stage">
+      <img src="${it.img}" alt="${esc(it.name)}">
+      <span class="lb-count">${g.i + 1} / ${g.items.length}</span>
+      <button class="round-btn lb-close" data-act="gallery-close" aria-label="Close gallery">${ic('close')}</button>
+      ${many ? `<button class="round-btn lb-nav prev" data-act="gallery-nav" data-d="-1" aria-label="Previous photo">${ic('chevron_left')}</button>
+      <button class="round-btn lb-nav next" data-act="gallery-nav" data-d="1" aria-label="Next photo">${ic('chevron_right')}</button>` : ''}
+    </div>
+    <div class="lb-info ${many ? '' : 'solo'}"><h3>${esc(it.name)}</h3><p>${esc(it.desc)}</p></div>
+    ${many ? `<div class="lb-thumbs no-bar">${g.items.map((x, i) => `<button class="lb-thumb ${i === g.i ? 'active' : ''}" data-act="gallery-go" data-i="${i}" style="background-image:url('${x.img}')" aria-label="${esc(x.name)}" ${i === g.i ? 'aria-current="true"' : ''}></button>`).join('')}</div>` : ''}
+  </div>`;
+  const cur = el.querySelector('.lb-thumb.active');
+  if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'center' });
+}
+
 /* ───────── Toast ───────── */
 let toastTimer;
 function toast(text) {
@@ -956,6 +980,15 @@ const ACTIONS = {
     const p = chat.panel; p.loc = d.place; p.locTab = 'Overview'; p.sheet = 'open';
     renderSheet();
   },
+  gallery: d => {
+    const city = d.kind === 'city' ? CITIES[d.id] : null, place = city ? null : placeById(d.id);
+    state.gallery = { items: city ? cityPhotos(city) : placePhotos(place), i: +d.i, title: (city || place).name };
+    renderGallery();
+    $('#lightbox .lb-close').focus();
+  },
+  'gallery-nav': d => { const g = state.gallery; g.i = (g.i + +d.d + g.items.length) % g.items.length; renderGallery(); },
+  'gallery-go': d => { state.gallery.i = +d.i; renderGallery(); },
+  'gallery-close': () => { state.gallery = null; renderGallery(); },
   attach: d => { state.pickFor = d.for; $('#filePick').click(); },
   'attach-remove': d => { state.attach[d.for].splice(+d.i, 1); renderAttach(d.for); },
   'explore-flights': () => send(`Find flights from New York to ${CITIES[panelOf().cityId].name}`),
@@ -1012,6 +1045,7 @@ document.addEventListener('click', e => {
   const t = e.target.closest('[data-act]');
   const handle = e.target.closest('.sheet-handle');
   if (handle && e.detail === 0) { const p = panelOf(); p.sheet = p.sheet === 'collapsed' ? 'open' : 'collapsed'; renderSheet(); return; }
+  if (state.gallery && e.target.id === 'lightbox') { state.gallery = null; renderGallery(); return; }
   if (state.pop && !e.target.closest('#pop') && !(t && t.dataset.act === 'pop')) closePop();
   if (state.cartOpen && !e.target.closest('#cart') && !(t && ['cart', 'flight-select'].includes(t.dataset.act))) { state.cartOpen = false; renderCart(); }
   if (t && ACTIONS[t.dataset.act]) ACTIONS[t.dataset.act](t.dataset, t, e);
@@ -1050,8 +1084,11 @@ document.addEventListener('input', e => {
 });
 
 document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][data-act]')) { e.preventDefault(); e.target.click(); return; }
+  if (state.gallery && (e.key === 'ArrowLeft' || e.key === 'ArrowRight') && state.gallery.items.length > 1) { ACTIONS['gallery-nav']({ d: e.key === 'ArrowLeft' ? -1 : 1 }); return; }
   if (e.key !== 'Escape') return;
-  if (state.pop) closePop();
+  if (state.gallery) { state.gallery = null; renderGallery(); }
+  else if (state.pop) closePop();
   else if (state.cartOpen) { state.cartOpen = false; renderCart(); }
 });
 

@@ -24,7 +24,13 @@ const CITIES = {
   tokyo: {
     id: 'tokyo', name: 'Tokyo', country: 'Japan', flag: '🇯🇵', days: 7, code: 'NRT', airport: 'Narita International Airport (NRT)',
     img: 'images/figma/trip-tokyo.jpg', airportImg: 'images/locations/narita-airport.jpg', currency: '¥',
-    gallery: ['images/figma/trip-tokyo.jpg', 'images/figma/tokyo-gallery-2.jpg', 'images/figma/tokyo-gallery-3.jpg', 'images/figma/tokyo-gallery-4.jpg', 'images/figma/tokyo-gallery-5.jpg'],
+    photos: [
+      { img: 'images/figma/trip-tokyo.jpg', name: 'Tokyo Tower', desc: 'The red-and-white tower rising above the trees of Shiba Park.' },
+      { img: 'images/figma/tokyo-gallery-2.jpg', name: 'Tokyo Skytree in spring', desc: 'Pink blossoms frame the Skytree on a clear morning in Sumida.' },
+      { img: 'images/figma/tokyo-gallery-3.jpg', name: 'The city at blue hour', desc: 'Office towers and taillights along a wide avenue just after sunset.' },
+      { img: 'images/figma/tokyo-gallery-4.jpg', name: 'Ameyoko market', desc: 'The gateway to Ameya-Yokochō, Ueno’s open-air market street.' },
+      { img: 'images/figma/tokyo-gallery-5.jpg', name: 'Ginza at night', desc: 'Lit shopfronts and evening traffic on Ginza’s main street.' },
+    ],
     blurb: 'Explore Tokyo’s ancient temples, neon-lit streets, and unforgettable food.',
     places: [
       P('sensoji', 'Sensō-ji Temple', 'Asakusa', '⛩️', 'senso-ji-temple.jpg', 139.7967, 35.7148, 'spot', 'Buddhist temple · Free entry', 'Daily, 6:00–17:00', '60–90 minutes', 'Tokyo’s oldest temple, reached through the lantern-hung Kaminarimon gate and a street of snack stalls.', 'Go early · Free entry · Busy on weekends'),
@@ -43,7 +49,7 @@ const CITIES = {
     },
   },
   kyoto: {
-    id: 'kyoto', name: 'Kyoto', country: 'Japan', flag: '🇯🇵', days: 7, code: 'KIX', airport: 'Kansai International Airport (KIX)',
+    id: 'kyoto', heroName: 'Kiyomizu-dera pagoda', heroDesc: 'The vermilion three-storey pagoda at Kiyomizu-dera, above the trees of Higashiyama.', name: 'Kyoto', country: 'Japan', flag: '🇯🇵', days: 7, code: 'KIX', airport: 'Kansai International Airport (KIX)',
     img: 'images/figma/trip-kyoto.jpg', airportImg: 'images/locations/kansai-airport.jpg', currency: '¥',
     blurb: 'Wander Kyoto’s golden temples, bamboo groves, and lantern-lit teahouse lanes.',
     places: [
@@ -124,7 +130,23 @@ const CITIES = {
 Object.values(CITIES).forEach(c => c.places.forEach(p => { p.city = c.id; }));
 const placeById = id => { for (const c of Object.values(CITIES)) { const p = c.places.find(x => x.id === id); if (p) return p; } return null; };
 /* Ramen X uses the Figma gallery */
-(rx => { rx.gallery = [1, 2, 3, 4, 5].map(i => `images/figma/ramenx-${i}.jpg`); rx.img = rx.gallery[0]; })(placeById('ramenx'));
+(rx => {
+  rx.photos = [
+    ['Chashu ramen', 'Rich broth with sliced chashu, greens and a soft-boiled egg.'],
+    ['Noodle pull', 'Springy noodles lifted from a bowl of green-onion ramen.'],
+    ['At the counter', 'A patterned bowl served at one of the wooden counters.'],
+    ['House ramen', 'The signature bowl with pork, cucumber and two halves of egg.'],
+    ['Late-night bowl', 'A wide bowl under the neon signs of the dining room.'],
+  ].map(([name, desc], i) => ({ img: `images/figma/ramenx-${i + 1}.jpg`, name, desc }));
+  rx.img = rx.photos[0].img;
+})(placeById('ramenx'));
+
+/* Gallery photos: every photo carries a name and a description */
+const placePhotos = p => p.photos || (p.img ? [{ img: p.img, name: p.name, desc: p.desc }] : []);
+const cityPhotos = c => [
+  ...(c.photos || [{ img: c.img, name: c.heroName || c.name, desc: c.heroDesc || c.blurb }]),
+  ...c.places.filter(p => p.img).map(p => ({ img: p.img, name: p.name, desc: p.desc })),
+];
 
 /* Search keywords → cities to suggest */
 const DESTINATIONS = [

@@ -620,6 +620,29 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); z-index: 70; padding: 10px 16px; border-radius: var(--z-r-pill); background: var(--z-ink); color: var(--z-white); font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+/* Photo gallery: full-screen scrim + modal */
+.zoomable { cursor: zoom-in; }
+.zoomable:hover { filter: brightness(0.94); }
+.lightbox { position: fixed; inset: 0; z-index: 80; display: none; align-items: center; justify-content: center; padding: 32px; background: rgba(0, 0, 0, 0.72); }
+.lightbox.open { display: flex; animation: z-fade 0.18s ease-out; }
+@keyframes z-fade { from { opacity: 0; } to { opacity: 1; } }
+.lb-modal { width: min(980px, 100%); max-height: 100%; display: flex; flex-direction: column; background: var(--z-white); border-radius: var(--z-r-20); overflow: hidden; box-shadow: 0 24px 48px rgba(0, 0, 0, 0.30); }
+.lb-stage { position: relative; flex: 1 1 auto; min-height: 0; height: min(64vh, 640px); background: #111111; }
+.lb-stage img { width: 100%; height: 100%; object-fit: contain; }
+.lb-count { position: absolute; left: 16px; top: 16px; padding: 4px 10px; border-radius: var(--z-r-pill); background: rgba(0, 0, 0, 0.55); color: var(--z-white); font-size: 12px; font-weight: 500; line-height: 1.4; }
+.lb-close { position: absolute; right: 16px; top: 12px; }
+.lb-nav { position: absolute; top: 50%; transform: translateY(-50%); }
+.lb-nav.prev { left: 16px; }
+.lb-nav.next { right: 16px; }
+.lb-info { flex: none; padding: 16px 20px 12px; }
+.lb-info.solo { padding-bottom: 20px; }
+.lb-info h3 { font-size: 18px; font-weight: 600; line-height: 1.4; color: var(--z-ink); }
+.lb-info p { font-size: 14px; line-height: 1.4; color: var(--z-muted); margin-top: 2px; }
+.lb-thumbs { flex: none; display: flex; gap: 8px; padding: 4px 20px 20px; overflow-x: auto; }
+.lb-thumb { width: 72px; height: 54px; flex: none; border-radius: var(--z-r-8); background: var(--z-placeholder) center / cover; opacity: 0.6; }
+.lb-thumb:hover { opacity: 0.85; }
+.lb-thumb.active { opacity: 1; outline: 2px solid var(--z-purple); outline-offset: 2px; }
+
 /* ───────── 13. FRIENDS / TRIPS / SHOP PAGES ───────── */
 .plain-page { display: flex; gap: 8px; height: 100%; }
 .plain-card { flex: 1; min-width: 0; background: var(--z-white); border-radius: var(--z-r-20); overflow: hidden; display: flex; flex-direction: column; }
@@ -678,5 +701,6 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 }
 @media (prefers-reduced-motion: reduce) {
   .sheet, .cart, .toast { transition: none; }
+  .lightbox.open { animation: none; }
   .typing i { animation: none; }
 }
