@@ -75,7 +75,7 @@ const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: fals
   const ice = tripOf(iceland, 'reykjavik');
   ice.bookedFlights = [0];
   ice.cartStays = [0];
-  state.cart.push(cartHotel('Reykjavik 5 day', CITIES.reykjavik.img, HOTELS[0].img, '07:22:45', 'yellow'));
+  state.cart.push(cartHotel('Iceland', CITIES.reykjavik.img, HOTELS[0].img, '07:22:45', 'yellow'));
 
   state.chats = [japan, iceland, onsite, rome];
 })();
@@ -821,20 +821,33 @@ function addFlightToCart() {
 }
 
 /* ───────── Cart ───────── */
+/* One cart line: checkbox, logo or hotel photo, name, route, expiry, price. Matches "Cart — simplified selection" in Figma. */
+function cartItemHTML(item) {
+  const check = `<span class="cart-check ${item.expired ? '' : item.checked ? 'on' : ''}">${item.checked && !item.expired ? ic('check') : ''}</span>`;
+  const media = item.kind === 'flight' ? `<span class="cart-logo"><img src="images/figma/airline.png" alt=""></span>` : ph(item.thumb, '🏨', 'cart-thumb');
+  const expiry = item.expired ? `<span class="cart-expiry">${ic('schedule')}<span>Expired</span></span>`
+    : `<span class="cart-expiry">${ic('schedule')}<span>Expiring in <b>${item.offer}</b></span></span>`;
+  return `<button class="cart-item ${item.expired ? 'expired' : ''}" data-act="cart-toggle" data-id="${item.id}">
+    ${check}${media}
+    <span class="cart-text"><b>${item.title}</b><span class="cart-sub">${item.sub}</span>${expiry}</span>
+    <span class="cart-price"><b>${item.price}</b><span>${item.priceSub}</span></span>
+  </button>`;
+}
+
 function renderCart() {
   const el = $('#cart');
   el.classList.toggle('open', state.cartOpen);
-  const items = state.cart, live = items.filter(i => !i.expired), sel = live.filter(i => i.checked);
+  const items = state.cart, sel = items.filter(i => !i.expired && i.checked);
   const groups = [...new Set(items.map(i => i.group))];
-  el.innerHTML = `<div class="cart-head">Cart (${items.length})</div>
+  const total = sel.reduce((n, i) => n + (Number(i.price.replace(/[^0-9.]/g, '')) || 0), 0);
+  el.innerHTML = `<div class="cart-head"><span>Cart (${items.length})</span><button class="cart-x" data-act="cart-close" aria-label="Close cart">${ic('close')}</button></div>
     <div class="cart-body">
-      ${items.length ? `<button class="cart-all" data-act="cart-all"><span class="cb s20 ${live.length && sel.length === live.length ? 'on' : ''}">${ic('check')}</span>Select all<small>${sel.length} of ${live.length} selected</small></button>
-      ${groups.map(g => { const gi = items.filter(i => i.group === g); return `<div class="cart-group"><div class="cart-group-head">${ph(gi[0].groupImg)}${g}</div>${gi.map(i => bookingHTML(i, true)).join('')}</div>`; }).join('')}`
+      ${items.length ? groups.map(g => `<div class="cart-group"><div class="cart-group-head">${g}</div>${items.filter(i => i.group === g).map(cartItemHTML).join('')}</div>`).join('')
       : `<div class="cart-empty">${zoyaSVG()}<p>Your cart is empty. Ask Zoya for flights or stays to fill it.</p></div>`}
     </div>
     <div class="cart-foot">
-      <b>${plural(sel.length, 'item')} selected</b><small>Review final totals at checkout.</small>
-      <div><button class="btn secondary xl" data-act="cart-close">Close</button><button class="btn primary xl" data-act="checkout">Start checkout</button></div>
+      <div class="cart-sum"><b>${plural(sel.length, 'item')} selected</b><b>$${total.toLocaleString('en-US')}</b></div>
+      <div class="cart-actions"><button class="cart-btn secondary" data-act="cart-close">Close</button><button class="cart-btn primary" data-act="checkout">Start checkout</button></div>
     </div>`;
 }
 
@@ -1084,7 +1097,6 @@ const ACTIONS = {
   cart: () => { state.cartOpen = !state.cartOpen; closePop(); renderCart(); },
   'cart-close': () => { state.cartOpen = false; renderCart(); },
   'cart-toggle': d => { const i = state.cart.find(x => x.id === d.id); if (i.expired) return toast('This offer has expired'); i.checked = !i.checked; renderCart(); },
-  'cart-all': () => { const live = state.cart.filter(i => !i.expired), on = live.every(i => i.checked); live.forEach(i => { i.checked = !on; }); renderCart(); },
   checkout: () => {
     const n = state.cart.filter(i => !i.expired && i.checked).length;
     if (!n) return toast('Select at least one item to check out');

@@ -279,11 +279,10 @@ const HOTELS = [
 /* ───────── Cart seed ───────── */
 let _cartId = 0;
 const cartFlight = (group, img, sub, price, offer, tone) => ({ id: 'c' + (++_cartId), group, groupImg: img, kind: 'flight', title: 'American Airlines', sub, price, priceSub: 'round trip', offer, tone, expired: false, checked: true });
-const cartHotel = (group, img, thumb, offer, tone, expired) => ({ id: 'c' + (++_cartId), group, groupImg: img, kind: 'hotel', thumb, title: 'The Frederick Hotel', sub: '3 stars · Refundable', price: '$400', priceSub: 'per night · per room', offer, tone, expired: !!expired, checked: !expired });
+const cartHotel = (group, img, thumb, offer, tone, expired) => ({ id: 'c' + (++_cartId), group, groupImg: img, kind: 'hotel', thumb, title: 'The Frederick Hotel', sub: '3 stars · Refundable', price: '$400', priceSub: 'per night<br>per room', offer, tone, expired: !!expired, checked: !expired });
 const CART_SEED = [
   cartFlight('Tokyo 7 day', 'images/figma/trip-tokyo.jpg', 'JFK – NRT · Round trip', '$1,200', '02:22:45', 'red'),
   cartHotel('Tokyo 7 day', 'images/figma/trip-tokyo.jpg', 'images/figma/hotel-1.jpg', '07:22:45', 'yellow'),
   cartHotel('Tokyo 7 day', 'images/figma/trip-tokyo.jpg', 'images/figma/hotel-1.jpg', null, 'gray', true),
-  cartFlight('Kyoto 7 day', 'images/figma/trip-kyoto.jpg', 'JFK – KIX · Round trip', '$1,200', '02:22:45', 'red'),
-  cartHotel('Kyoto 7 day', 'images/figma/trip-kyoto.jpg', 'images/figma/hotel-1.jpg', '07:22:45', 'yellow'),
+  cartFlight('Iceland', 'images/trips/reykjavik.jpg', 'JFK – KEF · Round trip', '$1,200', '02:22:45', 'red'),
 ];
