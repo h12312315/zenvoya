@@ -86,7 +86,7 @@ const activeChat = () => state.chats.find(c => c.id === state.activeChatId) || n
 const chatById = id => state.chats.find(c => c.id === id);
 function tripOf(chat, cityId) {
   return chat.tripState[cityId] || (chat.tripState[cityId] = {
-    cityId, members: [...chat.members], days: CITIES[cityId].days, budget: '4,000 - 5,000',
+    cityId, members: [...chat.members], days: CITIES[cityId].days, budget: 5000,
     itin: buildItinerary(CITIES[cityId]), open: allOpen(CITIES[cityId].days), filter: 'all',
     saved: new Set(CITIES[cityId].places.filter(p => !p.extra).map(p => p.id)),
   });
@@ -601,7 +601,7 @@ function tripSheetHTML(chat, p) {
         </div>
         <div class="sel-row">
           <button class="sel" data-act="pop" data-pop="days">${ic('calendar_today')}<span>${trip.days} day</span>${ic('arrow_drop_down')}</button>
-          <button class="sel" data-act="pop" data-pop="budget">${ic('attach_money')}<span>${trip.budget}</span>${ic('arrow_drop_down')}</button>
+          <button class="sel" data-act="pop" data-pop="budget" title="${budgetLabel(trip.budget)}"><span>Up to ${money(trip.budget)}</span>${ic('arrow_drop_down')}</button>
           <button class="sel" data-act="pop" data-pop="trip-people" aria-label="People on this trip">${ic('person')}<span>${1 + trip.members.length}</span><span class="av-stack">${faces.map(f => avatarHTML(f, 20)).join('')}</span>${ic('arrow_drop_down')}</button>
         </div>
       </div>
@@ -906,7 +906,32 @@ const PAGES = {
 
 /* ───────── Popover ───────── */
 const DAY_OPTIONS = [4, 5, 7, 10];
-const BUDGET_OPTIONS = ['2,000 - 3,000', '3,000 - 4,000', '4,000 - 5,000', '5,000 - 7,000'];
+const BUDGET_OPTIONS = [3000, 4000, 5000, 7000];
+/* Limits for the custom number field at the bottom of each list */
+const CUSTOM = {
+  days: { min: 1, max: 30, unit: 'days', hint: 'Enter 1 to 30 days' },
+  budget: { min: 100, max: 100000, unit: 'per person', hint: 'Enter $100 to $100,000' },
+};
+const money = n => '$' + n.toLocaleString('en-US');
+const budgetLabel = n => `Up to ${money(n)} per person`;
+
+/* Preset options, plus the current value when it was typed in, so it shows as selected */
+const optionsWith = (list, cur) => (list.includes(cur) ? list : [...list, cur].sort((a, b) => a - b));
+
+function customFieldHTML(type) {
+  const c = CUSTOM[type];
+  return `<form class="pop-custom" data-form="custom" data-type="${type}" novalidate>
+      <label for="customNum">Custom</label>
+      <div class="pop-field">
+        ${type === 'budget' ? '<span>$</span>' : ''}
+        <input id="customNum" type="number" inputmode="numeric" min="${c.min}" max="${c.max}" step="1"
+          placeholder="${type === 'budget' ? '6,000' : '12'}" aria-describedby="customHint">
+        <span>${c.unit}</span>
+      </div>
+      <button class="pop-set" type="submit">Set</button>
+      <p class="pop-err" id="customHint" hidden>${c.hint}</p>
+    </form>`;
+}
 
 function openPop(type, anchor) {
   const chat = activeChat();
@@ -929,9 +954,11 @@ function renderPop() {
   } else if (p.type === 'more') {
     html = `<button class="pop-item" data-act="pop" data-pop="chat-people">${ic('add')}Add people</button><button class="pop-item danger" data-act="delete-chat">${ic('delete')}Delete chat</button>`;
   } else if (p.type === 'days') {
-    html = DAY_OPTIONS.map(n => `<button class="pop-item ${trip.days === n ? 'active' : ''}" data-act="set-days" data-n="${n}">${n} day</button>`).join('');
+    html = optionsWith(DAY_OPTIONS, trip.days).map(n => `<button class="pop-item ${trip.days === n ? 'active' : ''}" data-act="set-days" data-n="${n}">${n} day</button>`).join('')
+      + customFieldHTML('days');
   } else if (p.type === 'budget') {
-    html = BUDGET_OPTIONS.map(b => `<button class="pop-item ${trip.budget === b ? 'active' : ''}" data-act="set-budget" data-b="${b}">$ ${b}</button>`).join('');
+    html = optionsWith(BUDGET_OPTIONS, trip.budget).map(b => `<button class="pop-item ${trip.budget === b ? 'active' : ''}" data-act="set-budget" data-b="${b}">${budgetLabel(b)}</button>`).join('')
+      + customFieldHTML('budget');
   } else {
     const forTrip = p.type === 'trip-people';
     html = `<h4>${forTrip ? `Add people to ${CITIES[trip.cityId].name} ${trip.days} days` : 'Add people to this chat'}</h4>
@@ -1006,6 +1033,32 @@ function toast(text) {
 
 /* ───────── Actions ───────── */
 const panelOf = () => activeChat().panel;
+
+function setDays(n) {
+  const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId];
+  closePop();
+  if (n === t.days) return;
+  t.days = n; t.itin = buildItinerary(city, n); t.open = allOpen(n); t.filter = 'all';
+  send(`Change ${city.name} to ${n} days`, { text: `Done. ${city.name} is now ${n} days, ${dateRange(n)}. I’ve updated the itinerary to match.` });
+}
+function setBudget(n) {
+  const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId];
+  closePop();
+  if (n === t.budget) return;
+  t.budget = n;
+  send(`Set the ${city.name} budget to ${budgetLabel(n).toLowerCase()}`, { text: `Got it. I’ll keep ${city.name} under ${money(n)} per person and flag anything that goes over.` });
+}
+
+/* The custom number field in the days and budget lists */
+function submitCustom(form) {
+  const type = form.dataset.type, c = CUSTOM[type], input = form.querySelector('input'), err = form.querySelector('.pop-err');
+  const n = Math.round(Number(input.value));
+  const ok = input.value.trim() !== '' && n >= c.min && n <= c.max;
+  err.hidden = ok;
+  input.setAttribute('aria-invalid', String(!ok));
+  if (!ok) { input.focus(); return; }
+  type === 'days' ? setDays(n) : setBudget(n);
+}
 const ACTIONS = {
   nav: d => go(d.page),
   'new-chat': () => { state.activeChatId = null; go('chat'); const i = $('#chatInput'); if (i) i.focus(); },
@@ -1074,20 +1127,8 @@ const ACTIONS = {
   pop: (d, el) => { if (state.pop && state.pop.type === d.pop && !el.closest('#pop')) return closePop(); openPop(d.pop, el.closest('#pop') ? null : el); },
   'toggle-person': d => { const s = state.pop.sel; s.has(d.id) ? s.delete(d.id) : s.add(d.id); renderPop(); },
   'people-done': peopleDone,
-  'set-days': d => {
-    const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId], n = +d.n;
-    closePop();
-    if (n === t.days) return;
-    t.days = n; t.itin = buildItinerary(city, n); t.open = allOpen(n); t.filter = 'all';
-    send(`Change ${city.name} to ${n} days`, { text: `Done. ${city.name} is now ${n} days, ${dateRange(n)}. I’ve updated the itinerary to match.` });
-  },
-  'set-budget': d => {
-    const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId];
-    closePop();
-    if (d.b === t.budget) return;
-    t.budget = d.b;
-    send(`Set the ${city.name} budget to $${d.b}`, { text: `Got it. I’ll keep ${city.name} within $${d.b} per person and flag anything that goes over.` });
-  },
+  'set-days': d => setDays(+d.n),
+  'set-budget': d => setBudget(+d.b),
   'delete-chat': () => { state.chats = state.chats.filter(c => c.id !== state.activeChatId); state.activeChatId = null; closePop(); render(); toast('Chat deleted'); },
 
   'open-flight': d => { activeChat().panel = { type: 'flight', msg: +d.msg, i: +d.i }; render(); },
@@ -1129,6 +1170,7 @@ document.addEventListener('click', e => {
 
 document.addEventListener('submit', e => {
   e.preventDefault();
+  if (e.target.dataset.form === 'custom') return submitCustom(e.target);
   const id = e.target.dataset.form, input = e.target.querySelector('input[type=text]'), text = input.value, files = state.attach[id];
   if (!text.trim() && !files.length) return;
   input.value = '';

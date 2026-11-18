@@ -652,6 +652,20 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .pop-item.danger { color: var(--z-red); }
 .pop-item .ph { width: 32px; height: 32px; border-radius: var(--z-r-6); }
 .pop-item .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* Custom number field at the bottom of the days and budget lists */
+.pop-custom { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; padding: 10px 8px 4px; border-top: 1px solid var(--z-line); }
+.pop-custom label { flex-basis: 100%; font-size: 12px; font-weight: 500; color: var(--z-muted); }
+.pop-field { flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; height: 32px; padding: 0 10px; border: 1px solid var(--z-line); border-radius: var(--z-r-8); font-size: 14px; color: var(--z-muted); background: var(--z-white); }
+.pop-field:focus-within { border-color: var(--z-purple); box-shadow: 0 0 0 3px var(--z-purple-50); }
+.pop-field input { flex: 1; min-width: 0; width: 56px; border: 0; outline: 0; background: none; font: inherit; color: var(--z-ink); -moz-appearance: textfield; }
+.pop-field input::-webkit-outer-spin-button, .pop-field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.pop-field input::placeholder { color: rgba(0, 0, 0, 0.3); }
+.pop-field span { flex: none; white-space: nowrap; }
+.pop-field:has(input[aria-invalid=true]) { border-color: var(--z-red); }
+.pop-set { flex: none; height: 32px; padding: 0 12px; border-radius: var(--z-r-8); background: var(--z-purple); color: var(--z-white); font-size: 14px; font-weight: 500; }
+.pop-set:hover { filter: brightness(1.1); }
+.pop-err { flex-basis: 100%; font-size: 12px; color: var(--z-red); }
 .pop-item .grow small { font-size: 12px; color: var(--z-muted); }
 .pop .btn { margin: 6px 4px 4px; }
 
