@@ -928,7 +928,7 @@ function customFieldHTML(type) {
           placeholder="${type === 'budget' ? '6,000' : '12'}" aria-describedby="customHint">
         <span>${c.unit}</span>
       </div>
-      <button class="pop-set" type="submit">Set</button>
+      <button class="pop-set" type="submit">Save</button>
       <p class="pop-err" id="customHint" hidden>${c.hint}</p>
     </form>`;
 }
@@ -1034,19 +1034,24 @@ function toast(text) {
 /* ───────── Actions ───────── */
 const panelOf = () => activeChat().panel;
 
-function setDays(n) {
+/* A preset from the list updates the trip in place; a custom value is sent to Zoya as a chat prompt. */
+function setDays(n, custom) {
   const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId];
   closePop();
   if (n === t.days) return;
   t.days = n; t.itin = buildItinerary(city, n); t.open = allOpen(n); t.filter = 'all';
-  send(`Change ${city.name} to ${n} days`, { text: `Done. ${city.name} is now ${n} days, ${dateRange(n)}. I’ve updated the itinerary to match.` });
+  if (custom) return send(`Change ${city.name} to ${n} days`, { text: `Done. ${city.name} is now ${n} days, ${dateRange(n)}. I’ve updated the itinerary to match.` });
+  renderChatCol(); renderSheet();
+  toast(`${city.name} is now ${n} days. Itinerary updated.`);
 }
-function setBudget(n) {
+function setBudget(n, custom) {
   const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId];
   closePop();
   if (n === t.budget) return;
   t.budget = n;
-  send(`Set the ${city.name} budget to ${budgetLabel(n).toLowerCase()}`, { text: `Got it. I’ll keep ${city.name} under ${money(n)} per person and flag anything that goes over.` });
+  if (custom) return send(`Set the ${city.name} budget to ${budgetLabel(n).toLowerCase()}`, { text: `Got it. I’ll keep ${city.name} under ${money(n)} per person and flag anything that goes over.` });
+  renderChatCol(); renderSheet();
+  toast(`Budget set to ${budgetLabel(n).toLowerCase()}`);
 }
 
 /* The custom number field in the days and budget lists */
@@ -1057,7 +1062,7 @@ function submitCustom(form) {
   err.hidden = ok;
   input.setAttribute('aria-invalid', String(!ok));
   if (!ok) { input.focus(); return; }
-  type === 'days' ? setDays(n) : setBudget(n);
+  type === 'days' ? setDays(n, true) : setBudget(n, true);
 }
 const ACTIONS = {
   nav: d => go(d.page),
