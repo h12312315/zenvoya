@@ -514,6 +514,10 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .act-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; }
 .act-time { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; line-height: 18px; color: var(--z-muted-warm); }
 .act-badge { padding: 2px 8px; border-radius: var(--z-r-6); background: var(--z-purple-100); font-size: 10px; font-weight: 600; line-height: 18px; color: var(--z-purple); }
+/* Activities the budget changed from the standard plan */
+.act-badge.tag { background: var(--z-bg); color: var(--z-ink); }
+.itin-head { display: flex; flex-direction: column; gap: 4px; }
+.itin-note { font-size: 12px; line-height: 18px; color: var(--z-muted); }
 .act-main b { font-size: 14px; font-weight: 600; line-height: 22px; color: var(--z-ink-warm); }
 .act-main > span { font-size: 12px; line-height: 18px; color: var(--z-muted-warm); }
 .act-del { width: 28px; height: 28px; display: grid; place-items: center; color: var(--z-icon); border-radius: 50%; flex: none; }

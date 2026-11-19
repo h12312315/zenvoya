@@ -8,7 +8,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const ic = (name, cls = '') => `<span class="ms ${cls}" aria-hidden="true">${name}</span>`;
 const zoyaSVG = () => `<img class="zoya" src="images/figma/zoya.png" alt="">`;
 const airLogo = (cls = '') => `<span class="air-logo ${cls}"><img src="images/figma/airline.png" alt=""></span>`;
-const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+const plural = (n, w, many) => `${n} ${n === 1 ? w : many || w + 's'}`;
 const names = ids => { const n = ids.map(id => personById(id).name.split(' ')[0]); return n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0]; };
 
 /* Photo → gradient + emoji fallback (never a bare icon when a photo exists) */
@@ -87,7 +87,7 @@ const chatById = id => state.chats.find(c => c.id === id);
 function tripOf(chat, cityId) {
   return chat.tripState[cityId] || (chat.tripState[cityId] = {
     cityId, members: [...chat.members], days: CITIES[cityId].days, budget: 5000,
-    itin: buildItinerary(CITIES[cityId]), open: allOpen(CITIES[cityId].days), filter: 'all',
+    itin: planItinerary(CITIES[cityId], CITIES[cityId].days, 5000), open: allOpen(CITIES[cityId].days), filter: 'all',
     saved: new Set(CITIES[cityId].places.filter(p => !p.extra).map(p => p.id)),
   });
 }
@@ -645,7 +645,7 @@ const TAB_BODY = {
     const actHTML = a => `<div class="act">
         ${ph(a.img, a.emoji)}
         <${a.placeId ? `button data-act="open-loc" data-place="${a.placeId}"` : 'div'} class="act-main">
-          <span class="act-time">${a.time}${a.opt ? `<span class="act-badge">${a.opt}</span>` : ''}</span>
+          <span class="act-time">${a.time}${a.opt ? `<span class="act-badge">${a.opt}</span>` : ''}${a.tag ? `<span class="act-badge tag">${a.tag}</span>` : ''}</span>
           <b>${esc(a.title)}</b><span>${esc(a.where)}</span>
         </${a.placeId ? 'button' : 'div'}>
         <button class="act-del" data-act="del-act" data-id="${a.id}" aria-label="Remove ${esc(a.title)}">${ic('delete')}</button>
@@ -662,7 +662,10 @@ const TAB_BODY = {
       </div>`;
     };
     return `<div class="itin">
-      <div class="sec-title">${ic('calendar_today')}${dateRange(trip.days)}</div>
+      <div class="itin-head">
+        <div class="sec-title">${ic('calendar_today')}${dateRange(trip.days)}</div>
+        <p class="itin-note">Planned for ${budgetLabel(trip.budget).toLowerCase()}${{ save: ', with free sights and cheaper meals', splurge: ', with guided experiences added', standard: '' }[budgetTier(trip.budget)]}</p>
+      </div>
       <div class="day-chips no-bar">
         <button class="day-chip ${f === 'all' ? 'active' : ''}" data-act="day-filter" data-day="all">All</button>
         ${trip.itin.map((_, i) => `<button class="day-chip ${f === i ? 'active' : ''}" data-act="day-filter" data-day="${i}">Day ${i + 1}</button>`).join('')}
@@ -1034,12 +1037,54 @@ function toast(text) {
 /* ───────── Actions ───────── */
 const panelOf = () => activeChat().panel;
 
+/* Budget shapes the itinerary: under $4,000 per person swaps pricier activities for free or cheap
+   places, $4,000–5,999 is the standard plan, $6,000+ adds a guided experience to each full day.
+   Activities that differ from the standard plan carry a tag. */
+function budgetTier(b) { return b < 4000 ? 'save' : b < 6000 ? 'standard' : 'splurge'; }
+function planItinerary(city, n, budget) {
+  const tier = budgetTier(budget), days = buildItinerary(city, n, tier);
+  if (tier === 'standard') return days;
+  if (tier === 'splurge') {
+    const r = recsOf(city), recs = [...r.spots, ...r.social];
+    let k = 0;
+    days.slice(1, -1).forEach(d => {
+      const slot = d.slots.find(s => s.name === 'Afternoon'), i = slot.acts.findIndex(a => a.opt === 'Option A');
+      const taken = new Set(d.slots.flatMap(s => s.acts.map(a => a.title)));
+      for (let tries = 0; i >= 0 && tries < recs.length; tries++) {
+        const [title, meta, , placeId, img] = recs[k++ % recs.length];
+        if (taken.has(title)) continue;
+        const pl = placeById(placeId);
+        slot.acts[i] = act(slot.acts[i].time, title, meta.split(' · ')[0], pl ? pl.emoji : '✨', { img: img || (pl && pl.img), placeId, opt: 'Option A' });
+        break;
+      }
+    });
+  }
+  /* Tag what changed. On a tight budget only count real savings: a pick that replaced a pricier one
+     (a Figma activity with no place counts as paid). */
+  const base = buildItinerary(city, n, 'standard');
+  const price = a => (a.placeId ? costOf(placeById(a.placeId)) : Infinity);
+  days.forEach((d, i) => d.slots.forEach((s, j) => s.acts.forEach((a, x) => {
+    const b = base[i].slots[j].acts[x];
+    if (!b || b.title === a.title) return;
+    if (tier === 'splurge') a.tag = 'Upgrade';
+    else if (price(b) > price(a)) a.tag = 'Budget pick';
+  })));
+  return days;
+}
+const budgetChanges = itin => itin.flatMap(d => d.slots.flatMap(s => s.acts)).filter(a => a.tag).length;
+function budgetSummary(trip) {
+  const n = budgetChanges(trip.itin), tier = budgetTier(trip.budget);
+  if (tier === 'standard') return 'The itinerary is back to the standard plan';
+  if (!n) return 'No cheaper swaps found, so the itinerary stays the same';
+  return tier === 'save' ? `${plural(n, 'activity', 'activities')} swapped for cheaper picks` : `${plural(n, 'guided experience')} added`;
+}
+
 /* A preset from the list updates the trip in place; a custom value is sent to Zoya as a chat prompt. */
 function setDays(n, custom) {
   const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId];
   closePop();
   if (n === t.days) return;
-  t.days = n; t.itin = buildItinerary(city, n); t.open = allOpen(n); t.filter = 'all';
+  t.days = n; t.itin = planItinerary(city, n, t.budget); t.open = allOpen(n); t.filter = 'all';
   if (custom) return send(`Change ${city.name} to ${n} days`, { text: `Done. ${city.name} is now ${n} days, ${dateRange(n)}. I’ve updated the itinerary to match.` });
   renderChatCol(); renderSheet();
   toast(`${city.name} is now ${n} days. Itinerary updated.`);
@@ -1048,10 +1093,11 @@ function setBudget(n, custom) {
   const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId];
   closePop();
   if (n === t.budget) return;
-  t.budget = n;
-  if (custom) return send(`Set the ${city.name} budget to ${budgetLabel(n).toLowerCase()}`, { text: `Got it. I’ll keep ${city.name} under ${money(n)} per person and flag anything that goes over.` });
+  t.budget = n; t.itin = planItinerary(city, t.days, n); t.open = allOpen(t.days); t.filter = 'all';
+  const summary = budgetSummary(t);
+  if (custom) return send(`Set the ${city.name} budget to ${budgetLabel(n).toLowerCase()}`, { text: `Got it. I’ve planned ${city.name} for ${budgetLabel(n).toLowerCase()}. ${summary}, and I’ll flag anything that goes over.` });
   renderChatCol(); renderSheet();
-  toast(`Budget set to ${budgetLabel(n).toLowerCase()}`);
+  toast(`${summary}`);
 }
 
 /* The custom number field in the days and budget lists */

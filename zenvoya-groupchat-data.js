@@ -201,11 +201,33 @@ function figmaDay(rows, label, where, near) {
   return { label, city: where, slots, near: near || [] };
 }
 
-function buildItinerary(city, nDays) {
+/* Price of a place, read from its meta ("¥3,800 per person", "From ISK 9,990"); free places are 0.
+   Only compared within one city, so the currency doesn't matter. */
+const costOf = p => { const m = p.meta.match(/\d[\d,]*/); return m ? +m[0].replace(/,/g, '') : 0; };
+
+/* On a tight budget the Tokyo plan swaps its priciest Figma activities for cheaper places. */
+const BUDGET_SWAPS = {
+  tokyo: { 'Sushi-making class': 'akihabara', 'Ginza sushi dinner': 'ramenx', 'Farewell shabu-shabu': 'goldengai' },
+};
+
+/* tier: 'save' | 'standard' | 'splurge'. 'splurge' extras are added in zenvoya-groupchat.js (planItinerary). */
+function buildItinerary(city, nDays, tier = 'standard') {
   const n = nDays || city.days;
   const spots = city.places.filter(p => p.cat === 'spot' && !p.extra);
   const food = city.places.filter(p => p.cat === 'food' && !p.extra);
   const all = city.places.filter(p => !p.extra);
+  /* Tight budget on a generated day: swap each paid place for the cheapest cheaper one not already that day */
+  const saveDay = day => {
+    const used = new Set(day.slots.flatMap(s => s.acts.map(a => a.placeId)));
+    day.slots.forEach(s => { s.acts = s.acts.map(a => {
+      const p = placeById(a.placeId);
+      const q = (p.cat === 'food' ? food : spots).filter(x => costOf(x) < costOf(p) && !used.has(x.id)).sort((x, y) => costOf(x) - costOf(y))[0];
+      if (!q) return a;
+      used.add(q.id);
+      return placeAct(a.time, q, a.opt);
+    }); });
+    return day;
+  };
   const fixed = FIGMA_DAYS[city.id];
   let si = 0, fi = 0;
   const spot = () => spots[si++ % spots.length];
@@ -215,14 +237,20 @@ function buildItinerary(city, nDays) {
     const label = `${WEEKDAYS[d % 7]}, Oct ${3 + d}`;
     if (d === 0) days.push(figmaDay(FIGMA_DAYS.first, label, 'New York City'));
     else if (d === n - 1) days.push(figmaDay(FIGMA_DAYS.last, label, 'New York City'));
-    else if (fixed) { const k = (d - 1) % fixed.length; days.push(figmaDay(fixed[k], label, city.name, (FIGMA_NEAR[city.id] || [])[k])); }
+    else if (fixed) {
+      const k = (d - 1) % fixed.length, day = figmaDay(fixed[k], label, city.name, (FIGMA_NEAR[city.id] || [])[k]);
+      const swaps = tier === 'save' && BUDGET_SWAPS[city.id];
+      if (swaps) day.slots.forEach(s => { s.acts = s.acts.map(a => (swaps[a.title] ? placeAct(a.time, placeById(swaps[a.title]), a.opt) : a)); });
+      days.push(day);
+    }
     else {
       const a = spot(), b = spots.length > 2 ? spot() : eat();
-      days.push({ label, city: city.name, slots: [
+      const day = { label, city: city.name, slots: [
         { name: 'Morning', acts: [placeAct('09:00–10:30', spot())] },
         { name: 'Afternoon', acts: [placeAct('13:00–14:30', a, 'Option A'), placeAct('13:00–14:30', b, 'Option B')] },
         { name: 'Evening', acts: [placeAct('18:00–19:30', eat())] },
-      ] });
+      ] };
+      days.push(tier === 'save' ? saveDay(day) : day);
     }
   }
   return days;
