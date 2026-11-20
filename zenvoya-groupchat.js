@@ -112,20 +112,43 @@ function tripCardHTML(city, chat, { selected = false, raised = false } = {}) {
   </button>`;
 }
 
-function bookingHTML(item, inCart) {
-  const cb = inCart ? `<span class="cb s20 ${item.expired ? 'off' : item.checked ? 'on' : ''}">${ic('check')}</span>` : '';
-  const pill = item.expired ? 'Offer has expired.' : `Offer expiring in <b>${item.offer}</b>`;
-  return `<div class="booking ${item.expired ? 'expired' : ''}">
-    <div class="booking-pill-row"><span class="booking-pill ${item.tone}">${ic('schedule', 's12')}<span>${pill}</span></span></div>
-    <button class="booking-card" data-act="${inCart ? 'cart-toggle' : 'cart'}" data-id="${item.id}">
-      <div class="booking-left">${cb}
-        ${item.kind === 'flight' ? `<span class="booking-logo"><img src="images/figma/airline.png" alt=""></span>` : ph(item.thumb, '🏨', 'booking-thumb')}
-        <div class="booking-text"><b>${item.title}</b><span>${item.sub}</span></div>
-      </div>
-      <div class="booking-price"><b>${item.price}</b><span>${item.priceSub}</span></div>
+/* Unfinished booking on the home page: the cart line (logo or photo, name, route, expiry under the route, price)
+   as a card in a horizontal carousel. Opens the cart. */
+function homeBookingHTML(item) {
+  const media = item.kind === 'flight' ? `<span class="cart-logo"><img src="images/figma/airline.png" alt=""></span>` : ph(item.thumb, '🏨', 'cart-thumb');
+  const expiry = item.expired ? `<span class="cart-expiry">${ic('schedule')}<span>Expired</span></span>`
+    : `<span class="cart-expiry">${ic('schedule')}<span>Expiring in <b>${item.offer}</b></span></span>`;
+  return `<button class="hb-card ${item.expired ? 'expired' : ''}" data-act="cart">
+    <span class="hb-group">${item.group}</span>
+    <span class="hb-row">${media}
+      <span class="cart-text"><b>${item.title}</b><span class="cart-sub">${item.sub}</span>${expiry}</span>
+      <span class="cart-price"><b>${item.price}</b><span>${item.priceSub}</span></span>
+    </span>
+  </button>`;
+}
+
+/* Upcoming trip on the home page: photo, dates, booking status per tab, travelers */
+function upcomingCardHTML(t) {
+  const trip = tripOf(t.chat, t.city.id), c = t.city, status = tripStatus(trip);
+  const people = ['me', ...trip.members].map(personById);
+  const go = `data-act="open-trip" data-city="${c.id}" data-chat="${t.chat.id}"`;
+  return `<div class="up-card">
+    <button class="up-main" ${go}>
+      ${ph(c.img, c.flag, 'up-photo')}
+      <span class="up-title"><b>${c.name}</b><span>${trip.days} days</span></span>
+      <span class="up-meta">${ic('calendar_today')}${dateRange(trip.days)}<i class="dot s3"></i>${c.flag} ${c.country}</span>
+      <span class="up-blurb">${c.blurb}</span>
     </button>
+    <div class="up-status">${Object.entries(status).map(([tab, done]) => `<button class="up-chip ${done ? 'done' : 'todo'}" ${go} data-tab="${tab}" aria-label="${tab}: ${done ? 'booked' : 'nothing booked yet'}"><span class="tab-status ${done ? 'done' : 'todo'}">${ic(done ? 'check' : 'priority_high')}</span>${tab}</button>`).join('')}</div>
+    <div class="up-people"><span class="av-stack ring">${people.map(f => avatarHTML(f, 28)).join('')}</span><span>${esc(names(people.map(f => f.id)))}</span></div>
   </div>`;
 }
+
+/* Trip being planned on the home page: a compact row */
+const planRowHTML = t => {
+  const days = t.chat.tripState[t.city.id] ? t.chat.tripState[t.city.id].days : t.city.days;
+  return `<button class="plan-row" data-act="open-trip" data-city="${t.city.id}" data-chat="${t.chat.id}">${ph(t.city.img, t.city.flag)}<span class="plan-text"><b>${t.city.name}</b><span>${t.city.flag} ${t.city.country}<i class="dot s3"></i>${days} days</span></span>${ic('chevron_right')}</button>`;
+};
 
 /* note: booking details shown on the same row, after the labels */
 const labelsHTML = (labels, note = '') => labels.length ? `<div class="flight-labels">${labels.map(l => `<span class="label ${(l === 'Best' || l === 'In cart') ? 'blue' : 'green'}">${l === 'Booked' ? ic('check') : ''}${l}</span>`).join('')}${note ? `<span class="label-note">${note}</span>` : ''}</div>` : '';
@@ -252,19 +275,25 @@ function homeHTML() {
       <h2>${zoyaSVG()}Tell me about your next adventure</h2>
       ${chatInputHTML('home')}
     </section>
-    <section class="home-cards">
-      <div class="home-card"><div class="home-card-in tight no-bar">
-        <h3>${plural(state.cart.length, 'Unfinished booking')}</h3>
-        ${state.cart.map(i => bookingHTML(i, false)).join('')}
-      </div></div>
-      <div class="home-card"><div class="home-card-in no-bar">
+    <section class="home-split">
+      <div class="home-panel">
         <h3>${plural(upcoming.length, 'Upcoming trip')}</h3>
-        ${upcoming.map(t => tripCardHTML(t.city, t.chat)).join('')}
-      </div></div>
-      <div class="home-card"><div class="home-card-in no-bar">
-        <h3>${planned.length} Trips being planned</h3>
-        ${planned.map(t => tripCardHTML(t.city, t.chat)).join('')}
-      </div></div>
+        ${upcoming.map(upcomingCardHTML).join('')}
+      </div>
+      <div class="home-panel">
+        <h3>${plural(planned.length, 'Trip')} being planned</h3>
+        <div class="plan-list">${planned.map(planRowHTML).join('')}</div>
+      </div>
+    </section>
+    <section class="home-block">
+      <div class="hb-head">
+        <h3>${plural(state.cart.length, 'Unfinished booking')}</h3>
+        <div class="hb-nav">
+          <button class="hb-arrow" data-act="hb-scroll" data-d="-1" aria-label="Scroll bookings left">${ic('chevron_left')}</button>
+          <button class="hb-arrow" data-act="hb-scroll" data-d="1" aria-label="Scroll bookings right">${ic('chevron_right')}</button>
+        </div>
+      </div>
+      <div class="hb-track no-bar" id="hbTrack">${state.cart.map(homeBookingHTML).join('')}</div>
     </section>
     <section class="home-block">
       <h3>Your friends’ activities</h3>
@@ -1244,7 +1273,13 @@ const ACTIONS = {
   chip: d => send(d.text),
   start: d => { state.activeChatId = null; state.page = 'chat'; render(); send(d.text); },
 
-  'open-trip': d => { closePop(); openTrip(d.chat ? chatById(d.chat) : activeChat(), d.city); },
+  'open-trip': d => {
+    closePop();
+    openTrip(d.chat ? chatById(d.chat) : activeChat(), d.city);
+    if (d.tab) { const p = panelOf(); p.tab = d.tab; p.sheet = 'open'; renderSheet(); }
+  },
+  /* Home bookings carousel: move by about one card */
+  'hb-scroll': d => { const t = $('#hbTrack'); t.scrollBy({ left: +d.d * (t.querySelector('.hb-card').offsetWidth + 12), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); },
   'close-panel': () => { activeChat().panel = null; closePop(); render(); },
   tab: d => { const p = panelOf(); p.tab = d.tab; p.sheet = 'open'; renderSheet(); },
   'open-loc': d => {

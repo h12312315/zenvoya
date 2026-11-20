@@ -265,11 +265,51 @@ body[data-page="home"] .main { gap: 16px; }
 .home-hero { flex: none; min-height: 136px; display: flex; flex-direction: column; align-items: center; }
 .home-hero h2 { height: 40px; display: flex; align-items: center; gap: 4px; font-size: 18px; font-weight: 700; color: var(--z-ink); }
 .home-hero .composer { max-width: 660px; margin-top: 20px; padding-bottom: 20px; }
-.home-cards { flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; height: 429px; }
-.home-card { background: var(--z-white); border-radius: var(--z-r-20); overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
-.home-card h3, .home-block h3 { font-size: 16px; font-weight: 700; line-height: 1.4; color: var(--z-ink); }
-.home-card-in { padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; min-height: 0; }
-.home-card-in.tight { gap: 8px; }
+.home-panel h3, .home-block h3 { font-size: 16px; font-weight: 700; line-height: 1.4; color: var(--z-ink); }
+
+/* Upcoming trip (left) and trips being planned (right) */
+.home-split { flex: none; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.home-panel { background: var(--z-white); border-radius: var(--z-r-20); padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.up-card { display: flex; flex-direction: column; gap: 12px; padding: 8px 8px 14px; border: 1px solid var(--z-line); border-radius: var(--z-r-16); box-shadow: var(--z-shadow-card); }
+.up-card:hover { border-color: rgba(108, 0, 246, 0.45); }
+.up-main { display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: left; }
+.up-photo { width: 100%; height: 180px; border-radius: var(--z-r-12); margin-bottom: 6px; }
+.up-main > :not(.ph), .up-status, .up-people { padding: 0 4px; }
+.up-title { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.up-title b { font-family: var(--z-font-display); font-size: 20px; font-weight: 700; line-height: 1.3; color: var(--z-ink); }
+.up-title span { font-size: 14px; color: var(--z-muted); white-space: nowrap; }
+.up-meta { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; line-height: 1.4; color: var(--z-ink); }
+.up-meta .ms { font-size: 16px; color: var(--z-icon); }
+.up-blurb { font-size: 14px; line-height: 1.4; color: var(--z-muted); }
+.up-status { display: flex; flex-wrap: wrap; gap: 8px; }
+.up-chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px 0 4px; border-radius: var(--z-r-pill); font-size: 13px; font-weight: 500; color: var(--z-ink); }
+.up-chip.done { background: var(--z-tag-green-soft); border: 1px solid var(--z-tag-green-bg); }
+.up-chip.todo { background: var(--z-tag-red-soft); border: 1px solid var(--z-tag-red-bg); }
+.up-chip .tab-status { width: 22px; height: 22px; }
+.up-chip .tab-status .ms { font-size: 14px; }
+.up-chip:hover { filter: brightness(0.98); }
+.up-people { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--z-muted); }
+.plan-list { display: flex; flex-direction: column; gap: 8px; }
+.plan-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 12px 8px 8px; border: 1px solid var(--z-line); border-radius: var(--z-r-16); text-align: left; }
+.plan-row:hover { border-color: rgba(108, 0, 246, 0.45); }
+.plan-row .ph { width: 64px; height: 64px; flex: none; border-radius: var(--z-r-12); }
+.plan-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.plan-text b { font-size: 16px; font-weight: 600; line-height: 1.4; color: var(--z-ink); }
+.plan-text span { display: flex; align-items: center; gap: 6px; font-size: 14px; line-height: 1.4; color: var(--z-muted); }
+.plan-row > .ms { font-size: 20px; color: var(--z-icon); }
+
+/* Unfinished bookings: cart-style cards in a horizontal carousel */
+.hb-head { display: flex; align-items: center; justify-content: space-between; }
+.hb-nav { display: flex; gap: 8px; }
+.hb-arrow { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--z-line); background: var(--z-white); }
+.hb-arrow:hover { background: var(--z-bg); }
+.hb-arrow .ms { font-size: 20px; color: var(--z-ink); }
+.hb-track { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -16px; padding: 2px 16px 6px; scroll-padding: 0 16px; }
+.hb-card { flex: none; width: 340px; max-width: 85%; scroll-snap-align: start; display: flex; flex-direction: column; gap: 6px; padding: 12px 16px; border: 1px solid var(--z-line); border-radius: var(--z-r-16); box-shadow: var(--z-shadow-card); text-align: left; background: var(--z-white); }
+.hb-card:hover { border-color: rgba(108, 0, 246, 0.45); }
+.hb-group { font-size: 12px; font-weight: 600; line-height: 18px; color: var(--z-muted); }
+.hb-row { display: flex; align-items: center; gap: 12px; }
+.hb-card.expired .cart-logo, .hb-card.expired .cart-thumb, .hb-card.expired .cart-text, .hb-card.expired .cart-price { opacity: 0.4; }
 .home-block { flex: none; background: var(--z-white); border-radius: var(--z-r-20); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .home-friends { display: flex; gap: 20px; }
 .home-map { height: 298px; border-radius: var(--z-r-20); overflow: hidden; background: #cfe3f3; }
@@ -297,29 +337,6 @@ body[data-page="home"] .main { gap: 16px; }
 .trip-card-top b { font-size: 16px; font-weight: 600; line-height: 1.4; color: var(--z-ink); }
 .trip-card-body span, .trip-card-body p { font-size: 14px; line-height: 1.4; color: var(--z-muted); }
 
-/* ───────── 8. BOOKING ITEM (home + cart) ───────── */
-.booking { display: flex; flex-direction: column; flex: none; }
-.booking-pill-row { display: flex; justify-content: flex-end; padding: 0 8px; margin-bottom: -8px; position: relative; z-index: 1; }
-.booking-pill { display: flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 12px; line-height: 18px; color: var(--z-muted); }
-.booking-pill.red { background: var(--z-offer-red); }
-.booking-pill.yellow { background: var(--z-offer-yellow); }
-.booking-pill.gray { background: var(--z-bg); }
-.booking-pill b { font-weight: 600; color: var(--z-red); }
-.booking-card {
-  display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px; width: 100%;
-  background: var(--z-white); border: 1px solid var(--z-line); border-radius: var(--z-r-12); box-shadow: var(--z-shadow-item); text-align: left;
-}
-.booking-left { display: flex; align-items: center; gap: 16px; min-width: 0; }
-.booking-logo { width: 48px; height: 48px; flex: none; border-radius: var(--z-r-12); border: 1px solid var(--z-line); background: var(--z-white); display: grid; place-items: center; overflow: hidden; }
-.booking-logo img { width: 48px; height: 48px; }
-.booking-thumb { width: 48px; height: 48px; border-radius: var(--z-r-8); }
-.booking-text { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.booking-text b { font-size: 14px; font-weight: 600; line-height: 22px; color: var(--z-ink); }
-.booking-text span { font-size: 12px; line-height: 18px; color: var(--z-muted-cool); }
-.booking-price { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex: none; }
-.booking-price b { font-size: 16px; font-weight: 700; line-height: 22px; color: var(--z-ink); }
-.booking-price span { font-size: 11px; line-height: 18px; color: var(--z-muted-cool); text-align: right; }
-.booking.expired .booking-thumb, .booking.expired .booking-price, .booking.expired .booking-text { opacity: 0.4; }
 
 /* ───────── 9. CHAT ───────── */
 .chat-page { display: flex; gap: 8px; height: 100%; }
@@ -812,8 +829,7 @@ button.hotel-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 }
 @media (max-width: 980px) {
   .side-panel { position: fixed; top: 54px; right: 16px; bottom: 16px; left: 75px; width: auto; height: auto; z-index: 30; }
-  .home-cards { grid-template-columns: 1fr; height: auto; }
-  .home-card { max-height: 429px; }
+  .home-split { grid-template-columns: 1fr; }
   .home-tiles { grid-template-columns: 1fr; }
   .fr-grid { grid-template-columns: 1fr; }
   .plain-scroll { padding: 24px 20px; }
