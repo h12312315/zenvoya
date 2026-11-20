@@ -687,7 +687,7 @@ function renderMapDays(chat, p) {
   el.innerHTML = `<button class="day-chip float ${f === 'all' ? 'active' : ''}" data-act="map-day" data-day="all" aria-pressed="${f === 'all'}" ${show ? '' : 'tabindex="-1"'}>All</button>`
     + trip.itin.map((_, i) => `<button class="day-chip float ${f === i ? 'active' : ''}" data-act="map-day" data-day="${i}" aria-pressed="${f === i}" ${show ? '' : 'tabindex="-1"'}>Day ${i + 1}</button>`).join('');
   const on = f === 'all' ? new Set() : dayPinIds(trip, f);
-  Object.entries(tripMarkers).forEach(([id, m]) => m.classList.toggle('day', on.has(id)));
+  Object.entries(tripMarkers).forEach(([id, m]) => m.classList.toggle('pin-day', on.has(id)));
 }
 function fitPins(ids) {
   if (!tripMap || !ids.length) return;
