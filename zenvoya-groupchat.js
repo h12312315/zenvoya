@@ -140,8 +140,8 @@ function flightItemHTML(f, city, { tag = 'div', attrs = '', selected = false, de
   </${tag}>`;
 }
 
-function hotelItemHTML(h, img) {
-  return `<div class="hotel-item">
+function hotelItemHTML(h, img, { tag = 'div', attrs = '', selected = false } = {}) {
+  return `<${tag} class="hotel-item ${selected ? 'selected' : ''}" ${attrs}>
     ${ph(img, '🏨', '', '<div class="hotel-dots"><i></i><i></i><i></i><i></i></div>')}
     <div class="hotel-info">
       ${labelsHTML(h.labels)}
@@ -151,7 +151,7 @@ function hotelItemHTML(h, img) {
       <span class="hotel-dist">0.25 mi from center</span>
     </div>
     <div class="hotel-price"><b>${h.price}</b><span>per night</span><span>per room</span></div>
-  </div>`;
+  </${tag}>`;
 }
 const hotelImgs = () => HOTELS.map(h => h.img);
 
@@ -345,14 +345,14 @@ function msgHTML(m, i, chat) {
     const city = CITIES[m.flights.dest], p = chat.panel;
     return `<div class="flights">${text}
       <div class="route-line"><span>NYC → ${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span></div>
-      ${FLIGHTS.map((f, fi) => flightItemHTML(f, city, { tag: 'button', details: true, attrs: `data-act="open-flight" data-msg="${i}" data-i="${fi}"`, selected: !!p && p.type === 'flight' && p.msg === i && p.i === fi })).join('')}
+      ${FLIGHTS.map((f, fi) => flightItemHTML(f, city, { tag: 'button', details: true, attrs: `data-act="open-flight" data-msg="${i}" data-i="${fi}"`, selected: p && p.type === 'flight' && p.msg === i ? p.i === fi : m.flights.pick === fi })).join('')}
     </div>`;
   }
   if (m.hotels) {
     const city = CITIES[m.hotels.dest], imgs = hotelImgs();
     return `<div class="flights">${text}
       <div class="route-line"><span>${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span></div>
-      ${HOTELS.map((h, hi) => hotelItemHTML(h, imgs[hi])).join('')}
+      ${HOTELS.map((h, hi) => hotelItemHTML(h, imgs[hi], { selected: m.hotels.pick === hi })).join('')}
     </div>`;
   }
   if (m.recs) {
@@ -616,7 +616,14 @@ const ratingHTML = (value, label = '', after = '') => {
   const on = Math.ceil(value - 0.5);
   return `<div class="rating"><b>${label ? label + ' ' : ''}${value.toFixed(1)}</b><span class="stars" role="img" aria-label="${on} out of 5 stars">${[0, 1, 2, 3, 4].map(i => ic('star', i < on ? 'fill' : 'fill off')).join('')}</span>${after}</div>`;
 };
-const tabsHTML = (tabs, active, act) => `<div class="tabs" role="tablist">${tabs.map(t => `<button class="tab ${t === active ? 'active' : ''}" role="tab" aria-selected="${t === active}" data-act="${act}" data-tab="${t}">${t}</button>`).join('')}</div>`;
+/* todo: tabs that still have something to book get a red dot */
+const tabsHTML = (tabs, active, act, todo = new Set()) => `<div class="tabs" role="tablist">${tabs.map(t => `<button class="tab ${t === active ? 'active' : ''}" role="tab" aria-selected="${t === active}" data-act="${act}" data-tab="${t}">${t}${todo.has(t) ? '<i class="tab-dot" aria-hidden="true"></i><span class="sr">, nothing booked yet</span>' : ''}</button>`).join('')}</div>`;
+/* Flights are done once booked; a stay in the cart isn't booked yet; activities are never booked in this prototype */
+const tripTodo = trip => new Set([
+  !(trip.bookedFlights && trip.bookedFlights.length) && 'Flights',
+  !(trip.bookedStays && trip.bookedStays.length) && 'Stays',
+  !(trip.bookedActs && trip.bookedActs.length) && 'Activities',
+].filter(Boolean));
 
 function tripSheetHTML(chat, p) {
   const city = CITIES[p.cityId], trip = tripOf(chat, p.cityId);
@@ -635,7 +642,7 @@ function tripSheetHTML(chat, p) {
           <button class="sel" data-act="pop" data-pop="trip-people" aria-label="People on this trip">${ic('person')}<span>${1 + trip.members.length}</span><span class="av-stack">${faces.map(f => avatarHTML(f, 20)).join('')}</span>${ic('arrow_drop_down')}</button>
         </div>
       </div>
-      <div class="tabs-bar trip">${tabsHTML(TRIP_TABS, p.tab, 'tab')}</div>
+      <div class="tabs-bar trip">${tabsHTML(TRIP_TABS, p.tab, 'tab', tripTodo(trip))}</div>
       <div class="tab-body">${TAB_BODY[p.tab](city, trip)}</div>
     </div>`;
 }
@@ -715,12 +722,9 @@ const TAB_BODY = {
     }
     return `<div class="sec">
       <p class="empty-note">You haven’t booked any flights.</p>
-      <div class="deal-box">
-        <div class="deal-col">
-          <div class="route-line sm"><span>NYC → ${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span><i class="dot"></i><span class="faint">Updated: 10/12/2026</span></div>
-          ${FLIGHTS.map(fl => flightItemHTML(fl, city)).join('')}
-        </div>
-        <div class="deal-fade">${zoyaSVG()}<p>Secure these deals now!</p><button class="btn primary gap8" data-act="explore-flights">${ic('flight')}Explore flights</button></div>
+      <div class="deal-list">
+        <div class="route-line sm"><span>NYC → ${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span><i class="dot"></i><span class="faint">Updated: 10/12/2026</span></div>
+        ${FLIGHTS.map((fl, i) => flightItemHTML(fl, city, { tag: 'button', attrs: `data-act="ask-flight" data-i="${i}" aria-label="Ask Zoya about the ${fl.out.dep} flight to ${city.name}, ${fl.price} round trip"` })).join('')}
       </div>
     </div>`;
   },
@@ -737,12 +741,9 @@ const TAB_BODY = {
     }
     return `<div class="sec">
       <p class="empty-note">You haven’t booked any stays.</p>
-      <div class="deal-box">
-        <div class="deal-col">
-          <div class="route-line sm"><span>NYC → ${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span><i class="dot"></i><span class="faint">Updated: 10/12/2026</span></div>
-          ${HOTELS.map((h, i) => hotelItemHTML(h, imgs[i])).join('')}
-        </div>
-        <div class="deal-fade">${zoyaSVG()}<p>Secure these deals now!</p><button class="btn primary gap8" data-act="explore-stays">${ic('hotel')}Explore stays</button></div>
+      <div class="deal-list">
+        <div class="route-line sm"><span>${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span><i class="dot"></i><span class="faint">Updated: 10/12/2026</span></div>
+        ${HOTELS.map((h, i) => hotelItemHTML(h, imgs[i], { tag: 'button', attrs: `data-act="ask-stay" data-i="${i}" aria-label="Ask Zoya about ${esc(h.name)} in ${city.name}, ${h.price} per night"` })).join('')}
       </div>
     </div>`;
   },
@@ -1200,8 +1201,17 @@ const ACTIONS = {
   'gallery-close': () => { state.gallery = null; renderGallery(); },
   attach: d => { state.pickFor = d.for; $('#filePick').click(); },
   'attach-remove': d => { state.attach[d.for].splice(+d.i, 1); renderAttach(d.for); },
-  'explore-flights': () => send(`Find flights from New York to ${CITIES[panelOf().cityId].name}`),
-  'explore-stays': () => send(`Find places to stay in ${CITIES[panelOf().cityId].name}`),
+  /* A flight or stay card in the trip drawer asks Zoya to look for that option in the chat */
+  'ask-flight': d => {
+    const city = CITIES[panelOf().cityId], f = FLIGHTS[+d.i];
+    send(`Look for the ${f.out.dep} American Airlines flight from New York to ${city.name}, ${f.price} round trip`,
+      { text: `Here’s the ${f.out.dep} flight to ${city.name}, with a few others on the same dates in case you want to compare.`, flights: { dest: city.id, pick: +d.i } });
+  },
+  'ask-stay': d => {
+    const city = CITIES[panelOf().cityId], h = HOTELS[+d.i];
+    send(`Look for a room at ${h.name} in ${city.name}, ${h.price} per night`,
+      { text: `Here’s ${h.name} in ${city.name}, with a few other stays nearby for the same dates.`, hotels: { dest: city.id, pick: +d.i } });
+  },
 
   pop: (d, el) => { if (state.pop && state.pop.type === d.pop && !el.closest('#pop')) return closePop(); openPop(d.pop, el.closest('#pop') ? null : el); },
   'toggle-person': d => { const s = state.pop.sel; s.has(d.id) ? s.delete(d.id) : s.add(d.id); renderPop(); },

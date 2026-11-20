@@ -475,6 +475,8 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .tabs { display: flex; gap: 12px; border-bottom: 1px solid var(--z-line); }
 .tab { padding: 12px 8px 10px; font-size: 14px; font-weight: 500; line-height: 20px; color: var(--z-ink); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
 .tab.active { font-weight: 700; color: var(--z-purple); border-bottom-color: var(--z-purple); }
+.tab-dot { display: inline-block; width: 6px; height: 6px; margin-left: 4px; border-radius: 50%; background: var(--z-red); vertical-align: top; transform: translateY(2px); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .sheet-scroll { flex: 1; min-height: 0; overflow-y: auto; position: relative; }
 
 /* Loading state while a preset day count or budget re-plans the trip */
@@ -548,13 +550,12 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .day-add .ms { font-size: 16px; }
 
 /* Deals box (Flights / Stays tabs) */
-.deal-box { background: var(--z-bg); border-radius: var(--z-r-20); padding: 20px 0; height: 567px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
-.deal-col { width: 445px; max-width: calc(100% - 32px); display: flex; flex-direction: column; gap: 12px; }
-.deal-col .flight-item { zoom: 0.8256; width: auto; }
-.deal-col .hotel-item { zoom: 0.8337; }
-.deal-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 248px; padding: 28px 0; background: linear-gradient(to bottom, rgba(238, 238, 238, 0), var(--z-bg) 55%); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px; }
-.deal-fade .zoya { width: 48px; height: 48px; margin: 0; }
-.deal-fade p { font-size: 14px; color: var(--z-ink); }
+.deal-list { display: flex; flex-direction: column; gap: 12px; }
+/* Flight and stay cards in the trip drawer ask Zoya about that option */
+.deal-list .hotel-item .ph { width: 38%; max-width: 220px; flex: none; }
+button.hotel-item { width: 100%; text-align: left; }
+button.hotel-item:hover { border-color: rgba(108, 0, 246, 0.45); }
+.hotel-item.selected { border-color: var(--z-purple); }
 
 /* Activity recommendation card */
 .acts { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
