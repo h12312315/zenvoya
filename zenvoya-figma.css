@@ -438,7 +438,7 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .maplibregl-ctrl-attrib { font-size: 10px; }
 
 /* Day filter floating on the map, just above the collapsed drawer */
-.map-days { position: absolute; left: 0; right: 0; bottom: calc(284px + 8px); z-index: 3; display: flex; gap: 8px; padding: 6px 16px; overflow-x: auto; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 0.2s, transform 0.2s; }
+.map-days { position: absolute; left: 0; right: 0; bottom: calc(50% + 8px); z-index: 3; display: flex; gap: 8px; padding: 6px 16px; overflow-x: auto; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 0.2s, transform 0.2s; }
 .map-days.show { opacity: 1; transform: none; pointer-events: auto; }
 .day-chip.float { background: var(--z-white); box-shadow: var(--z-shadow-card); }
 .day-chip.float.active { background: var(--z-purple-100); }
@@ -448,7 +448,7 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
   background: var(--z-white); border-radius: var(--z-r-20) var(--z-r-20) 0 0; box-shadow: var(--z-shadow-sheet);
   display: flex; flex-direction: column; transition: top 0.36s cubic-bezier(0.22, 0.8, 0.24, 1);
 }
-.sheet.collapsed { top: calc(100% - var(--sheet-peek, 284px)); }
+.sheet.collapsed { top: calc(100% - var(--sheet-peek, 50%)); }
 .sheet.dragging { transition: none; }
 .sheet-fixed { flex: none; padding: 16px 16px 12px; }
 .sheet-head { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }

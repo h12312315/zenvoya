@@ -31,7 +31,11 @@ const GREETING = 'Hi I’m Zoya, your personal travel assistant. What should we 
 const MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 const TRIP_TABS = ['Overview', 'Itinerary', 'Flights', 'Stays', 'Activities'];
 const LOC_TABS = ['Overview', 'Reviews', 'About'];
-const SHEET = { trip: { open: 61, peek: 284 }, loc: { open: 78, peek: 281 } };
+/* Drawer stops: open sits this many px below the panel top; collapsed shows the bottom PEEK of the panel,
+   so the map and the drawer split the panel in half. */
+const SHEET = { trip: { open: 61 }, loc: { open: 78 } };
+const PEEK = 0.5;
+const peekPx = () => { const el = $('.side-panel'); return Math.round((el ? el.clientHeight : innerHeight) * PEEK); };
 const FRIEND_LINES = ['I think so...', 'Love this plan!', 'Works for me 🙌', 'Can we add one more food stop?', 'I’m in. Which dates are we looking at?'];
 
 let _uid = 0;
@@ -511,7 +515,7 @@ function mountTripMap(p) {
   city.places.forEach(pl => b.extend(pl.ll));
   tripMap = new maplibregl.Map({
     container: 'tpMap', style: MAP_STYLE, bounds: b, attributionControl: { compact: true },
-    fitBoundsOptions: { padding: { top: 76, bottom: SHEET.trip.peek + 40, left: 48, right: 48 }, maxZoom: 13.5 },
+    fitBoundsOptions: { padding: { top: 76, bottom: peekPx() + 40, left: 48, right: 48 }, maxZoom: 13.5 },
   });
   city.places.forEach(pl => {
     const el = document.createElement('button');
@@ -536,7 +540,7 @@ function renderSheet() {
   sheet.dataset.scope = scope;
   sheet.className = 'sheet' + (p.sheet === 'collapsed' ? ' collapsed' : '');
   sheet.style.setProperty('--sheet-open', dims.open + 'px');
-  sheet.style.setProperty('--sheet-peek', dims.peek + 'px');
+  sheet.style.setProperty('--sheet-peek', PEEK * 100 + '%');
   sheet.innerHTML = (p.loc ? locSheetHTML(chat, p) : tripSheetHTML(chat, p)) + (p.loading ? sheetLoadingHTML(p.loading) : '');
   sheet.setAttribute('aria-busy', String(!!p.loading));
   const sc = sheet.querySelector('.sheet-scroll');
@@ -607,7 +611,7 @@ function fitPins(ids) {
   if (!tripMap || !ids.length) return;
   const b = new maplibregl.LngLatBounds();
   ids.forEach(id => b.extend(placeById(id).ll));
-  tripMap.fitBounds(b, { padding: { top: 76, bottom: SHEET.trip.peek + 76, left: 48, right: 48 }, maxZoom: 13.5, duration: 600 });
+  tripMap.fitBounds(b, { padding: { top: 76, bottom: peekPx() + 40, left: 48, right: 48 }, maxZoom: 13.5, duration: 600 });
 }
 
 const handleHTML = p => `<button class="sheet-handle" aria-label="${p.sheet === 'collapsed' ? 'Expand' : 'Collapse'} details" aria-expanded="${p.sheet !== 'collapsed'}"><i></i></button>`;
@@ -1155,7 +1159,7 @@ const ACTIONS = {
   tab: d => { const p = panelOf(); p.tab = d.tab; p.sheet = 'open'; renderSheet(); },
   'open-loc': d => {
     const p = panelOf(); p.loc = d.place; p.locTab = 'Overview'; renderSheet();
-    if (tripMap && p.sheet === 'collapsed') tripMap.easeTo({ center: placeById(d.place).ll, padding: { top: 60, bottom: SHEET.loc.peek, left: 0, right: 0 }, duration: 500 });
+    if (tripMap && p.sheet === 'collapsed') tripMap.easeTo({ center: placeById(d.place).ll, padding: { top: 60, bottom: peekPx(), left: 0, right: 0 }, duration: 500 });
   },
   'back-trip': () => { panelOf().loc = null; renderSheet(); },
   'loc-tab': d => { const p = panelOf(); p.locTab = d.tab; p.sheet = 'open'; renderSheet(); },
@@ -1318,7 +1322,7 @@ document.addEventListener('pointermove', e => {
   if (!drag.moved) return;
   const dims = panelOf().loc ? SHEET.loc : SHEET.trip;
   drag.sheet.classList.add('dragging');
-  drag.sheet.style.top = Math.min(drag.height - dims.peek, Math.max(dims.open, drag.top + dy)) + 'px';
+  drag.sheet.style.top = Math.min(drag.height * (1 - PEEK), Math.max(dims.open, drag.top + dy)) + 'px';
 });
 document.addEventListener('pointerup', e => {
   if (!drag) return;
