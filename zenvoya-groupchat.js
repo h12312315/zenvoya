@@ -625,7 +625,7 @@ const tabStatusHTML = done => done
   ? `<span class="tab-status done">${ic('check')}</span><span class="sr">, booked</span>`
   : `<span class="tab-status todo">${ic('priority_high')}</span><span class="sr">, nothing booked yet</span>`;
 /* Booking status line at the top of the Flights, Stays and Activities tabs, with the same icon as the tab */
-const bookNoteHTML = (done, text) => `<p class="book-note"><span class="tab-status ${done ? 'done' : 'todo'}">${ic(done ? 'check' : 'priority_high')}</span>${text}</p>`;
+const bookNoteHTML = (done, text) => `<p class="book-note ${done ? 'done' : 'todo'}"><span class="tab-status ${done ? 'done' : 'todo'}">${ic(done ? 'check' : 'priority_high')}</span>${text}</p>`;
 /* Zoya introduces the suggestions when nothing is booked yet */
 const SUGGESTED_ON = '10/12/2026';
 const zoyaLineHTML = what => `<p class="zoya-line">${zoyaSVG()}<span>Here are some suggested ${what} found on ${SUGGESTED_ON}.</span></p>`;

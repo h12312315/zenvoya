@@ -51,6 +51,8 @@
   --z-tag-blue-fg: #0077a8;
   --z-tag-red-bg: #ffe1df;
   --z-tag-red-fg: #e0251b;
+  --z-tag-red-soft: #fff4f3;
+  --z-tag-green-soft: #effcf0;
   --z-offer-red: #fee2e2;
   --z-offer-yellow: #fef8e2;
 
@@ -525,9 +527,13 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .loc-card .ph { width: 100%; height: 104.5px; border-radius: var(--z-r-12); }
 .loc-card b { font-size: 16px; font-weight: 600; line-height: 1.4; color: var(--z-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
 .loc-card span { font-size: 14px; line-height: 1.4; color: var(--z-muted); display: block; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.book-note { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; line-height: 1.4; color: var(--z-ink); }
-.book-note .tab-status { width: 20px; height: 20px; }
-.book-note .tab-status .ms { font-size: 14px; }
+/* Booking status banner: light red when nothing is booked, light green once booked.
+   The icon keeps its own circle, one step stronger than the banner. */
+.book-note { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--z-r-12); font-size: 14px; font-weight: 500; line-height: 1.4; color: var(--z-ink); }
+.book-note.todo { background: var(--z-tag-red-soft); border: 1px solid var(--z-tag-red-bg); }
+.book-note.done { background: var(--z-tag-green-soft); border: 1px solid var(--z-tag-green-bg); }
+.book-note .tab-status { width: 24px; height: 24px; }
+.book-note .tab-status .ms { font-size: 16px; }
 .zoya-line { display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 1.4; color: var(--z-ink); }
 .zoya-line .zoya { width: 24px; height: 24px; margin: 0; }
 
