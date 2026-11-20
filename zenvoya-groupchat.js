@@ -35,7 +35,7 @@ const LOC_TABS = ['Overview', 'Reviews', 'About'];
    so the map and the drawer split the panel in half. */
 const SHEET = { trip: { open: 61 }, loc: { open: 78 } };
 const PEEK = 0.5;
-const peekPx = () => { const el = $('.side-panel'); return Math.round((el ? el.clientHeight : innerHeight) * PEEK); };
+const peekPx = () => { if (state.page === 'trip') return 0; const el = $('.side-panel'); return Math.round((el ? el.clientHeight : innerHeight) * PEEK); };
 const FRIEND_LINES = ['I think so...', 'Love this plan!', 'Works for me 🙌', 'Can we add one more food stop?', 'I’m in. Which dates are we looking at?'];
 
 let _uid = 0;
@@ -43,7 +43,7 @@ function makeChat(name, members = []) {
   return { id: 'chat' + (++_uid), name, named: !!name, members: [...members], messages: [{ from: 'zoya', text: GREETING }], trips: [], tripState: {}, panel: null };
 }
 
-const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: false, cartOpen: false, cart: CART_SEED.map(i => ({ ...i })), pop: null, popRect: null, friend: null, gallery: null, spot: null, attach: { home: [], chat: [] }, pickFor: 'chat' };
+const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: false, cartOpen: false, cart: CART_SEED.map(i => ({ ...i })), pop: null, popRect: null, friend: null, gallery: null, spot: null, tripReturn: { page: 'home', chatId: null, panel: null }, attach: { home: [], chat: [] }, pickFor: 'chat' };
 
 (function seed() {
   const japan = makeChat('Japan trip');
@@ -228,7 +228,7 @@ function renderAttach(id) {
 }
 
 /* ───────── App render ───────── */
-const TITLES = { home: 'Home', chat: 'Your chats', shop: 'Shop', trips: 'Your trips', friends: 'Friends' };
+const TITLES = { home: 'Home', chat: 'Your chats', shop: 'Shop', trips: 'Your trips', friends: 'Friends', trip: 'Trip details' };
 let tripMap = null, tripMarkers = {}, homeMap = null;
 
 function destroyMaps() {
@@ -238,12 +238,14 @@ function destroyMaps() {
 
 function render() {
   document.body.dataset.page = state.page;
+  /* The trip page keeps the nav item of the page it was opened from */
+  const navPage = state.page === 'trip' ? state.tripReturn.page : state.page;
   document.querySelectorAll('.nav-item').forEach(n => {
-    const on = n.dataset.page === state.page;
+    const on = n.dataset.page === navPage;
     n.classList.toggle('active', on);
     if (on) n.setAttribute('aria-current', 'page'); else n.removeAttribute('aria-current');
   });
-  $('#title').textContent = TITLES[state.page];
+  $('#title').textContent = state.page === 'trip' ? `${CITIES[activeChat().panel.cityId].name} trip` : TITLES[state.page];
   $('#cartBadge').textContent = state.cart.length;
   $('#cartBadge').style.display = state.cart.length ? '' : 'none';
   const page = $('#page');
@@ -275,6 +277,9 @@ function homeHTML() {
       <h2>${zoyaSVG()}Tell me about your next adventure</h2>
       ${chatInputHTML('home')}
     </section>
+    <section class="home-tiles">
+      ${tiles.map(([label, i, img, text]) => `<button class="home-tile" style="background-image:url('${img}')" data-act="start" data-text="${esc(text)}"><span class="icon" style="background-position:${40 - (i + 0.5) * 112}px -16px"></span><span>${label}</span></button>`).join('')}
+    </section>
     <section class="home-split">
       <div class="home-panel">
         <h3>${plural(upcoming.length, 'Upcoming trip')}</h3>
@@ -302,9 +307,6 @@ function homeHTML() {
     <section class="home-block">
       <h3>Your trips in 2026</h3>
       <div class="home-map" id="homeMap"></div>
-    </section>
-    <section class="home-tiles">
-      ${tiles.map(([label, i, img, text]) => `<button class="home-tile" style="background-image:url('${img}')" data-act="start" data-text="${esc(text)}"><span class="icon" style="background-position:${40 - (i + 0.5) * 112}px -16px"></span><span>${label}</span></button>`).join('')}
     </section>
   </div>`;
 }
@@ -454,6 +456,7 @@ function send(text, preset, files) {
   text = text.trim();
   const hasFiles = !!(files && files.length);
   if (!text && !hasFiles) return;
+  if (state.page === 'trip') state.page = 'chat';  /* prompts sent from the trip page show in its chat */
   let chat = activeChat();
   if (!chat) { chat = makeChat(''); state.chats.unshift(chat); state.activeChatId = chat.id; }
   const m = { from: 'me', text };
@@ -531,6 +534,33 @@ function openTrip(chat, cityId) {
   render();
 }
 
+/* Trips opened outside the chat (home, trips page, map pins) get a full page with the same content as the
+   trip drawer: details on the left, the map on the right. Back returns to where it was opened from. */
+function openTripPage(chat, cityId, tab = 'Overview') {
+  if (!chat.trips.includes(cityId)) chat.trips.push(cityId);
+  tripOf(chat, cityId);
+  if (state.page !== 'trip') state.tripReturn = { page: state.page, chatId: state.activeChatId, panel: chat.panel };
+  chat.panel = { type: 'trip', cityId, tab, sheet: 'open', loc: null, locTab: 'Overview' };
+  state.activeChatId = chat.id;
+  state.page = 'trip';
+  render();
+}
+function tripPageHTML() {
+  return `<div class="trip-page">
+    <section class="tpp-detail" aria-label="Trip details">
+      <div class="tpp-bar">
+        <button class="btn secondary gap8" data-act="trip-back">${ic('chevron_left')}Back</button>
+        <button class="btn outline gap8" data-act="trip-chat">${ic('chat_bubble')}Open chat</button>
+      </div>
+      <div class="sheet page" id="sheet"></div>
+    </section>
+    <section class="tpp-map" aria-label="Map">
+      <div class="tp-map" id="tpMap"></div>
+      <div class="map-days no-bar" id="mapDays" role="group" aria-label="Show a day on the map"></div>
+    </section>
+  </div>`;
+}
+
 /* ───────── Right panel: trip drawer ───────── */
 function renderPanel() {
   const host = $('#panelHost');
@@ -584,7 +614,7 @@ function renderSheet() {
   const dims = p.loc ? SHEET.loc : SHEET.trip;
   sheet.dataset.view = view;
   sheet.dataset.scope = scope;
-  sheet.className = 'sheet' + (p.sheet === 'collapsed' ? ' collapsed' : '');
+  sheet.className = 'sheet' + (state.page === 'trip' ? ' page' : p.sheet === 'collapsed' ? ' collapsed' : '');
   sheet.style.setProperty('--sheet-open', dims.open + 'px');
   sheet.style.setProperty('--sheet-peek', PEEK * 100 + '%');
   sheet.innerHTML = (p.loc ? locSheetHTML(chat, p) : tripSheetHTML(chat, p)) + (p.loading ? sheetLoadingHTML(p.loading) : '');
@@ -646,7 +676,7 @@ function renderMapDays(chat, p) {
   const el = $('#mapDays');
   if (!el) return;
   const trip = tripOf(chat, p.cityId), f = trip.filter;
-  const show = p.sheet === 'collapsed' && !p.loc;
+  const show = (p.sheet === 'collapsed' || state.page === 'trip') && !p.loc;
   el.classList.toggle('show', show);
   el.innerHTML = `<button class="day-chip float ${f === 'all' ? 'active' : ''}" data-act="map-day" data-day="all" aria-pressed="${f === 'all'}" ${show ? '' : 'tabindex="-1"'}>All</button>`
     + trip.itin.map((_, i) => `<button class="day-chip float ${f === i ? 'active' : ''}" data-act="map-day" data-day="${i}" aria-pressed="${f === i}" ${show ? '' : 'tabindex="-1"'}>Day ${i + 1}</button>`).join('');
@@ -1008,6 +1038,7 @@ const PAGES = {
   friends: { shell: () => '', render: renderFriends },
   trips: { shell: () => '', render: renderTrips },
   shop: { shell: () => '', render: renderShop },
+  trip: { shell: tripPageHTML, mount: () => mountTripMap(activeChat().panel), render: renderSheet },
 };
 
 /* ───────── Popover ───────── */
@@ -1203,29 +1234,44 @@ function afterSaveChange() {
 }
 
 /* ───────── Spot detail modal (from Zoya's suggestions in the chat) ───────── */
+let spotMap = null;
 function renderSpotModal() {
   const el = $('#spotModal'), s = state.spot;
   el.classList.toggle('open', !!s);
-  if (!s) { el.innerHTML = ''; return; }
+  if (!s) { if (spotMap) { spotMap.remove(); spotMap = null; } el.innerHTML = ''; delete el.dataset.id; return; }
   const pl = placeById(s.id), city = CITIES[pl.city], d = placeDetail(pl), trip = tripOf(activeChat(), s.city), saved = trip.saved.has(pl.id);
+  const saveBtn = `<button class="btn lg ${saved ? 'secondary saved' : 'primary'}" data-act="toggle-save" data-place="${pl.id}" data-city="${pl.city}" aria-pressed="${saved}">${ic('bookmark', saved ? 'fill' : '')}${saved ? 'Saved to trip' : 'Save to trip'}</button>`;
+  /* Already open on this spot (e.g. after Save): only the save button changes, so the map isn't rebuilt */
+  if (el.dataset.id === pl.id) { el.querySelector('[data-act=toggle-save]').outerHTML = saveBtn; return; }
+  if (spotMap) { spotMap.remove(); spotMap = null; }
+  el.dataset.id = pl.id;
   const kv = ([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`;
   el.innerHTML = `<div class="spot-modal" role="dialog" aria-modal="true" aria-labelledby="smTitle">
-    <div class="sm-hero">${ph(pl.img, pl.emoji)}<button class="round-btn sm-close" data-act="spot-close" aria-label="Close">${ic('close')}</button></div>
-    <div class="sm-body">
-      <div class="sm-title"><h3 id="smTitle">${pl.name}</h3><span>${city.flag} ${pl.area}, ${city.name}</span></div>
-      ${ratingHTML(+d.rating, '', `<span class="n">${d.count.toLocaleString()} reviews</span>`)}
-      <p class="sm-meta">${pl.meta}</p>
-      <p class="t16">${pl.desc}</p>
-      <div class="hr"></div>
-      <div class="kv-block"><h4 class="h16">Plan your visit</h4>${d.visit.map(kv).join('')}</div>
-      <div class="hr"></div>
-      <div class="kv-block g8"><h4 class="h16">Good to know</h4><p class="t16 muted">${pl.good}</p></div>
+    <div class="sm-content">
+      <div class="sm-hero">${ph(pl.img, pl.emoji)}</div>
+      <div class="sm-body">
+        <div class="sm-title"><h3 id="smTitle">${pl.name}</h3><span>${city.flag} ${pl.area}, ${city.name}</span></div>
+        ${ratingHTML(+d.rating, '', `<span class="n">${d.count.toLocaleString()} reviews</span>`)}
+        <p class="sm-meta">${pl.meta}</p>
+        <p class="t16">${pl.desc}</p>
+        <div class="hr"></div>
+        <div class="kv-block"><h4 class="h16">Plan your visit</h4>${d.visit.map(kv).join('')}</div>
+        <div class="hr"></div>
+        <div class="kv-block g8"><h4 class="h16">Good to know</h4><p class="t16 muted">${pl.good}</p></div>
+      </div>
+      <div class="sm-foot">
+        <button class="btn lg secondary" data-act="spot-map">${ic('map')}Open in trip</button>
+        ${saveBtn}
+      </div>
     </div>
-    <div class="sm-foot">
-      <button class="btn lg secondary" data-act="spot-map">${ic('map')}Show on map</button>
-      <button class="btn lg ${saved ? 'secondary saved' : 'primary'}" data-act="toggle-save" data-place="${pl.id}" data-city="${pl.city}" aria-pressed="${saved}">${ic('bookmark', saved ? 'fill' : '')}${saved ? 'Saved to trip' : 'Save to trip'}</button>
-    </div>
+    <div class="sm-map" id="smMap" role="img" aria-label="Map showing ${esc(pl.name)} in ${pl.area}, ${city.name}"></div>
+    <button class="round-btn sm-close" data-act="spot-close" aria-label="Close">${ic('close')}</button>
   </div>`;
+  if (typeof maplibregl === 'undefined') return;
+  spotMap = new maplibregl.Map({ container: 'smMap', style: MAP_STYLE, center: pl.ll, zoom: 14.5, attributionControl: { compact: true } });
+  const pin = document.createElement('div');
+  pin.className = 'pin on'; pin.textContent = pl.emoji; pin.setAttribute('aria-hidden', 'true');
+  new maplibregl.Marker({ element: pin }).setLngLat(pl.ll).addTo(spotMap);
 }
 function closeSpotModal() {
   if (!state.spot) return;
@@ -1275,16 +1321,25 @@ const ACTIONS = {
 
   'open-trip': d => {
     closePop();
-    openTrip(d.chat ? chatById(d.chat) : activeChat(), d.city);
+    const chat = d.chat ? chatById(d.chat) : activeChat();
+    if (state.page !== 'chat') return openTripPage(chat, d.city, d.tab);
+    openTrip(chat, d.city);
     if (d.tab) { const p = panelOf(); p.tab = d.tab; p.sheet = 'open'; renderSheet(); }
   },
+  'trip-back': () => {
+    const r = state.tripReturn;
+    activeChat().panel = r.panel;  /* the trip's chat gets back whatever panel it had */
+    state.activeChatId = r.chatId;
+    go(r.page);
+  },
+  'trip-chat': () => go('chat'),
   /* Home bookings carousel: move by about one card */
   'hb-scroll': d => { const t = $('#hbTrack'); t.scrollBy({ left: +d.d * (t.querySelector('.hb-card').offsetWidth + 12), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); },
   'close-panel': () => { activeChat().panel = null; closePop(); render(); },
   tab: d => { const p = panelOf(); p.tab = d.tab; p.sheet = 'open'; renderSheet(); },
   'open-loc': d => {
     const p = panelOf(); p.loc = d.place; p.locTab = 'Overview'; renderSheet();
-    if (tripMap && p.sheet === 'collapsed') tripMap.easeTo({ center: placeById(d.place).ll, padding: { top: 60, bottom: peekPx(), left: 0, right: 0 }, duration: 500 });
+    if (tripMap && (p.sheet === 'collapsed' || state.page === 'trip')) tripMap.easeTo({ center: placeById(d.place).ll, padding: { top: 60, bottom: peekPx(), left: 0, right: 0 }, duration: 500 });
   },
   'back-trip': () => { panelOf().loc = null; renderSheet(); },
   'loc-tab': d => { const p = panelOf(); p.locTab = d.tab; p.sheet = 'open'; renderSheet(); },
