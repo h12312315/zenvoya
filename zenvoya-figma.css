@@ -380,7 +380,9 @@ body[data-page="home"] .main { gap: 16px; }
 }
 button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .flight-item.selected { border-color: var(--z-purple); }
-.flight-labels { display: flex; gap: 8px; }
+.flight-labels { display: flex; align-items: center; gap: 8px; }
+.label .ms { font-size: 12px; font-weight: 700; margin-right: 2px; vertical-align: -2px; }
+.label-note { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; line-height: 1.4; color: var(--z-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .flight-main { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .flight-legs { display: flex; flex-direction: column; gap: 24px; }
 .flight-leg { display: flex; align-items: center; gap: 12px; }

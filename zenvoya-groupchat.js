@@ -125,9 +125,10 @@ function bookingHTML(item, inCart) {
   </div>`;
 }
 
-const labelsHTML = labels => labels.length ? `<div class="flight-labels">${labels.map(l => `<span class="label ${(l === 'Best' || l === 'In cart') ? 'blue' : 'green'}">${l}</span>`).join('')}</div>` : '';
+/* note: booking details shown on the same row, after the labels */
+const labelsHTML = (labels, note = '') => labels.length ? `<div class="flight-labels">${labels.map(l => `<span class="label ${(l === 'Best' || l === 'In cart') ? 'blue' : 'green'}">${l === 'Booked' ? ic('check') : ''}${l}</span>`).join('')}${note ? `<span class="label-note">${note}</span>` : ''}</div>` : '';
 
-function flightItemHTML(f, city, { tag = 'div', attrs = '', selected = false, details = false } = {}) {
+function flightItemHTML(f, city, { tag = 'div', attrs = '', selected = false, details = false, note = '' } = {}) {
   const line = n => `<span class="fl-line"><i class="end"></i>${n === 2 ? '<i class="stop" style="left:22px"></i><i class="stop" style="left:44px"></i>' : n === 1 ? '<i class="stop" style="left:33px"></i>' : ''}<i class="end r"></i></span>`;
   const leg = (l, from, to) => `<div class="flight-leg">${airLogo()}<div>
       <div class="flight-times"><span>${l.dep}</span>${line(l.stops)}<span>${l.arr}<sup>+1</sup></span></div>
@@ -135,7 +136,7 @@ function flightItemHTML(f, city, { tag = 'div', attrs = '', selected = false, de
     </div></div>`;
   const dur = l => `<div class="flight-dur"><b>${l.dur}${l.stops ? `<i class="dot s3"></i>${plural(l.stops, 'stop')}` : ''}</b><span>${l.stops ? l.via : 'Nonstop'}</span></div>`;
   return `<${tag} class="flight-item ${selected ? 'selected' : ''}" ${attrs}>
-    ${labelsHTML(f.labels)}
+    ${labelsHTML(f.labels, note)}
     <div class="flight-main">
       <div class="flight-legs">${leg(f.out, 'JFK', city.code)}${leg(f.back, city.code, 'JFK')}</div>
       <div class="flight-durs">${dur(f.out)}${dur(f.back)}</div>
@@ -736,8 +737,7 @@ const TAB_BODY = {
       return `<div class="sec">
         ${bookNoteHTML(true, 'You’ve booked your flights.')}
         <div class="route-line"><span>NYC → ${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span></div>
-        ${trip.bookedFlights.map(i => flightItemHTML({ ...FLIGHTS[i], labels: ['Booked'] }, city)).join('')}
-        <p class="status-line ok">${ic('check', 's16')}Confirmed · ${plural(1 + trip.members.length, 'traveler')} · Confirmation ZNV-48213</p>
+        ${trip.bookedFlights.map(i => flightItemHTML({ ...FLIGHTS[i], labels: ['Booked'] }, city, { note: `${esc(names(['me', ...trip.members]))}<i class="dot s3"></i>Confirmation ZNV-48213` })).join('')}
       </div>`;
     }
     return `<div class="sec">
