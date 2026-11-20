@@ -545,17 +545,11 @@ function openTripPage(chat, cityId, tab = 'Overview') {
   state.page = 'trip';
   render();
 }
-/* Where the trip page's breadcrumb leads back to */
-const CRUMB = { home: 'Home', trips: 'Trips', friends: 'Friends', shop: 'Shop' };
 function tripPageHTML() {
   return `<div class="trip-page">
     <section class="tpp-detail" aria-label="Trip details">
       <div class="tpp-bar">
-        <nav class="crumbs" aria-label="Breadcrumb">
-          <button class="crumb-link" data-act="trip-back">${ic('chevron_left')}${CRUMB[state.tripReturn.page] || 'Back'}</button>
-          <span class="crumb-sep" aria-hidden="true">/</span>
-          <span aria-current="page">${CITIES[activeChat().panel.cityId].name} trip</span>
-        </nav>
+        <button class="loc-back tpp-back" data-act="trip-back">${ic('chevron_left')}Back</button>
         <button class="btn outline gap8" data-act="trip-chat">${ic('chat_bubble')}Open chat</button>
       </div>
       <div class="sheet page" id="sheet"></div>
@@ -625,6 +619,9 @@ function renderSheet() {
   sheet.style.setProperty('--sheet-peek', PEEK * 100 + '%');
   sheet.innerHTML = (p.loc ? locSheetHTML(chat, p) : tripSheetHTML(chat, p)) + (p.loading ? sheetLoadingHTML(p.loading) : '');
   sheet.setAttribute('aria-busy', String(!!p.loading));
+  /* On the trip page, a place's own "Back to trip" link replaces the page's Back link */
+  const pageBack = $('.tpp-back');
+  if (pageBack) pageBack.hidden = !!p.loc;
   const sc = sheet.querySelector('.sheet-scroll');
   if (sc) {
     /* Same view keeps its place; a new tab stays pinned if the tabs were pinned; a collapsed drawer shows its top. */
