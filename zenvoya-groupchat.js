@@ -746,6 +746,7 @@ const TAB_BODY = {
         ${zoyaLineHTML('flight options')}
         ${FLIGHTS.map((fl, i) => flightItemHTML(fl, city, { tag: 'button', attrs: `data-act="ask-flight" data-i="${i}" aria-label="Ask Zoya about the ${fl.out.dep} flight to ${city.name}, ${fl.price} round trip"` })).join('')}
       </div>
+      <button class="btn secondary block gap8" data-act="explore-flights">${ic('add')}Explore more flights</button>
     </div>`;
   },
 
@@ -766,6 +767,7 @@ const TAB_BODY = {
         ${zoyaLineHTML('stays')}
         ${HOTELS.map((h, i) => hotelItemHTML(h, imgs[i], { tag: 'button', attrs: `data-act="ask-stay" data-i="${i}" aria-label="Ask Zoya about ${esc(h.name)} in ${city.name}, ${h.price} per night"` })).join('')}
       </div>
+      <button class="btn secondary block gap8" data-act="explore-stays">${ic('add')}Explore more stays</button>
     </div>`;
   },
 
@@ -1207,7 +1209,16 @@ const ACTIONS = {
     const chat = activeChat(), city = CITIES[panelOf().cityId];
     send(`Show me more places and activities in ${city.name}`, () => ({ text: `Here are some more places and activities you might like in ${city.name}:`, recs: { city: city.id, items: moreIdeas(chat, city.id) } }));
   },
-  /* Sent to Zoya as a chat prompt; her reply lists activities the tab doesn't already suggest */
+  /* Explore more: sent to Zoya as chat prompts, answered in the chat */
+  'explore-flights': () => {
+    const city = CITIES[panelOf().cityId];
+    send(`Show me more flights from New York to ${city.name}`, { text: `Here are more flight options from New York to ${city.name} for Sep 12 - Sep 26:`, flights: { dest: city.id } });
+  },
+  'explore-stays': () => {
+    const city = CITIES[panelOf().cityId];
+    send(`Show me more places to stay in ${city.name}`, { text: `Here are more places to stay in ${city.name} for Sep 12 - Sep 26:`, hotels: { dest: city.id } });
+  },
+  /* Her reply to this one lists activities the tab doesn't already suggest */
   'explore-acts': () => {
     const city = CITIES[panelOf().cityId];
     send(`Show me more activities in ${city.name}`, () => ({ text: `Here are a few more activities in ${city.name} you might like:`, recs: { city: city.id, items: moreActivities(city) } }));
