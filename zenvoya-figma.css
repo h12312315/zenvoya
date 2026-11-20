@@ -524,7 +524,14 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .sec-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 36px; }
 .sec-row b, .sec-sub { font-size: 14px; font-weight: 600; line-height: 1.4; color: var(--z-ink); }
 .loc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.loc-card { display: flex; flex-direction: column; gap: 8px; padding: 8px; background: var(--z-white); border: 1px solid var(--z-line); border-radius: var(--z-r-16); box-shadow: var(--z-shadow-card); text-align: left; min-width: 0; }
+.loc-card { position: relative; padding: 8px; background: var(--z-white); border: 1px solid var(--z-line); border-radius: var(--z-r-16); box-shadow: var(--z-shadow-card); min-width: 0; }
+.loc-open { display: flex; flex-direction: column; gap: 8px; width: 100%; min-width: 0; text-align: left; }
+/* Bookmark on a spot card: outline = not saved, filled purple = saved to this trip */
+.save-btn { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.94); box-shadow: var(--z-shadow-card); color: var(--z-ink); }
+.save-btn .ms { font-size: 18px; }
+.save-btn.on { color: var(--z-purple); }
+.save-btn:hover { background: var(--z-white); transform: scale(1.06); }
+.chat-spots { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
 .loc-card:hover { border-color: rgba(108, 0, 246, 0.45); }
 .loc-card .ph { width: 100%; height: 104.5px; border-radius: var(--z-r-12); }
 .loc-card b { font-size: 16px; font-weight: 600; line-height: 1.4; color: var(--z-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
@@ -740,6 +747,20 @@ button.hotel-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .lb-thumb { width: 72px; height: 54px; flex: none; border-radius: var(--z-r-8); background: var(--z-placeholder) center / cover; opacity: 0.6; }
 .lb-thumb:hover { opacity: 0.85; }
 .lb-thumb.active { opacity: 1; outline: 2px solid var(--z-purple); outline-offset: 2px; }
+
+/* Spot detail modal, opened from Zoya's suggestions in the chat */
+.spot-modal { width: min(520px, 100%); max-height: 100%; display: flex; flex-direction: column; background: var(--z-white); border-radius: var(--z-r-20); overflow: hidden; box-shadow: 0 24px 48px rgba(0, 0, 0, 0.30); }
+.sm-hero { position: relative; flex: none; height: 240px; }
+.sm-hero .ph { width: 100%; height: 100%; }
+.sm-close { position: absolute; right: 12px; top: 12px; }
+.sm-body { flex: 1; min-height: 0; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; }
+.sm-title { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.sm-title h3 { font-family: var(--z-font-display); font-size: 24px; font-weight: 700; line-height: 1.3; color: var(--z-ink); }
+.sm-title span { font-size: 14px; color: var(--z-muted); white-space: nowrap; }
+.sm-meta { font-size: 14px; line-height: 1.4; color: var(--z-muted); }
+.sm-foot { flex: none; display: flex; gap: 12px; padding: 16px 24px 20px; border-top: 1px solid var(--z-line); }
+.sm-foot .btn { flex: 1; font-size: 16px; }
+.sm-foot .btn.saved .ms { color: var(--z-purple); }
 
 /* ───────── 13. FRIENDS / TRIPS / SHOP PAGES ───────── */
 .plain-page { display: flex; gap: 8px; height: 100%; }

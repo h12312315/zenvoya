@@ -43,7 +43,7 @@ function makeChat(name, members = []) {
   return { id: 'chat' + (++_uid), name, named: !!name, members: [...members], messages: [{ from: 'zoya', text: GREETING }], trips: [], tripState: {}, panel: null };
 }
 
-const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: false, cartOpen: false, cart: CART_SEED.map(i => ({ ...i })), pop: null, popRect: null, friend: null, gallery: null, attach: { home: [], chat: [] }, pickFor: 'chat' };
+const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: false, cartOpen: false, cart: CART_SEED.map(i => ({ ...i })), pop: null, popRect: null, friend: null, gallery: null, spot: null, attach: { home: [], chat: [] }, pickFor: 'chat' };
 
 (function seed() {
   const japan = makeChat('Japan trip');
@@ -51,7 +51,9 @@ const state = { page: 'home', chats: [], activeChatId: null, listCollapsed: fals
     { from: 'me', text: '4-day trip from New York to Japan' },
     { from: 'zoya', text: 'Here are some ideas that you might like:', cards: ['tokyo', 'kyoto'] },
     { from: 'me', text: 'Does everyone like this plan?' },
-    { from: 'zoya', text: 'Do you want any adjustment? I’m here for you!' });
+    { from: 'zoya', text: 'Do you want any adjustment? I’m here for you!' },
+    { from: 'me', text: 'What shopping can I do in Tokyo?' },
+    { from: 'zoya', text: 'Here are a few shopping spots in Tokyo. Tap one to see the details, or save it to your trip.', spots: { city: 'tokyo', ids: ['ginza', 'ameyoko', 'takeshita', 'omotesando'] } });
   japan.trips = ['tokyo', 'kyoto'];
 
   const onsite = makeChat('Onsite 2026', ['maya', 'alex']);
@@ -358,6 +360,12 @@ function msgHTML(m, i, chat) {
     return `<div class="flights">${text}
       <div class="route-line"><span>${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span></div>
       ${HOTELS.map((h, hi) => hotelItemHTML(h, imgs[hi], { selected: m.hotels.pick === hi })).join('')}
+    </div>`;
+  }
+  if (m.spots) {
+    const trip = tripOf(chat, m.spots.city);
+    return `<div class="flights">${text}
+      <div class="loc-grid chat-spots">${m.spots.ids.map(id => spotCardHTML(placeById(id), trip, 'spot-modal')).join('')}</div>
     </div>`;
   }
   if (m.recs) {
@@ -668,7 +676,17 @@ function tripSheetHTML(chat, p) {
     </div>`;
 }
 
-const locCardHTML = pl => `<button class="loc-card" data-act="open-loc" data-place="${pl.id}">${ph(pl.img, pl.emoji)}<div><b>${pl.name}</b><span>📍 ${pl.area}</span></div></button>`;
+/* Spot card, used in the Overview's saved list and in Zoya's suggestions in the chat.
+   open: what the card opens ('open-loc' = location drawer, 'spot-modal' = detail modal).
+   The bookmark saves or unsaves the place for this trip. */
+function spotCardHTML(pl, trip, open = 'open-loc') {
+  const saved = trip.saved.has(pl.id);
+  return `<div class="loc-card">
+      <button class="loc-open" data-act="${open}" data-place="${pl.id}" data-city="${pl.city}">${ph(pl.img, pl.emoji)}<div><b>${pl.name}</b><span>📍 ${pl.area}</span></div></button>
+      ${saveBtnHTML(pl, saved)}
+    </div>`;
+}
+const saveBtnHTML = (pl, saved) => `<button class="save-btn ${saved ? 'on' : ''}" data-act="toggle-save" data-place="${pl.id}" data-city="${pl.city}" aria-pressed="${saved}" aria-label="${saved ? `Remove ${esc(pl.name)} from this trip` : `Save ${esc(pl.name)} to this trip`}" title="${saved ? 'Remove from trip' : 'Save to trip'}">${ic('bookmark', saved ? 'fill' : '')}</button>`;
 
 function recsOf(city) {
   if (city.recs) return city.recs;
@@ -689,12 +707,12 @@ const TAB_BODY = {
       <div class="sec">
         <div class="sec-title">${ic('bookmark')}Saved to this trip</div>
         <div class="sec-row"><b>🏞️ Spots (${spots.length} in itinerary)</b><button class="btn secondary" data-act="explore-more">${ic('add')}Explore more</button></div>
-        <div class="loc-grid">${spots.map(locCardHTML).join('')}</div>
+        <div class="loc-grid">${spots.map(x => spotCardHTML(x, trip)).join('')}</div>
       </div>
       ${food.length ? `<div class="hr"></div>
       <div class="sec">
         <div class="sec-sub">🍔 Food (${food.length} in itinerary)</div>
-        <div class="loc-grid">${food.map(locCardHTML).join('')}</div>
+        <div class="loc-grid">${food.map(x => spotCardHTML(x, trip)).join('')}</div>
       </div>` : ''}`;
   },
 
@@ -1135,6 +1153,60 @@ function budgetSummary(trip) {
   return tier === 'save' ? `${plural(n, 'activity', 'activities')} swapped for cheaper picks` : `${plural(n, 'guided experience')} added`;
 }
 
+/* Saving a place adds it to "Saved to this trip" and to the itinerary (evening of day 2), as Add to trip does.
+   Unsaving takes it out of both; activities the itinerary planned for that place on its own stay. */
+function savePlace(trip, id) {
+  trip.saved.add(id);
+  const day = trip.itin[Math.min(1, trip.itin.length - 1)];
+  day.slots[day.slots.length - 1].acts.push({ ...placeAct('20:00–21:00', placeById(id)), added: true });
+  return day.label;
+}
+function unsavePlace(trip, id) {
+  trip.saved.delete(id);
+  trip.itin.forEach(day => day.slots.forEach(s => { s.acts = s.acts.filter(a => !(a.added && a.placeId === id)); }));
+}
+/* Redraw everything that shows saved state */
+function afterSaveChange() {
+  renderChatCol();
+  const p = activeChat().panel;
+  if (p && p.type === 'trip') renderSheet();
+  if (state.spot) renderSpotModal();
+}
+
+/* ───────── Spot detail modal (from Zoya's suggestions in the chat) ───────── */
+function renderSpotModal() {
+  const el = $('#spotModal'), s = state.spot;
+  el.classList.toggle('open', !!s);
+  if (!s) { el.innerHTML = ''; return; }
+  const pl = placeById(s.id), city = CITIES[pl.city], d = placeDetail(pl), trip = tripOf(activeChat(), s.city), saved = trip.saved.has(pl.id);
+  const kv = ([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`;
+  el.innerHTML = `<div class="spot-modal" role="dialog" aria-modal="true" aria-labelledby="smTitle">
+    <div class="sm-hero">${ph(pl.img, pl.emoji)}<button class="round-btn sm-close" data-act="spot-close" aria-label="Close">${ic('close')}</button></div>
+    <div class="sm-body">
+      <div class="sm-title"><h3 id="smTitle">${pl.name}</h3><span>${city.flag} ${pl.area}, ${city.name}</span></div>
+      ${ratingHTML(+d.rating, '', `<span class="n">${d.count.toLocaleString()} reviews</span>`)}
+      <p class="sm-meta">${pl.meta}</p>
+      <p class="t16">${pl.desc}</p>
+      <div class="hr"></div>
+      <div class="kv-block"><h4 class="h16">Plan your visit</h4>${d.visit.map(kv).join('')}</div>
+      <div class="hr"></div>
+      <div class="kv-block g8"><h4 class="h16">Good to know</h4><p class="t16 muted">${pl.good}</p></div>
+    </div>
+    <div class="sm-foot">
+      <button class="btn lg secondary" data-act="spot-map">${ic('map')}Show on map</button>
+      <button class="btn lg ${saved ? 'secondary saved' : 'primary'}" data-act="toggle-save" data-place="${pl.id}" data-city="${pl.city}" aria-pressed="${saved}">${ic('bookmark', saved ? 'fill' : '')}${saved ? 'Saved to trip' : 'Save to trip'}</button>
+    </div>
+  </div>`;
+}
+function closeSpotModal() {
+  if (!state.spot) return;
+  const from = state.spot.from;
+  state.spot = null;
+  renderSpotModal();
+  const back = from && document.contains(from) ? from : document.querySelector(`#msgsIn .loc-open[data-place="${from && from.dataset.place}"]`);
+  if (back) back.focus();
+}
+
 /* A preset from the list updates the trip in place; a custom value is sent to Zoya as a chat prompt. */
 function setDays(n, custom) {
   const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId];
@@ -1182,13 +1254,22 @@ const ACTIONS = {
   'back-trip': () => { panelOf().loc = null; renderSheet(); },
   'loc-tab': d => { const p = panelOf(); p.locTab = d.tab; p.sheet = 'open'; renderSheet(); },
   'add-to-trip': d => {
-    const chat = activeChat(), trip = tripOf(chat, chat.panel.cityId), pl = placeById(d.place);
-    if (trip.saved.has(pl.id)) return toast('Already in your itinerary');
-    trip.saved.add(pl.id);
-    const day = trip.itin[Math.min(1, trip.itin.length - 1)];
-    day.slots[day.slots.length - 1].acts.push(placeAct('20:00–21:00', pl));
-    renderSheet();
-    toast(`Added to ${day.label}`);
+    const chat = activeChat(), trip = tripOf(chat, chat.panel.cityId);
+    if (trip.saved.has(d.place)) return toast('Already in your itinerary');
+    toast(`Added to ${savePlace(trip, d.place)}`);
+    afterSaveChange();
+  },
+  'toggle-save': d => {
+    const trip = tripOf(activeChat(), d.city), pl = placeById(d.place), city = CITIES[d.city];
+    if (trip.saved.has(pl.id)) { unsavePlace(trip, pl.id); toast(`Removed ${pl.name} from ${city.name}`); }
+    else toast(`Saved ${pl.name} to ${city.name}, added to ${savePlace(trip, pl.id)}`);
+    afterSaveChange();
+  },
+  'spot-modal': (d, el) => { state.spot = { id: d.place, city: d.city, from: el }; renderSpotModal(); $('#spotModal .sm-close').focus(); },
+  'spot-close': closeSpotModal,
+  'spot-map': () => {
+    const s = state.spot; closeSpotModal();
+    ACTIONS['open-loc-chat']({ city: s.city, place: s.id });
   },
   'day-filter': d => { const t = tripOf(activeChat(), panelOf().cityId); t.filter = d.day === 'all' ? 'all' : +d.day; renderSheet(); },
   'map-day': d => {
@@ -1291,6 +1372,7 @@ document.addEventListener('click', e => {
   const handle = e.target.closest('.sheet-handle');
   if (handle && e.detail === 0) { const p = panelOf(); p.sheet = p.sheet === 'collapsed' ? 'open' : 'collapsed'; renderSheet(); return; }
   if (state.gallery && e.target.id === 'lightbox') { state.gallery = null; renderGallery(); return; }
+  if (state.spot && e.target.id === 'spotModal') { closeSpotModal(); return; }
   if (state.pop && !e.target.closest('#pop') && !(t && t.dataset.act === 'pop')) closePop();
   if (state.cartOpen && !e.target.closest('#cart') && !(t && ['cart', 'flight-select'].includes(t.dataset.act))) { state.cartOpen = false; renderCart(); }
   if (t && ACTIONS[t.dataset.act]) ACTIONS[t.dataset.act](t.dataset, t, e);
@@ -1334,6 +1416,7 @@ document.addEventListener('keydown', e => {
   if (state.gallery && (e.key === 'ArrowLeft' || e.key === 'ArrowRight') && state.gallery.items.length > 1) { ACTIONS['gallery-nav']({ d: e.key === 'ArrowLeft' ? -1 : 1 }); return; }
   if (e.key !== 'Escape') return;
   if (state.gallery) { state.gallery = null; renderGallery(); }
+  else if (state.spot) closeSpotModal();
   else if (state.pop) closePop();
   else if (state.cartOpen) { state.cartOpen = false; renderCart(); }
 });

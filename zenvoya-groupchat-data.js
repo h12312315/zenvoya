@@ -42,6 +42,10 @@ const CITIES = {
       P('tsukiji', 'Tsukiji Outer Market', 'Tsukiji', '🍣', 'tsukiji-outer-market.jpg', 139.7707, 35.6655, 'food', 'Japanese · Seafood · ¥2,000–4,000 per person', 'Daily, 5:00–14:00', '60–90 minutes', 'Rows of stalls selling fresh sushi, tamagoyaki and grilled seafood. Come hungry and come early.', 'Cash helps · Closed some Wednesdays · Best before 10:00'),
       P('goldengai', 'Shinjuku Golden Gai', 'Shinjuku', '🍺', 'shinjuku-golden-gai.jpg', 139.7046, 35.6940, 'food', 'Bars · Izakaya · ¥2,000–3,000 per person', 'Daily, 19:00–late', '1–2 hours', 'Six narrow alleys of tiny bars, each seating a handful of people. Good for a late drink and a snack.', 'Cover charges common · Tiny bars · Evenings only'),
       P('ramenx', 'Ramen X', 'Ginza', '🍜', null, 139.7650, 35.6717, 'food', 'Japanese · Ramen · ¥1,000–2,000 per person', 'Daily, 11:00–22:00', '45–60 minutes', 'A cozy ramen stop in Tokyo, with rich broth, springy noodles and comforting bowls topped with chashu and a soft-boiled egg.', 'Dine-in · Counter seating · Great for a quick lunch', true),
+      /* Shopping spots Zoya suggests in the Japan trip chat; not saved to the trip until the user saves them */
+      P('ginza', 'Ginza', 'Chūō', '🛍️', null, 139.7690, 35.6745, 'spot', 'Shopping district · Free', 'Shops, 11:00–20:00', '2–3 hours', 'Department stores, flagship boutiques and Japanese craft shops along wide avenues. The main street closes to cars on weekend afternoons.', 'Car-free on weekends · Tax-free shopping · Food halls in the basements', true),
+      P('ameyoko', 'Ameyoko Market', 'Ueno', '🏮', null, 139.7745, 35.7105, 'spot', 'Street market · Free', 'Daily, 10:00–20:00', '1–2 hours', 'A busy market street under the train tracks between Ueno and Okachimachi, selling snacks, sneakers, cosmetics and dried goods.', 'Cash helps · Busy on weekends · Great street snacks', true),
+      P('takeshita', 'Takeshita Street', 'Harajuku', '🍭', null, 139.7036, 35.6716, 'spot', 'Shopping street · Free', 'Shops, 10:00–20:00', '1 hour', 'A narrow pedestrian street of youth fashion, crêpe stands and kawaii accessory shops, right across from Harajuku station.', 'Crowded on weekends · Try a crêpe · Near Meiji Shrine', true),
     ],
     recs: {
       spots: [['Tsukiji food walk', 'Tsukiji · 3 hours', 'Est. ¥9,000 / person', 'tsukiji', 'images/figma/rec-tsukiji-food-walk.jpg'], ['Tokyo skyline at sunset', 'Shibuya · 1–2 hours', 'Est. ¥3,000 / person', 'shibuya', 'images/figma/rec-tokyo-skyline-at-sunset.jpg']],
@@ -152,12 +156,17 @@ const placeById = id => { for (const c of Object.values(CITIES)) { const p = c.p
   rx.img = rx.photos[0].img;
 })(placeById('ramenx'));
 
+/* Shopping spot photos: Ginza and Ameyoko are Tokyo gallery photos from Figma, Takeshita Street uses the Harajuku activity photo */
+Object.entries({ ginza: 'images/figma/tokyo-gallery-5.jpg', ameyoko: 'images/figma/tokyo-gallery-4.jpg', takeshita: 'images/figma/act-harajuku-snack-trail.jpg' })
+  .forEach(([id, img]) => { placeById(id).img = img; });
+
 /* Gallery photos: every photo carries a name and a description */
 const placePhotos = p => p.photos || (p.img ? [{ img: p.img, name: p.name, desc: p.desc }] : []);
-const cityPhotos = c => [
-  ...(c.photos || [{ img: c.img, name: c.heroName || c.name, desc: c.heroDesc || c.blurb }]),
-  ...c.places.filter(p => p.img).map(p => ({ img: p.img, name: p.name, desc: p.desc })),
-];
+const cityPhotos = c => {
+  const own = c.photos || [{ img: c.img, name: c.heroName || c.name, desc: c.heroDesc || c.blurb }];
+  const seen = new Set(own.map(p => p.img));
+  return [...own, ...c.places.filter(p => p.img && !seen.has(p.img) && seen.add(p.img)).map(p => ({ img: p.img, name: p.name, desc: p.desc }))];
+};
 
 /* Search keywords → cities to suggest */
 const DESTINATIONS = [
