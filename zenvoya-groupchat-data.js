@@ -16,6 +16,12 @@ FRIENDS.forEach(f => { f.photo = `images/figma/friend-${f.id}.jpg`; });
 /* Trips each friend shares with you (shown in Friend detail). Counts match their "shared trips" line. */
 Object.entries({ maya: ['tokyo', 'kyoto'], alex: ['barcelona'], priya: ['tokyo', 'lisbon'], james: ['lisbon'], sofia: ['barcelona'], noah: ['reykjavik'] })
   .forEach(([id, trips]) => { FRIENDS.find(f => f.id === id).trips = trips; });
+/* Pending friend requests (Friends page → Requests). Approving one moves the person into FRIENDS. */
+const REQUESTS = [
+  { id: 'kenji', name: 'Kenji Tanaka', initial: 'K', color: '#5856d6', loc: 'Tokyo, Japan', mutual: '3 mutual friends', when: '5 hours ago' },
+  { id: 'emma', name: 'Emma Davis', initial: 'E', color: '#ff9500', loc: 'Chicago, IL', mutual: 'Maya Chen is a mutual friend', when: '2 days ago' },
+  { id: 'lena', name: 'Lena Fischer', initial: 'L', color: '#af52de', loc: 'Berlin, Germany', mutual: 'Alex Rivera is a mutual friend', when: '1 week ago' },
+];
 const personById = id => (id === 'me' ? ME : FRIENDS.find(f => f.id === id));
 
 /* ───────── Places ─────────

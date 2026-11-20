@@ -991,6 +991,7 @@ function renderCart() {
 function renderFriends() {
   const f = state.friend && personById(state.friend);
   const tab = state.friendTab || 'Shared trips';
+  const list = state.friendsList || 'all';
   /* A friend's shared trips, matched to the chat each trip lives in so the card can open it */
   const shared = f ? (f.trips || []).map(id => allTrips().find(t => t.city.id === id)).filter(Boolean) : [];
   $('#page').innerHTML = `<div class="plain-page">
@@ -1002,11 +1003,25 @@ function renderFriends() {
           <button class="btn primary lg" data-act="soon" data-what="Adding a friend">Add friend</button>
         </div>
         <div class="fr-tools"><input class="fr-field" placeholder="Search your friends" aria-label="Search your friends" data-filter="friends"><button class="fr-sort" data-act="soon" data-what="Sorting">Sort: Recently added</button></div>
-        <div class="fr-tabs"><span class="active">All friends  ${FRIENDS.length}</span><span>Requests  0</span></div>
-        <div class="fr-grid" id="frGrid">${FRIENDS.map(x => `<button class="fr-card ${state.friend === x.id ? 'selected' : ''}" data-act="friend" data-id="${x.id}" data-name="${esc(x.name.toLowerCase())}">
+        <div class="fr-tabs" role="tablist">
+          <button role="tab" class="${list === 'all' ? 'active' : ''}" aria-selected="${list === 'all'}" data-act="friends-list" data-list="all">All friends <span>${FRIENDS.length}</span></button>
+          <button role="tab" class="${list === 'requests' ? 'active' : ''}" aria-selected="${list === 'requests'}" data-act="friends-list" data-list="requests">Requests <span class="${REQUESTS.length ? 'count' : ''}">${REQUESTS.length}</span></button>
+        </div>
+        ${list === 'all'
+          ? `<div class="fr-grid" id="frGrid">${FRIENDS.map(x => `<button class="fr-card ${state.friend === x.id ? 'selected' : ''}" data-act="friend" data-id="${x.id}" data-name="${esc(x.name.toLowerCase())}">
           <div class="fr-who">${avatarHTML(x, 40)}<div><b>${x.name}</b><span>${x.loc}</span></div></div>
           <small>${x.shared}</small>
-        </button>`).join('')}</div>
+        </button>`).join('')}</div>`
+          : REQUESTS.length
+            ? `<div class="fr-grid" id="frGrid">${REQUESTS.map(x => `<div class="fr-card req" data-name="${esc(x.name.toLowerCase())}">
+          <div class="fr-who">${avatarHTML(x, 40)}<div><b>${x.name}</b><span>${x.loc}</span></div></div>
+          <small>${x.mutual}<br>Sent ${x.when}</small>
+          <div class="fr-req-actions">
+            <button class="btn primary" data-act="friend-approve" data-id="${x.id}" aria-label="Approve ${esc(x.name)}'s friend request">Approve</button>
+            <button class="btn secondary" data-act="friend-deny" data-id="${x.id}" aria-label="Deny ${esc(x.name)}'s friend request">Deny</button>
+          </div>
+        </div>`).join('')}</div>`
+            : `<p class="fr-empty">No pending requests. When someone asks to be your friend, it shows up here.</p>`}
       </div>
     </div>
     ${f ? `<aside class="side-panel flat" aria-label="Friend detail">
@@ -1453,6 +1468,19 @@ const ACTIONS = {
 
   friend: d => { state.friend = d.id; state.friendTab = 'Shared trips'; go('friends'); },
   'friend-tab': d => { state.friendTab = d.tab; render(); },
+  'friends-list': d => { state.friendsList = d.list; render(); },
+  /* Approving a request makes them a friend (no shared trips yet); denying just removes the request */
+  'friend-approve': d => {
+    const i = REQUESTS.findIndex(r => r.id === d.id), r = REQUESTS.splice(i, 1)[0];
+    FRIENDS.push({ ...r, status: '', shared: 'No shared trips yet', since: 'November 2026', activity: `You and ${r.name.split(' ')[0]} became friends`, trips: [] });
+    render();
+    toast(`You and ${r.name.split(' ')[0]} are now friends`);
+  },
+  'friend-deny': d => {
+    const i = REQUESTS.findIndex(r => r.id === d.id), r = REQUESTS.splice(i, 1)[0];
+    render();
+    toast(`Request from ${r.name.split(' ')[0]} declined`);
+  },
   'friend-close': () => { state.friend = null; render(); },
   'friend-message': d => {
     let chat = state.chats.find(c => c.members.length === 1 && c.members[0] === d.id);

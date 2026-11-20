@@ -808,9 +808,11 @@ button.hotel-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .fr-field::placeholder { color: var(--z-muted-soft); }
 .fr-field:focus { border-color: var(--z-purple); }
 .fr-sort { height: 46px; padding: 12px 16px; border-radius: var(--z-r-10); border: 1px solid var(--z-line-cool); background: var(--z-white); font-size: 14px; color: var(--z-ink); width: 208px; flex: none; }
-.fr-tabs { display: flex; gap: 69px; margin-top: 29px; border-bottom: 1px solid var(--z-line-cool); }
-.fr-tabs span { padding-bottom: 11px; font-size: 15px; line-height: 1.45; color: var(--z-muted-soft); border-bottom: 3px solid transparent; margin-bottom: -2px; }
-.fr-tabs span.active { font-weight: 600; color: var(--z-purple); border-bottom-color: var(--z-purple); }
+.fr-tabs { display: flex; gap: 24px; margin-top: 29px; border-bottom: 1px solid var(--z-line-cool); }
+.fr-tabs button { display: flex; align-items: center; gap: 6px; padding-bottom: 11px; font-size: 15px; line-height: 1.45; color: var(--z-muted-soft); border-bottom: 3px solid transparent; margin-bottom: -2px; }
+.fr-tabs button:hover { color: var(--z-ink); }
+.fr-tabs button.active { font-weight: 600; color: var(--z-purple); border-bottom-color: var(--z-purple); }
+.fr-tabs button span.count { min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--z-r-pill); background: var(--z-red); color: var(--z-white); font-size: 12px; font-weight: 600; line-height: 20px; text-align: center; }
 .fr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-top: 24px; }
 /* Friend card: initial avatar, name, location and what you share */
 .fr-card { border: 1px solid var(--z-line); border-radius: var(--z-r-16); box-shadow: var(--z-shadow-card); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; text-align: left; background: var(--z-white); }
@@ -822,6 +824,10 @@ button.hotel-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .fr-card small { font-size: 13px; line-height: 1.4; color: var(--z-muted-soft); white-space: pre-wrap; }
 .fd-trips { padding: 16px 24px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
 .fd-empty { font-size: 14px; color: var(--z-muted-soft); }
+.fr-card.req:hover { border-color: var(--z-line); }
+.fr-req-actions { display: flex; gap: 8px; }
+.fr-req-actions .btn { flex: 1; padding: 8px 12px; }
+.fr-empty { margin-top: 24px; font-size: 14px; color: var(--z-muted-soft); }
 .fd-profile { padding: 8px 24px 20px; display: flex; gap: 20px; align-items: flex-start; }
 .fd-profile h3 { font-size: 28px; font-weight: 600; line-height: 1.3; color: var(--z-ink); }
 .fd-profile p { font-size: 13px; line-height: 1.6; color: var(--z-muted-soft); }
