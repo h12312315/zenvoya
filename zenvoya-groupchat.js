@@ -469,6 +469,14 @@ function respond(chat, text, preset, files) {
   }, 1000);
 }
 
+/* Activities beyond the ones the Activities tab already suggests: places the suggestions don't cover first,
+   then the rest of the city's places, as [title, meta, price, place id, photo]. */
+function moreActivities(city) {
+  const r = recsOf(city), shown = new Set([...r.spots, ...r.social].map(x => x[3]));
+  const asAct = x => [x.name, `${x.area} · ${x.time}`, x.meta.split(' · ').pop(), x.id, x.img];
+  return [...city.places.filter(x => !shown.has(x.id)), ...city.places.filter(x => shown.has(x.id))].slice(0, 4).map(asAct);
+}
+
 /* Places not yet saved to the trip, then bookable activities */
 function moreIdeas(chat, cityId) {
   const city = CITIES[cityId], trip = tripOf(chat, cityId), recs = recsOf(city);
@@ -771,6 +779,7 @@ const TAB_BODY = {
       <div class="rec-list">${recs.spots.map(rec).join('')}</div>
       <h4>🕺 Social (${recs.social.length})</h4>
       <div class="rec-list">${recs.social.map(rec).join('')}</div>
+      <button class="btn secondary block gap8 acts-more" data-act="explore-acts">${ic('add')}Explore more activities</button>
     </div>`;
   },
 };
@@ -1197,6 +1206,11 @@ const ACTIONS = {
   'explore-more': () => {
     const chat = activeChat(), city = CITIES[panelOf().cityId];
     send(`Show me more places and activities in ${city.name}`, () => ({ text: `Here are some more places and activities you might like in ${city.name}:`, recs: { city: city.id, items: moreIdeas(chat, city.id) } }));
+  },
+  /* Sent to Zoya as a chat prompt; her reply lists activities the tab doesn't already suggest */
+  'explore-acts': () => {
+    const city = CITIES[panelOf().cityId];
+    send(`Show me more activities in ${city.name}`, () => ({ text: `Here are a few more activities in ${city.name} you might like:`, recs: { city: city.id, items: moreActivities(city) } }));
   },
   'open-loc-chat': d => {
     const chat = activeChat();
