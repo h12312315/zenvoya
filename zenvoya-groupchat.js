@@ -624,6 +624,11 @@ const ratingHTML = (value, label = '', after = '') => {
 const tabStatusHTML = done => done
   ? `<span class="tab-status done">${ic('check')}</span><span class="sr">, booked</span>`
   : `<span class="tab-status todo">${ic('priority_high')}</span><span class="sr">, nothing booked yet</span>`;
+/* Booking status line at the top of the Flights, Stays and Activities tabs, with the same icon as the tab */
+const bookNoteHTML = (done, text) => `<p class="book-note"><span class="tab-status ${done ? 'done' : 'todo'}">${ic(done ? 'check' : 'priority_high')}</span>${text}</p>`;
+/* Zoya introduces the suggestions when nothing is booked yet */
+const SUGGESTED_ON = '10/12/2026';
+const zoyaLineHTML = what => `<p class="zoya-line">${zoyaSVG()}<span>Here are some suggested ${what} found on ${SUGGESTED_ON}.</span></p>`;
 const tabsHTML = (tabs, active, act, status = {}) => `<div class="tabs" role="tablist">${tabs.map(t => `<button class="tab ${t === active ? 'active' : ''}" role="tab" aria-selected="${t === active}" data-act="${act}" data-tab="${t}">${t}${t in status ? tabStatusHTML(status[t]) : ''}</button>`).join('')}</div>`;
 /* Flights are done once booked; a stay in the cart isn't booked yet; activities are never booked in this prototype */
 const tripStatus = trip => ({
@@ -721,16 +726,16 @@ const TAB_BODY = {
   Flights(city, trip) {
     if (trip.bookedFlights && trip.bookedFlights.length) {
       return `<div class="sec">
-        <div class="sec-title">${ic('flight')}Booked flights</div>
+        ${bookNoteHTML(true, 'You’ve booked your flights.')}
         <div class="route-line"><span>NYC → ${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span></div>
         ${trip.bookedFlights.map(i => flightItemHTML({ ...FLIGHTS[i], labels: ['Booked'] }, city)).join('')}
         <p class="status-line ok">${ic('check', 's16')}Confirmed · ${plural(1 + trip.members.length, 'traveler')} · Confirmation ZNV-48213</p>
       </div>`;
     }
     return `<div class="sec">
-      <p class="empty-note">You haven’t booked any flights.</p>
+      ${bookNoteHTML(false, 'You haven’t booked any flights.')}
       <div class="deal-list">
-        <div class="route-line sm"><span>NYC → ${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span><i class="dot"></i><span class="faint">Updated: 10/12/2026</span></div>
+        ${zoyaLineHTML('flight options')}
         ${FLIGHTS.map((fl, i) => flightItemHTML(fl, city, { tag: 'button', attrs: `data-act="ask-flight" data-i="${i}" aria-label="Ask Zoya about the ${fl.out.dep} flight to ${city.name}, ${fl.price} round trip"` })).join('')}
       </div>
     </div>`;
@@ -740,6 +745,7 @@ const TAB_BODY = {
     const imgs = hotelImgs();
     if (trip.cartStays && trip.cartStays.length) {
       return `<div class="sec">
+        ${bookNoteHTML(false, 'You haven’t booked any stays.')}
         <div class="sec-title">${ic('shopping_cart')}Added to cart</div>
         ${trip.cartStays.map(i => hotelItemHTML({ ...HOTELS[i], labels: ['In cart'] }, imgs[i])).join('')}
         <p class="status-line">${ic('schedule', 's16')}Not booked yet. Check out to confirm this stay.</p>
@@ -747,9 +753,9 @@ const TAB_BODY = {
       </div>`;
     }
     return `<div class="sec">
-      <p class="empty-note">You haven’t booked any stays.</p>
+      ${bookNoteHTML(false, 'You haven’t booked any stays.')}
       <div class="deal-list">
-        <div class="route-line sm"><span>${city.name}</span><i class="dot"></i><span>Sep 12 - Sep 26</span><i class="dot"></i><span class="faint">Updated: 10/12/2026</span></div>
+        ${zoyaLineHTML('stays')}
         ${HOTELS.map((h, i) => hotelItemHTML(h, imgs[i], { tag: 'button', attrs: `data-act="ask-stay" data-i="${i}" aria-label="Ask Zoya about ${esc(h.name)} in ${city.name}, ${h.price} per night"` })).join('')}
       </div>
     </div>`;
@@ -759,7 +765,8 @@ const TAB_BODY = {
     const recs = recsOf(city);
     const rec = ([title, meta, price, placeId, img]) => { const pl = placeById(placeId); return `<button class="rec" data-act="open-loc" data-place="${placeId}">${ph(img || pl.img, pl.emoji)}<div><b>${title}</b><span>${meta}</span><span class="price">${price}</span></div></button>`; };
     return `<div class="acts">
-      <p class="empty-note">You haven’t booked any activities.</p>
+      ${bookNoteHTML(false, 'You haven’t booked any activities.')}
+      ${zoyaLineHTML('activities')}
       <h4>🏞️ Spots (${recs.spots.length})</h4>
       <div class="rec-list">${recs.spots.map(rec).join('')}</div>
       <h4>🕺 Social (${recs.social.length})</h4>
