@@ -476,6 +476,28 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .tab { padding: 12px 8px 10px; font-size: 14px; font-weight: 500; line-height: 20px; color: var(--z-ink); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
 .tab.active { font-weight: 700; color: var(--z-purple); border-bottom-color: var(--z-purple); }
 .sheet-scroll { flex: 1; min-height: 0; overflow-y: auto; position: relative; }
+
+/* Loading state while a preset day count or budget re-plans the trip */
+.sheet-loading {
+  position: absolute; inset: 0; z-index: 5; border-radius: inherit;
+  display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 96px;
+  background: rgba(255, 255, 255, 0.86); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  animation: z-fade 0.2s ease-out both;
+}
+.sheet-loading p { font-size: 14px; font-weight: 500; color: var(--z-ink); }
+.load-av { position: relative; width: 72px; height: 72px; display: grid; place-items: center; }
+.load-av .av { animation: z-pulse 1.1s ease-in-out infinite; }
+.load-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+.load-ring circle { fill: none; stroke-width: 3; }
+.load-ring .track { stroke: var(--z-purple-100); }
+.load-ring .bar {
+  stroke: var(--z-purple); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100;
+  animation: z-ring var(--load, 1.4s) cubic-bezier(0.4, 0, 0.2, 1) var(--elapsed, 0ms) forwards;
+}
+@keyframes z-ring { to { stroke-dashoffset: 0; } }
+@keyframes z-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.9); } }
+.tab-body.fresh { animation: z-rise 0.32s ease-out both; }
+@keyframes z-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .sheet.collapsed .sheet-scroll { overflow: hidden; }
 .hr { height: 1px; background: var(--z-line); flex: none; }
 
@@ -759,4 +781,5 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
   .sheet, .cart, .toast, .map-days, .pin { transition: none; }
   .lightbox.open { animation: none; }
   .typing i { animation: none; }
+  .load-av .av, .tab-body.fresh, .sheet-loading { animation: none; }
 }

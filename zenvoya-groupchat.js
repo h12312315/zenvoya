@@ -537,7 +537,8 @@ function renderSheet() {
   sheet.className = 'sheet' + (p.sheet === 'collapsed' ? ' collapsed' : '');
   sheet.style.setProperty('--sheet-open', dims.open + 'px');
   sheet.style.setProperty('--sheet-peek', dims.peek + 'px');
-  sheet.innerHTML = p.loc ? locSheetHTML(chat, p) : tripSheetHTML(chat, p);
+  sheet.innerHTML = (p.loc ? locSheetHTML(chat, p) : tripSheetHTML(chat, p)) + (p.loading ? sheetLoadingHTML(p.loading) : '');
+  sheet.setAttribute('aria-busy', String(!!p.loading));
   const sc = sheet.querySelector('.sheet-scroll');
   if (sc) {
     /* Same view keeps its place; a new tab stays pinned if the tabs were pinned; a collapsed drawer shows its top. */
@@ -547,6 +548,35 @@ function renderSheet() {
   }
   Object.entries(tripMarkers).forEach(([id, el]) => el.classList.toggle('on', id === p.loc));
   renderMapDays(chat, p);
+}
+
+/* Drawer loading state for preset day/budget picks: Zoya's avatar pulses inside a ring that fills
+   over LOAD_MS, then the drawer redraws with the new plan. A negative delay keeps the ring in step
+   if the drawer redraws mid-load. */
+const LOAD_MS = 1400;
+function sheetLoadingHTML(l) {
+  const elapsed = Math.min(LOAD_MS, Date.now() - l.start);
+  return `<div class="sheet-loading" role="status" style="--load:${LOAD_MS}ms;--elapsed:-${elapsed}ms">
+      <div class="load-av">
+        <svg class="load-ring" viewBox="0 0 72 72" aria-hidden="true"><circle class="track" cx="36" cy="36" r="34"/><circle class="bar" cx="36" cy="36" r="34" pathLength="100"/></svg>
+        ${zoyaAvatar(52)}
+      </div>
+      <p>${esc(l.label)}</p>
+    </div>`;
+}
+function loadSheet(label, done) {
+  const chat = activeChat(), p = chat.panel;
+  p.loading = { label, start: Date.now() };
+  renderSheet();
+  setTimeout(() => {
+    if (activeChat() !== chat || chat.panel !== p) { p.loading = null; return; }
+    p.loading = null;
+    renderSheet();
+    const body = $('#sheet .tab-body');
+    if (body) body.classList.add('fresh');
+    renderChatCol();
+    done && done();
+  }, LOAD_MS);
 }
 
 /* The tab bar sticks to the top of the drawer once the title block has scrolled away. */
@@ -1086,8 +1116,7 @@ function setDays(n, custom) {
   if (n === t.days) return;
   t.days = n; t.itin = planItinerary(city, n, t.budget); t.open = allOpen(n); t.filter = 'all';
   if (custom) return send(`Change ${city.name} to ${n} days`, { text: `Done. ${city.name} is now ${n} days, ${dateRange(n)}. I’ve updated the itinerary to match.` });
-  renderChatCol(); renderSheet();
-  toast(`${city.name} is now ${n} days. Itinerary updated.`);
+  loadSheet(`Updating ${city.name} to ${n} days`);
 }
 function setBudget(n, custom) {
   const chat = activeChat(), t = tripOf(chat, chat.panel.cityId), city = CITIES[t.cityId];
@@ -1096,8 +1125,7 @@ function setBudget(n, custom) {
   t.budget = n; t.itin = planItinerary(city, t.days, n); t.open = allOpen(t.days); t.filter = 'all';
   const summary = budgetSummary(t);
   if (custom) return send(`Set the ${city.name} budget to ${budgetLabel(n).toLowerCase()}`, { text: `Got it. I’ve planned ${city.name} for ${budgetLabel(n).toLowerCase()}. ${summary}, and I’ll flag anything that goes over.` });
-  renderChatCol(); renderSheet();
-  toast(`${summary}`);
+  loadSheet(`Planning ${city.name} for ${budgetLabel(n).toLowerCase()}`);
 }
 
 /* The custom number field in the days and budget lists */
