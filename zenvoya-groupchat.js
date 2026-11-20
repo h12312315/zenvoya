@@ -22,8 +22,6 @@ function ph(img, emoji = '', cls = '', inner = '', style = '', attrs = '') {
 function avatarHTML(p, size = 24, cls = '') {
   return `<span class="av ${size === 28 ? 's28' : ''} ${cls}" style="--s:${size}px;background:${p.color}" title="${esc(p.name)}">${p.initial}</span>`;
 }
-/* Portrait version, used on the Friends page as in Figma */
-const photoAvatarHTML = (p, size) => `<span class="av photo" style="--s:${size}px;background-image:url('${p.photo}')" title="${esc(p.name)}">${p.initial}</span>`;
 const zoyaAvatar = (size = 24) => `<span class="av zoya-av" style="--s:${size}px" title="Zoya">${zoyaSVG()}</span>`;
 
 /* ───────── State ───────── */
@@ -147,7 +145,9 @@ function upcomingCardHTML(t) {
 /* Trip being planned on the home page: a compact row */
 const planRowHTML = t => {
   const days = t.chat.tripState[t.city.id] ? t.chat.tripState[t.city.id].days : t.city.days;
-  return `<button class="plan-row" data-act="open-trip" data-city="${t.city.id}" data-chat="${t.chat.id}">${ph(t.city.img, t.city.flag)}<span class="plan-text"><b>${t.city.name}</b><span>${t.city.flag} ${t.city.country}<i class="dot s3"></i>${days} days</span></span>${ic('chevron_right')}</button>`;
+  const status = tripStatus(tripOf(t.chat, t.city.id));
+  const badges = Object.entries(status).map(([tab, done]) => `<span class="mini-status ${done ? 'done' : 'todo'}"><span class="tab-status ${done ? 'done' : 'todo'}">${ic(done ? 'check' : 'priority_high')}</span>${tab}<span class="sr">${done ? ' booked' : ' not booked'}</span></span>`).join('');
+  return `<button class="plan-row" data-act="open-trip" data-city="${t.city.id}" data-chat="${t.chat.id}">${ph(t.city.img, t.city.flag)}<span class="plan-text"><b>${t.city.name}</b><span>${t.city.flag} ${t.city.country}<i class="dot s3"></i>${days} days</span><span class="mini-row">${badges}</span></span>${ic('chevron_right')}</button>`;
 };
 
 /* note: booking details shown on the same row, after the labels */
@@ -990,6 +990,9 @@ function renderCart() {
 /* ───────── Friends / Trips / Shop pages ───────── */
 function renderFriends() {
   const f = state.friend && personById(state.friend);
+  const tab = state.friendTab || 'Shared trips';
+  /* A friend's shared trips, matched to the chat each trip lives in so the card can open it */
+  const shared = f ? (f.trips || []).map(id => allTrips().find(t => t.city.id === id)).filter(Boolean) : [];
   $('#page').innerHTML = `<div class="plain-page">
     <div class="plain-card">
       <div class="plain-head">Friends</div>
@@ -1001,18 +1004,19 @@ function renderFriends() {
         <div class="fr-tools"><input class="fr-field" placeholder="Search your friends" aria-label="Search your friends" data-filter="friends"><button class="fr-sort" data-act="soon" data-what="Sorting">Sort: Recently added</button></div>
         <div class="fr-tabs"><span class="active">All friends  ${FRIENDS.length}</span><span>Requests  0</span></div>
         <div class="fr-grid" id="frGrid">${FRIENDS.map(x => `<button class="fr-card ${state.friend === x.id ? 'selected' : ''}" data-act="friend" data-id="${x.id}" data-name="${esc(x.name.toLowerCase())}">
-          <div class="fr-who">${photoAvatarHTML(x, 60)}<div><b>${x.name}</b><span>${x.loc}</span></div></div>
-          <p>${x.status}</p><hr><small>${x.shared}</small><em>View friend →</em>
+          <div class="fr-who">${avatarHTML(x, 40)}<div><b>${x.name}</b><span>${x.loc}</span></div></div>
+          <small>${x.shared}</small>
         </button>`).join('')}</div>
-        <div class="fr-banner"><div><b>Good trips start with great company.</b><span>Add someone you’d love to explore with. All you need is their name or email.</span></div><button class="btn secondary lg" data-act="soon" data-what="Finding a friend">Find a friend</button></div>
       </div>
     </div>
     ${f ? `<aside class="side-panel flat" aria-label="Friend detail">
       <div class="fd-head"><h2>Friend detail</h2><button class="icon-btn" data-act="friend-close" aria-label="Close friend detail">${ic('close')}</button></div>
-      <div class="fd-profile">${photoAvatarHTML(f, 80)}<div><h3>${f.name}</h3><p>${f.loc}</p><p>Friends since ${f.since}</p></div>
+      <div class="fd-profile">${avatarHTML(f, 72)}<div><h3>${f.name}</h3><p>${f.loc}</p><p>Friends since ${f.since}</p></div>
         <div class="acts-row"><button class="btn primary lg" data-act="friend-message" data-id="${f.id}">Message</button><button class="btn secondary lg" data-act="soon" data-what="Removing a friend">Remove</button></div></div>
-      <div style="padding:0 24px"><div class="tabs"><span class="tab active">Recent activity</span><span class="tab">Shared trips</span></div></div>
-      <div class="fd-activity"><i></i><div><b>${f.activity}</b><span>Trip planning · 2 hours ago</span></div></div>
+      <div style="padding:0 24px">${tabsHTML(['Shared trips', 'Recent activity'], tab, 'friend-tab')}</div>
+      ${tab === 'Shared trips'
+        ? `<div class="fd-trips">${shared.length ? shared.map(planRowHTML).join('') : `<p class="fd-empty">No shared trips yet.</p>`}</div>`
+        : `<div class="fd-activity"><i></i><div><b>${f.activity}</b><span>Trip planning · 2 hours ago</span></div></div>`}
     </aside>` : ''}
   </div>`;
 }
@@ -1447,7 +1451,8 @@ const ACTIONS = {
     setTimeout(() => { chat.messages.push({ from: 'zoya', text: `I’m holding your ${plural(n, 'item')}. Payment isn’t part of this prototype yet.` }); refresh(chat); }, 1400);
   },
 
-  friend: d => { state.friend = d.id; go('friends'); },
+  friend: d => { state.friend = d.id; state.friendTab = 'Shared trips'; go('friends'); },
+  'friend-tab': d => { state.friendTab = d.tab; render(); },
   'friend-close': () => { state.friend = null; render(); },
   'friend-message': d => {
     let chat = state.chats.find(c => c.members.length === 1 && c.members[0] === d.id);

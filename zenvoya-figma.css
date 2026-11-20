@@ -298,6 +298,13 @@ body[data-page="home"] .main { gap: 16px; }
 .plan-text b { font-size: 16px; font-weight: 600; line-height: 1.4; color: var(--z-ink); }
 .plan-text span { display: flex; align-items: center; gap: 6px; font-size: 14px; line-height: 1.4; color: var(--z-muted); }
 .plan-row > .ms { font-size: 20px; color: var(--z-icon); }
+/* Booking status on a planned trip: same check / alert icons as the trip tabs, smaller */
+.mini-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.plan-text .mini-status { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px 0 3px; border-radius: var(--z-r-pill); font-size: 12px; font-weight: 500; color: var(--z-ink); }
+.mini-status.done { background: var(--z-tag-green-soft); border: 1px solid var(--z-tag-green-bg); }
+.mini-status.todo { background: var(--z-tag-red-soft); border: 1px solid var(--z-tag-red-bg); }
+.plan-text .mini-status .tab-status { display: inline-grid; place-items: center; width: 16px; height: 16px; }
+.mini-status .tab-status .ms { font-size: 11px; }
 
 /* Unfinished bookings: cart-style cards in a horizontal carousel */
 .hb-head { display: flex; align-items: center; justify-content: space-between; }
@@ -804,19 +811,17 @@ button.hotel-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .fr-tabs { display: flex; gap: 69px; margin-top: 29px; border-bottom: 1px solid var(--z-line-cool); }
 .fr-tabs span { padding-bottom: 11px; font-size: 15px; line-height: 1.45; color: var(--z-muted-soft); border-bottom: 3px solid transparent; margin-bottom: -2px; }
 .fr-tabs span.active { font-weight: 600; color: var(--z-purple); border-bottom-color: var(--z-purple); }
-.fr-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 26px; margin-top: 29px; }
-.fr-card { border: 1px solid var(--z-line-cool); border-radius: var(--z-r-16); padding: 24px 22px 14px; display: flex; flex-direction: column; text-align: left; background: var(--z-white); }
+.fr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-top: 24px; }
+/* Friend card: initial avatar, name, location and what you share */
+.fr-card { border: 1px solid var(--z-line); border-radius: var(--z-r-16); box-shadow: var(--z-shadow-card); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; text-align: left; background: var(--z-white); }
 .fr-card.selected, .fr-card:hover { border-color: var(--z-purple); }
-.fr-who { display: flex; align-items: center; gap: 18px; }
-.fr-who b { font-size: 18px; font-weight: 600; line-height: 1.45; color: var(--z-ink); display: block; }
-.fr-who div span { font-size: 13px; line-height: 1.45; color: var(--z-muted-soft); }
-.fr-card p { margin-top: 20px; font-size: 14px; line-height: 1.45; color: var(--z-muted-soft); }
-.fr-card hr { border: 0; height: 1px; background: var(--z-line-cool); margin: 19px 0 18px; }
-.fr-card small { font-size: 13px; line-height: 1.45; color: var(--z-muted-soft); white-space: pre-wrap; }
-.fr-card em { font-style: normal; font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--z-purple); margin-top: 11px; }
-.fr-banner { margin-top: 54px; padding: 17px 24px; border-radius: var(--z-r-14); background: var(--z-purple-50); display: flex; justify-content: space-between; align-items: center; gap: 24px; }
-.fr-banner b { font-size: 18px; font-weight: 600; line-height: 1.45; color: var(--z-ink); display: block; }
-.fr-banner span { font-size: 14px; line-height: 1.45; color: var(--z-muted-soft); display: block; margin-top: 5px; }
+.fr-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.fr-who > div { min-width: 0; }
+.fr-who b { font-size: 15px; font-weight: 600; line-height: 1.4; color: var(--z-ink); display: block; }
+.fr-who div span { font-size: 13px; line-height: 1.4; color: var(--z-muted-soft); }
+.fr-card small { font-size: 13px; line-height: 1.4; color: var(--z-muted-soft); white-space: pre-wrap; }
+.fd-trips { padding: 16px 24px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+.fd-empty { font-size: 14px; color: var(--z-muted-soft); }
 .fd-profile { padding: 8px 24px 20px; display: flex; gap: 20px; align-items: flex-start; }
 .fd-profile h3 { font-size: 28px; font-weight: 600; line-height: 1.3; color: var(--z-ink); }
 .fd-profile p { font-size: 13px; line-height: 1.6; color: var(--z-muted-soft); }

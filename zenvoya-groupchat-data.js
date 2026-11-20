@@ -13,6 +13,9 @@ const FRIENDS = [
   { id: 'noah',  name: 'Noah Kim',       initial: 'N', color: '#34c759', loc: 'Seattle, WA',       status: 'Mountains over meetings',      shared: '1 shared trip  ·  1 shared chat',   since: 'January 2026',   activity: 'Noah added Gullfoss Waterfall to Iceland' },
 ];
 FRIENDS.forEach(f => { f.photo = `images/figma/friend-${f.id}.jpg`; });
+/* Trips each friend shares with you (shown in Friend detail). Counts match their "shared trips" line. */
+Object.entries({ maya: ['tokyo', 'kyoto'], alex: ['barcelona'], priya: ['tokyo', 'lisbon'], james: ['lisbon'], sofia: ['barcelona'], noah: ['reykjavik'] })
+  .forEach(([id, trips]) => { FRIENDS.find(f => f.id === id).trips = trips; });
 const personById = id => (id === 'me' ? ME : FRIENDS.find(f => f.id === id));
 
 /* ───────── Places ─────────
