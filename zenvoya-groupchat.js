@@ -545,11 +545,17 @@ function openTripPage(chat, cityId, tab = 'Overview') {
   state.page = 'trip';
   render();
 }
+/* Where the trip page's breadcrumb leads back to */
+const CRUMB = { home: 'Home', trips: 'Trips', friends: 'Friends', shop: 'Shop' };
 function tripPageHTML() {
   return `<div class="trip-page">
     <section class="tpp-detail" aria-label="Trip details">
       <div class="tpp-bar">
-        <button class="btn secondary gap8" data-act="trip-back">${ic('chevron_left')}Back</button>
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <button class="crumb-link" data-act="trip-back">${ic('chevron_left')}${CRUMB[state.tripReturn.page] || 'Back'}</button>
+          <span class="crumb-sep" aria-hidden="true">/</span>
+          <span aria-current="page">${CITIES[activeChat().panel.cityId].name} trip</span>
+        </nav>
         <button class="btn outline gap8" data-act="trip-chat">${ic('chat_bubble')}Open chat</button>
       </div>
       <div class="sheet page" id="sheet"></div>
