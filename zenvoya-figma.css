@@ -49,6 +49,8 @@
   --z-tag-green-fg: #009951;
   --z-tag-blue-bg: #d6f6ff;
   --z-tag-blue-fg: #0077a8;
+  --z-tag-red-bg: #ffe1df;
+  --z-tag-red-fg: #e0251b;
   --z-offer-red: #fee2e2;
   --z-offer-yellow: #fef8e2;
 
@@ -475,7 +477,12 @@ button.flight-item:hover { border-color: rgba(108, 0, 246, 0.45); }
 .tabs { display: flex; gap: 12px; border-bottom: 1px solid var(--z-line); }
 .tab { padding: 12px 8px 10px; font-size: 14px; font-weight: 500; line-height: 20px; color: var(--z-ink); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
 .tab.active { font-weight: 700; color: var(--z-purple); border-bottom-color: var(--z-purple); }
-.tab-dot { display: inline-block; width: 6px; height: 6px; margin-left: 4px; border-radius: 50%; background: var(--z-red); vertical-align: top; transform: translateY(2px); }
+/* Booking status beside the Flights, Stays and Activities tab labels */
+.tab { display: inline-flex; align-items: center; gap: 4px; }
+.tab-status { width: 16px; height: 16px; flex: none; border-radius: 50%; display: inline-grid; place-items: center; }
+.tab-status .ms { font-size: 12px; font-weight: 700; }
+.tab-status.done { background: var(--z-tag-green-bg); color: var(--z-tag-green-fg); }
+.tab-status.todo { background: var(--z-tag-red-bg); color: var(--z-tag-red-fg); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .sheet-scroll { flex: 1; min-height: 0; overflow-y: auto; position: relative; }
 

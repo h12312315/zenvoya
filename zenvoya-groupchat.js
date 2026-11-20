@@ -616,14 +616,17 @@ const ratingHTML = (value, label = '', after = '') => {
   const on = Math.ceil(value - 0.5);
   return `<div class="rating"><b>${label ? label + ' ' : ''}${value.toFixed(1)}</b><span class="stars" role="img" aria-label="${on} out of 5 stars">${[0, 1, 2, 3, 4].map(i => ic('star', i < on ? 'fill' : 'fill off')).join('')}</span>${after}</div>`;
 };
-/* todo: tabs that still have something to book get a red dot */
-const tabsHTML = (tabs, active, act, todo = new Set()) => `<div class="tabs" role="tablist">${tabs.map(t => `<button class="tab ${t === active ? 'active' : ''}" role="tab" aria-selected="${t === active}" data-act="${act}" data-tab="${t}">${t}${todo.has(t) ? '<i class="tab-dot" aria-hidden="true"></i><span class="sr">, nothing booked yet</span>' : ''}</button>`).join('')}</div>`;
+/* status: { tab: true (booked) | false (nothing booked) } puts a check or an alert beside that tab's label */
+const tabStatusHTML = done => done
+  ? `<span class="tab-status done">${ic('check')}</span><span class="sr">, booked</span>`
+  : `<span class="tab-status todo">${ic('priority_high')}</span><span class="sr">, nothing booked yet</span>`;
+const tabsHTML = (tabs, active, act, status = {}) => `<div class="tabs" role="tablist">${tabs.map(t => `<button class="tab ${t === active ? 'active' : ''}" role="tab" aria-selected="${t === active}" data-act="${act}" data-tab="${t}">${t}${t in status ? tabStatusHTML(status[t]) : ''}</button>`).join('')}</div>`;
 /* Flights are done once booked; a stay in the cart isn't booked yet; activities are never booked in this prototype */
-const tripTodo = trip => new Set([
-  !(trip.bookedFlights && trip.bookedFlights.length) && 'Flights',
-  !(trip.bookedStays && trip.bookedStays.length) && 'Stays',
-  !(trip.bookedActs && trip.bookedActs.length) && 'Activities',
-].filter(Boolean));
+const tripStatus = trip => ({
+  Flights: !!(trip.bookedFlights && trip.bookedFlights.length),
+  Stays: !!(trip.bookedStays && trip.bookedStays.length),
+  Activities: !!(trip.bookedActs && trip.bookedActs.length),
+});
 
 function tripSheetHTML(chat, p) {
   const city = CITIES[p.cityId], trip = tripOf(chat, p.cityId);
@@ -642,7 +645,7 @@ function tripSheetHTML(chat, p) {
           <button class="sel" data-act="pop" data-pop="trip-people" aria-label="People on this trip">${ic('person')}<span>${1 + trip.members.length}</span><span class="av-stack">${faces.map(f => avatarHTML(f, 20)).join('')}</span>${ic('arrow_drop_down')}</button>
         </div>
       </div>
-      <div class="tabs-bar trip">${tabsHTML(TRIP_TABS, p.tab, 'tab', tripTodo(trip))}</div>
+      <div class="tabs-bar trip">${tabsHTML(TRIP_TABS, p.tab, 'tab', tripStatus(trip))}</div>
       <div class="tab-body">${TAB_BODY[p.tab](city, trip)}</div>
     </div>`;
 }
